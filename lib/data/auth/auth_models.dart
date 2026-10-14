@@ -1,6 +1,6 @@
-typedef Json = Map<String, dynamic>;
+import '../json.dart';
 
-int _int(Object? v) => (v as num).toInt();
+export '../json.dart' show Json;
 
 class UserProfile {
   const UserProfile({
@@ -15,7 +15,7 @@ class UserProfile {
   });
 
   factory UserProfile.fromJson(Json json) => UserProfile(
-    id: _int(json['id']),
+    id: asInt(json['id']),
     username: json['username'] as String? ?? '',
     email: json['email'] as String? ?? '',
     fullName: json['fullName'] as String? ?? '',
@@ -70,8 +70,8 @@ class AuthSession {
     accessToken: json['accessToken'] as String,
     refreshToken: json['refreshToken'] as String,
     tokenType: json['tokenType'] as String? ?? 'Bearer',
-    expiresInSeconds: json['expiresInSeconds'] == null ? 0 : _int(json['expiresInSeconds']),
-    user: UserProfile.fromJson(json['user'] as Json),
+    expiresInSeconds: json['expiresInSeconds'] == null ? 0 : asInt(json['expiresInSeconds']),
+    user: UserProfile.fromJson(asJson(json['user'])),
   );
 
   final String accessToken;

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../app/providers.dart';
 import '../../app/theme/theme_mode_controller.dart';
 import '../../app/theme/tt_colors.dart';
 import '../../app/theme/tt_theme.dart';
@@ -82,6 +83,25 @@ class AccountScreen extends ConsumerWidget {
             selected: {mode},
             onSelectionChanged: (s) => ref.read(themeModeProvider.notifier).set(s.first),
           ),
+          if (Env.useMock) ...[
+            const SizedBox(height: 24),
+            Text('Dữ liệu mẫu', style: text.titleMedium),
+            const SizedBox(height: 4),
+            Text('Xoá truyện đã tạo thử và đưa 5 truyện mẫu về trạng thái ban đầu.', style: text.bodySmall),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TtButton(
+                label: 'Đặt lại dữ liệu mẫu',
+                icon: Icons.restart_alt_rounded,
+                variant: TtButtonVariant.secondary,
+                onPressed: () {
+                  ref.read(mockDbProvider).reset();
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã đặt lại dữ liệu mẫu')));
+                },
+              ),
+            ),
+          ],
           const SizedBox(height: 32),
           Align(
             alignment: Alignment.centerLeft,
