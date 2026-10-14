@@ -1,9 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/theme/tt_colors.dart';
 import '../../app/theme/tt_theme.dart';
 import '../../shared/widgets/tt_button.dart';
+import '../workspace/workspace_providers.dart';
 
 /// Kích thước màn hình (DESIGN.md › breakpoints).
 enum WindowSize {
@@ -34,7 +36,7 @@ const _tabs = [
 
 /// Khung khu người lớn: thanh đáy trên điện thoại, NavigationRail trên máy tính bảng.
 /// "Tạo truyện" không phải một tab mà mở Studio toàn màn hình.
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.shell});
 
   final StatefulNavigationShell shell;
@@ -43,14 +45,21 @@ class AppShell extends StatelessWidget {
 
   void _openStudio(BuildContext context) => context.push('/studio');
 
-  @override
-  Widget build(BuildContext context) {
-    final size = WindowSize.of(context);
-    if (size == WindowSize.compact) return _bottomBar(context);
-    return _rail(context, extended: size == WindowSize.expanded);
+  /// Tab Duyệt (vị trí 2 trong _tabs) có badge số truyện chờ duyệt.
+  static Widget _icon(int tab, IconData icon, int pending) {
+    if (tab != 2 || pending == 0) return Icon(icon);
+    return Badge(label: Text('$pending'), child: Icon(icon));
   }
 
-  Widget _bottomBar(BuildContext context) {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pending = ref.watch(reviewQueueProvider).length;
+    final size = WindowSize.of(context);
+    if (size == WindowSize.compact) return _bottomBar(context, pending);
+    return _rail(context, pending, extended: size == WindowSize.expanded);
+  }
+
+  Widget _bottomBar(BuildContext context, int pending) {
     // Nút "Tạo" nằm giữa thanh đáy: vị trí 2 trên thanh, các tab sau nó lùi một bậc.
     const createSlot = 2;
     final selected = shell.currentIndex < createSlot ? shell.currentIndex : shell.currentIndex + 1;
@@ -72,14 +81,14 @@ class AppShell extends StatelessWidget {
                 label: 'Tạo truyện',
                 tooltip: 'Tạo truyện mới',
               ),
-            NavigationDestination(icon: Icon(t.icon), selectedIcon: Icon(t.selectedIcon), label: t.label),
+            NavigationDestination(icon: _icon(i, t.icon, pending), selectedIcon: _icon(i, t.selectedIcon, pending), label: t.label),
           ],
         ],
       ),
     );
   }
 
-  Widget _rail(BuildContext context, {required bool extended}) {
+  Widget _rail(BuildContext context, int pending, {required bool extended}) {
     final c = context.tt;
     return Scaffold(
       body: Row(
@@ -104,7 +113,10 @@ class AppShell extends StatelessWidget {
                       ),
                     ),
             ),
-            destinations: [for (final t in _tabs) NavigationRailDestination(icon: Icon(t.icon), selectedIcon: Icon(t.selectedIcon), label: Text(t.label))],
+            destinations: [
+              for (final (i, t) in _tabs.indexed)
+                NavigationRailDestination(icon: _icon(i, t.icon, pending), selectedIcon: _icon(i, t.selectedIcon, pending), label: Text(t.label)),
+            ],
           ),
           VerticalDivider(width: 1, color: c.line),
           Expanded(child: shell),

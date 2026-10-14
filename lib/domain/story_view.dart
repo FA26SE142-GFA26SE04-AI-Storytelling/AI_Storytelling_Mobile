@@ -47,6 +47,13 @@ String storyTopic(Story s) => (s.categoryName ?? '').isNotEmpty ? s.categoryName
 
 String storyText(Story s) => s.content ?? s.pages.map((p) => p.content).join(' ');
 
+/// Ngày theo kiểu Việt Nam: 14/10/2026; bỏ năm nếu là năm nay (14/10) — trừ khi [withYear].
+String shortDate(DateTime d, {bool withYear = false, DateTime? now}) {
+  final l = d.toLocal();
+  final sameYear = l.year == (now ?? DateTime.now()).year;
+  return withYear || !sameYear ? '${l.day}/${l.month}/${l.year}' : '${l.day}/${l.month}';
+}
+
 int wordCount(String text) => text.trim().isEmpty ? 0 : text.trim().split(RegExp(r'\s+')).length;
 
 /// Tách nội dung thành các cảnh: theo đoạn; nếu chỉ có một đoạn thì gom mỗi 3 câu.

@@ -14,4 +14,19 @@ class ApiResult<T> {
 
   /// Đổi kiểu dữ liệu khi thất bại, giữ nguyên thông báo lỗi.
   ApiResult<R> castFailure<R>() => ApiResult<R>.fail(message, errors: errors, isNetworkError: isNetworkError);
+
+  /// Lấy dữ liệu hoặc ném [ApiException] — dùng trong provider để Riverpod hiện trạng thái lỗi.
+  T unwrap() {
+    if (success && data != null) return data as T;
+    throw ApiException(message.isEmpty ? 'Không tải được dữ liệu. Vui lòng thử lại.' : message, isNetworkError: isNetworkError);
+  }
+}
+
+class ApiException implements Exception {
+  const ApiException(this.message, {this.isNetworkError = false});
+  final String message;
+  final bool isNetworkError;
+
+  @override
+  String toString() => message;
 }

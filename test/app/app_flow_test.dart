@@ -1,39 +1,15 @@
-import 'package:ai_storytelling_mobile/app/app.dart';
-import 'package:ai_storytelling_mobile/app/providers.dart';
 import 'package:ai_storytelling_mobile/core/storage/session_storage.dart';
 import 'package:ai_storytelling_mobile/data/auth/mock_auth_repository.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/app_harness.dart';
 import '../helpers/fakes.dart';
 
 void main() {
   late MemorySecureStore store;
 
-  Future<void> pumpApp(WidgetTester tester, {Size size = const Size(390, 844)}) async {
-    // Tắt chuyển động lặp (ếch chớp mắt, nền ao) để test chạy ổn định.
-    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(disableAnimations: true);
-    tester.view.physicalSize = size * 3;
-    tester.view.devicePixelRatio = 3;
-    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
-    addTearDown(tester.view.reset);
-
-    SharedPreferences.setMockInitialValues({});
-    final prefs = await SharedPreferences.getInstance();
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(prefs),
-          secureStoreProvider.overrideWithValue(store),
-          authRepositoryProvider.overrideWith((ref) => MockAuthRepository(ref.watch(sessionStorageProvider), latency: Duration.zero)),
-        ],
-        child: const TaletaleApp(),
-      ),
-    );
-    await tester.pumpAndSettle();
-  }
+  Future<void> pumpApp(WidgetTester tester, {Size size = const Size(390, 844)}) => pumpTaletale(tester, store: store, size: size);
 
   setUp(() => store = MemorySecureStore());
 

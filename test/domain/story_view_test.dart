@@ -43,4 +43,11 @@ void main() {
     expect(coverColors(7), coverColors(1));
     expect(coverColors(-2), hasLength(3));
   });
+
+  test('shortDate bỏ năm nếu là năm nay', () {
+    final now = DateTime(2026, 10, 14);
+    expect(shortDate(DateTime(2026, 10, 13), now: now), '13/10');
+    expect(shortDate(DateTime(2025, 1, 2), now: now), '2/1/2025');
+    expect(shortDate(DateTime(2026, 10, 13), now: now, withYear: true), '13/10/2026');
+  });
 }

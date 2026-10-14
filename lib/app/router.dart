@@ -11,9 +11,16 @@ import '../features/library/library_screen.dart';
 import '../features/review/review_screen.dart';
 import '../features/shell/app_shell.dart';
 import '../features/shell/splash_screen.dart';
+import '../features/story/story_detail_screen.dart';
 import '../features/studio/studio_screen.dart';
 
 final _rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+
+/// Chi tiết truyện, lồng trong từng tab (/home/story/3, /library/story/3…) để giữ thanh điều hướng và nút quay lại.
+final _storyRoute = GoRoute(
+  path: 'story/:id',
+  builder: (context, state) => StoryDetailScreen(storyId: int.parse(state.pathParameters['id']!)),
+);
 
 final routerProvider = Provider<GoRouter>((ref) {
   final auth = ValueNotifier<AsyncValue<UserProfile?>>(const AsyncLoading());
@@ -37,13 +44,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, shell) => AppShell(shell: shell),
         branches: [
           StatefulShellBranch(
-            routes: [GoRoute(path: '/home', builder: (context, state) => const HomeScreen())],
+            routes: [
+              GoRoute(path: '/home', builder: (context, state) => const HomeScreen(), routes: [_storyRoute]),
+            ],
           ),
           StatefulShellBranch(
-            routes: [GoRoute(path: '/library', builder: (context, state) => const LibraryScreen())],
+            routes: [
+              GoRoute(path: '/library', builder: (context, state) => const LibraryScreen(), routes: [_storyRoute]),
+            ],
           ),
           StatefulShellBranch(
-            routes: [GoRoute(path: '/review', builder: (context, state) => const ReviewScreen())],
+            routes: [
+              GoRoute(path: '/review', builder: (context, state) => const ReviewScreen(), routes: [_storyRoute]),
+            ],
           ),
           StatefulShellBranch(
             routes: [GoRoute(path: '/child', builder: (context, state) => const AccountScreen())],

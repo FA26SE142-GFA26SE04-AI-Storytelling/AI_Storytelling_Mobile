@@ -41,7 +41,7 @@ lib/
 ## Lộ trình
 
 - [x] P0 – Nền tảng: theme, font, router, API client, đăng nhập / đăng ký / quên & đặt lại mật khẩu, chế độ dữ liệu mẫu
-- [ ] P1 – Chọn bé, Trang chủ, Thư viện, Chi tiết truyện
+- [x] P1 – Dữ liệu mẫu; chọn bé, Trang chủ, Thư viện, Chi tiết truyện, hàng chờ duyệt và badge
 - [ ] P2 – Chế độ của bé: đọc, câu đố, cổng phụ huynh, giọng đọc
 - [ ] P3 – Duyệt nội dung, Studio tạo truyện
 - [ ] P4 – Báo cáo, Cài đặt an toàn
