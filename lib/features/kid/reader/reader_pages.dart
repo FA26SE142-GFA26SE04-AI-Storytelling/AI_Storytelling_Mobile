@@ -221,6 +221,59 @@ int indexForLastPage(List<ReaderPage> pages, int lastPage) {
   return 0;
 }
 
+/// Trả segment chứa vị trí đầu trang ([ReaderPage.textStart]) trong văn bản cảnh.
+ReadingSegmentDto? segmentAtPageStart(ReaderPage page) {
+  if (page.segments.isEmpty) {
+    return null;
+  }
+
+  final sortedSegments = [...page.segments]
+    ..sort((a, b) => a.segmentOrder.compareTo(b.segmentOrder));
+
+  final positioned = <({ReadingSegmentDto segment, int start, int end})>[];
+  var cursor = 0;
+
+  for (final seg in sortedSegments) {
+    int start;
+    if (seg.startOffset != null) {
+      start = seg.startOffset!;
+    } else {
+      final idx = page.text.indexOf(seg.text, cursor);
+      if (idx != -1) {
+        start = idx;
+      } else {
+        start = cursor;
+      }
+    }
+    final end = start + seg.text.length;
+    cursor = end;
+    positioned.add((segment: seg, start: start, end: end));
+  }
+
+  for (final item in positioned) {
+    if (item.start <= page.textStart && page.textStart < item.end) {
+      return item.segment;
+    }
+  }
+
+  ReadingSegmentDto? fallback;
+  int? maxStart;
+  for (final item in positioned) {
+    if (item.start <= page.textStart) {
+      if (maxStart == null || item.start > maxStart) {
+        maxStart = item.start;
+        fallback = item.segment;
+      }
+    }
+  }
+
+  if (fallback != null) {
+    return fallback;
+  }
+
+  return sortedSegments.first;
+}
+
 /// Đại diện cho một đoạn văn bản thường hoặc từ vựng nổi bật.
 class VocabSpan {
   const VocabSpan({

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,7 +14,9 @@ import '../../../core/widgets/tt_state_views.dart';
 import '../../../core/widgets/tt_toast.dart';
 import '../data/kid_session_watcher.dart';
 import '../home/kid_home_providers.dart';
+import 'interaction/kid_interaction_sheet.dart';
 import 'media/authed_media.dart';
+import 'read_aloud_words.dart';
 import 'reader_controller.dart';
 import 'reader_pages.dart';
 import 'reader_vocabulary_sheet.dart';
@@ -68,8 +71,34 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen> {
     }
   }
 
+  /// Chuyển sang trang tiếp theo, mở tương tác trước nếu có.
+  Future<void> _goNext() async {
+    final n = ref.read(readerControllerProvider(widget.storyId).notifier);
+    if (n.needsInteraction()) {
+      final q = n.currentInteraction!;
+      final before = ref.read(readerControllerProvider(widget.storyId)).index;
+      await showKidInteractionDialog(context, storyId: widget.storyId, q: q);
+      if (!mounted) return;
+      if (ref.read(readerControllerProvider(widget.storyId)).index != before) {
+        return;
+      }
+    }
+    n.next();
+  }
+
+  /// Hoàn thành truyện, kiểm tra tương tác trước khi ghi nhận xong.
   Future<void> _finish() async {
-    final notifier = ref.read(readerControllerProvider(widget.storyId).notifier);
+    final notifier =
+        ref.read(readerControllerProvider(widget.storyId).notifier);
+    if (notifier.needsInteraction()) {
+      final q = notifier.currentInteraction!;
+      final before = ref.read(readerControllerProvider(widget.storyId)).index;
+      await showKidInteractionDialog(context, storyId: widget.storyId, q: q);
+      if (!mounted) return;
+      if (ref.read(readerControllerProvider(widget.storyId)).index != before) {
+        return;
+      }
+    }
     final result = await notifier.complete();
     if (result != null && mounted) {
       ref.invalidate(kidHomeDataProvider);
@@ -101,6 +130,19 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen> {
       (previous, next) {
         if (next != null && next.isNotEmpty) {
           showTtToast(context, next, type: TtToastType.error);
+        }
+      },
+    );
+
+    // Lắng nghe notice để báo toast thông báo
+    ref.listen<String?>(
+      readerControllerProvider(widget.storyId).select((s) => s.notice),
+      (previous, next) {
+        if (next != null && next.isNotEmpty) {
+          showTtToast(context, next, type: TtToastType.info);
+          ref
+              .read(readerControllerProvider(widget.storyId).notifier)
+              .clearNotice();
         }
       },
     );
@@ -219,6 +261,38 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen> {
                       expanded: true,
                       isLoading: state.completing,
                       onPressed: state.completing ? null : _finish,
+                    ),
+                  ),
+                ),
+              if (() {
+                final aloudResult = state.aloudResult;
+                if (aloudResult == null ||
+                    state.pages.isEmpty ||
+                    state.index < 0 ||
+                    state.index >= state.pages.length) {
+                  return false;
+                }
+                final segments = state.pages[state.index].segments;
+                return segments.isNotEmpty &&
+                    aloudResult.segmentId == segments.first.segmentId;
+              }())
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.sizeOf(context).height * 0.3,
+                    ),
+                    child: SingleChildScrollView(
+                      child: ReadAloudWordsView(
+                        result: state.aloudResult!,
+                        onRetry: () {
+                          ref
+                              .read(readerControllerProvider(widget.storyId)
+                                  .notifier)
+                              .clearReadAloud();
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -571,16 +645,11 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen> {
             activeColor: state.playing ? tt.primaryStrong : null,
             tt: tt,
           ),
-          _buildBottomButton(
-            icon: Icons.mic_rounded,
-            tooltip: 'Sắp có',
-            onPressed: null,
-            tt: tt,
-          ),
+          if (state.voiceEnabled) _buildMicButton(state, tt),
           _buildBottomButton(
             icon: Icons.chevron_right_rounded,
             tooltip: 'Trang sau',
-            onPressed: canNext ? () => notifier.next() : null,
+            onPressed: canNext ? _goNext : null,
             tt: tt,
           ),
         ],
@@ -588,13 +657,60 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen> {
     );
   }
 
+  /// Nút đọc to qua micro cho bé khi tính năng được phụ huynh bật.
+  Widget _buildMicButton(ReaderState state, TtColors tt) {
+    final notifier =
+        ref.read(readerControllerProvider(widget.storyId).notifier);
+    final isBusy = state.aloudState == AloudState.busy;
+    final isRecording = state.aloudState == AloudState.recording;
+
+    final Widget micChild;
+    if (isBusy) {
+      micChild = SizedBox(
+        width: 28,
+        height: 28,
+        child: CircularProgressIndicator(
+          strokeWidth: 3,
+          color: tt.primary,
+        ),
+      );
+    } else if (isRecording) {
+      micChild = Icon(
+        Icons.stop_circle_rounded,
+        size: 36,
+        color: tt.danger,
+      ).animate(
+        onPlay: (controller) => controller.repeat(count: 2, reverse: true),
+      ).fade(
+        begin: 0.3,
+        end: 1.0,
+        duration: const Duration(milliseconds: 300),
+      );
+    } else {
+      micChild = Icon(
+        Icons.mic_rounded,
+        size: 36,
+        color: tt.text,
+      );
+    }
+
+    return _buildBottomButton(
+      customIcon: micChild,
+      tooltip: 'Đọc to',
+      onPressed: isBusy ? null : () => notifier.toggleReadAloud(),
+      tt: tt,
+    );
+  }
+
   Widget _buildBottomButton({
-    required IconData icon,
+    IconData? icon,
+    Widget? customIcon,
     required String tooltip,
     required VoidCallback? onPressed,
     required TtColors tt,
     Color? activeColor,
   }) {
+    assert(icon != null || customIcon != null);
     final isEnabled = onPressed != null;
 
     return Tooltip(
@@ -615,13 +731,14 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen> {
             borderRadius: BorderRadius.circular(TtRadius.lg),
             onTap: onPressed,
             child: Center(
-              child: Icon(
-                icon,
-                size: 36,
-                color: isEnabled
-                    ? (activeColor ?? tt.text)
-                    : tt.muted.withValues(alpha: 0.4),
-              ),
+              child: customIcon ??
+                  Icon(
+                    icon,
+                    size: 36,
+                    color: isEnabled
+                        ? (activeColor ?? tt.text)
+                        : tt.muted.withValues(alpha: 0.4),
+                  ),
             ),
           ),
         ),

@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SafetyPolicyDto {
 
- int get childProfileId; bool get parentalGateEnabled;
+ int get childProfileId; bool get parentalGateEnabled; bool get voiceAnswersEnabled;
 /// Create a copy of SafetyPolicyDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $SafetyPolicyDtoCopyWith<SafetyPolicyDto> get copyWith => _$SafetyPolicyDtoCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as SafetyPolicyDto;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SafetyPolicyDto&&(identical(other.childProfileId, _this.childProfileId) || other.childProfileId == _this.childProfileId)&&(identical(other.parentalGateEnabled, _this.parentalGateEnabled) || other.parentalGateEnabled == _this.parentalGateEnabled));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SafetyPolicyDto&&(identical(other.childProfileId, _this.childProfileId) || other.childProfileId == _this.childProfileId)&&(identical(other.parentalGateEnabled, _this.parentalGateEnabled) || other.parentalGateEnabled == _this.parentalGateEnabled)&&(identical(other.voiceAnswersEnabled, _this.voiceAnswersEnabled) || other.voiceAnswersEnabled == _this.voiceAnswersEnabled));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as SafetyPolicyDto;
-  return Object.hash(runtimeType,_this.childProfileId,_this.parentalGateEnabled);
+  return Object.hash(runtimeType,_this.childProfileId,_this.parentalGateEnabled,_this.voiceAnswersEnabled);
 }
 
 @override
 String toString() {
   final _this = this as SafetyPolicyDto;
-  return 'SafetyPolicyDto(childProfileId: ${_this.childProfileId}, parentalGateEnabled: ${_this.parentalGateEnabled})';
+  return 'SafetyPolicyDto(childProfileId: ${_this.childProfileId}, parentalGateEnabled: ${_this.parentalGateEnabled}, voiceAnswersEnabled: ${_this.voiceAnswersEnabled})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $SafetyPolicyDtoCopyWith<$Res>  {
   factory $SafetyPolicyDtoCopyWith(SafetyPolicyDto value, $Res Function(SafetyPolicyDto) _then) = _$SafetyPolicyDtoCopyWithImpl;
 @useResult
 $Res call({
- int childProfileId, bool parentalGateEnabled
+ int childProfileId, bool parentalGateEnabled, bool voiceAnswersEnabled
 });
 
 
@@ -71,10 +71,11 @@ class _$SafetyPolicyDtoCopyWithImpl<$Res>
 
 /// Create a copy of SafetyPolicyDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? childProfileId = null,Object? parentalGateEnabled = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? childProfileId = null,Object? parentalGateEnabled = null,Object? voiceAnswersEnabled = null,}) {
   return _then(SafetyPolicyDto(
 childProfileId: null == childProfileId ? _self.childProfileId : childProfileId // ignore: cast_nullable_to_non_nullable
 as int,parentalGateEnabled: null == parentalGateEnabled ? _self.parentalGateEnabled : parentalGateEnabled // ignore: cast_nullable_to_non_nullable
+as bool,voiceAnswersEnabled: null == voiceAnswersEnabled ? _self.voiceAnswersEnabled : voiceAnswersEnabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -160,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int childProfileId,  bool parentalGateEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int childProfileId,  bool parentalGateEnabled,  bool voiceAnswersEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SafetyPolicyDto() when $default != null:
-return $default(_that.childProfileId,_that.parentalGateEnabled);case _:
+return $default(_that.childProfileId,_that.parentalGateEnabled,_that.voiceAnswersEnabled);case _:
   return orElse();
 
 }
@@ -181,10 +182,10 @@ return $default(_that.childProfileId,_that.parentalGateEnabled);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int childProfileId,  bool parentalGateEnabled)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int childProfileId,  bool parentalGateEnabled,  bool voiceAnswersEnabled)  $default,) {final _that = this;
 switch (_that) {
 case _SafetyPolicyDto():
-return $default(_that.childProfileId,_that.parentalGateEnabled);case _:
+return $default(_that.childProfileId,_that.parentalGateEnabled,_that.voiceAnswersEnabled);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +202,10 @@ return $default(_that.childProfileId,_that.parentalGateEnabled);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int childProfileId,  bool parentalGateEnabled)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int childProfileId,  bool parentalGateEnabled,  bool voiceAnswersEnabled)?  $default,) {final _that = this;
 switch (_that) {
 case _SafetyPolicyDto() when $default != null:
-return $default(_that.childProfileId,_that.parentalGateEnabled);case _:
+return $default(_that.childProfileId,_that.parentalGateEnabled,_that.voiceAnswersEnabled);case _:
   return null;
 
 }
@@ -216,11 +217,12 @@ return $default(_that.childProfileId,_that.parentalGateEnabled);case _:
 @JsonSerializable()
 
 class _SafetyPolicyDto implements SafetyPolicyDto {
-  const _SafetyPolicyDto({required this.childProfileId, this.parentalGateEnabled = true});
+  const _SafetyPolicyDto({required this.childProfileId, this.parentalGateEnabled = true, this.voiceAnswersEnabled = false});
   factory _SafetyPolicyDto.fromJson(Map<String, dynamic> json) => _$SafetyPolicyDtoFromJson(json);
 
 @override final  int childProfileId;
 @override@JsonKey() final  bool parentalGateEnabled;
+@override@JsonKey() final  bool voiceAnswersEnabled;
 
 /// Create a copy of SafetyPolicyDto
 /// with the given fields replaced by the non-null parameter values.
@@ -235,18 +237,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SafetyPolicyDto&&(identical(other.childProfileId, childProfileId) || other.childProfileId == childProfileId)&&(identical(other.parentalGateEnabled, parentalGateEnabled) || other.parentalGateEnabled == parentalGateEnabled));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SafetyPolicyDto&&(identical(other.childProfileId, childProfileId) || other.childProfileId == childProfileId)&&(identical(other.parentalGateEnabled, parentalGateEnabled) || other.parentalGateEnabled == parentalGateEnabled)&&(identical(other.voiceAnswersEnabled, voiceAnswersEnabled) || other.voiceAnswersEnabled == voiceAnswersEnabled));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,childProfileId,parentalGateEnabled);
+    return Object.hash(runtimeType,childProfileId,parentalGateEnabled,voiceAnswersEnabled);
 }
 
 @override
 String toString() {
-    return 'SafetyPolicyDto(childProfileId: $childProfileId, parentalGateEnabled: $parentalGateEnabled)';
+    return 'SafetyPolicyDto(childProfileId: $childProfileId, parentalGateEnabled: $parentalGateEnabled, voiceAnswersEnabled: $voiceAnswersEnabled)';
 }
 
 
@@ -257,7 +259,7 @@ abstract mixin class _$SafetyPolicyDtoCopyWith<$Res> implements $SafetyPolicyDto
   factory _$SafetyPolicyDtoCopyWith(_SafetyPolicyDto value, $Res Function(_SafetyPolicyDto) _then) = __$SafetyPolicyDtoCopyWithImpl;
 @override @useResult
 $Res call({
- int childProfileId, bool parentalGateEnabled
+ int childProfileId, bool parentalGateEnabled, bool voiceAnswersEnabled
 });
 
 
@@ -274,10 +276,11 @@ class __$SafetyPolicyDtoCopyWithImpl<$Res>
 
 /// Create a copy of SafetyPolicyDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? childProfileId = null,Object? parentalGateEnabled = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? childProfileId = null,Object? parentalGateEnabled = null,Object? voiceAnswersEnabled = null,}) {
   return _then(_SafetyPolicyDto(
 childProfileId: null == childProfileId ? _self.childProfileId : childProfileId // ignore: cast_nullable_to_non_nullable
 as int,parentalGateEnabled: null == parentalGateEnabled ? _self.parentalGateEnabled : parentalGateEnabled // ignore: cast_nullable_to_non_nullable
+as bool,voiceAnswersEnabled: null == voiceAnswersEnabled ? _self.voiceAnswersEnabled : voiceAnswersEnabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

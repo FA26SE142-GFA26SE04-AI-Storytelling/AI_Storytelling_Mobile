@@ -85,8 +85,8 @@ Tham khảo web: `features/kid/*`, `childAccessService.ts`, `childReadingService
 - [x] Màn đọc (bố cục A: tranh trên, chữ dưới, thanh ◀ 🔊 🎤 ▶ ở đáy; màn ngang tranh trái chữ phải): mỗi tranh một trang như web, vuốt lật trang, giọng đọc (just_audio, dừng cuối trang, tô vàng chữ đang đọc), từ vựng gạch chân → sheet nghĩa, lưu tiến độ + mở lại đúng trang, dấu trang, yêu thích, dải mờ báo còn chữ, nút "Em đọc xong rồi!" → màn chúc mừng tạm (+EXP). Đã chụp với Backend local (truyện 908).
 - [ ] Giọng đọc với file cần token (truyện gia đình tự soạn) chưa thử trên máy thật.
 - [ ] Sheet từ vựng chưa có nút "Thêm vào sổ tay" (2c).
-- [ ] 5 loại tương tác khi nghe: Checkpoint, RolePlay, FillBlank, EventOrdering, PicturePrediction.
-- [ ] Luyện đọc to bằng micro (ghi WAV, chấm từng chữ xanh / vàng / xám).
+- [x] 5 loại tương tác khi nghe: Checkpoint, RolePlay, FillBlank, EventOrdering, PicturePrediction — hỏi khi bé qua hết cảnh như web, ếch phản ứng, chỉ khen, nút "Đọc tiếp" / "Để sau" / "Nghe lại cảnh". Đã thử thật Checkpoint + PicturePrediction (attempts 200, Backend local, truyện 908). Chưa thử thật FillBlank, EventOrdering, RolePlay (truyện demo không có).
+- [ ] **Một phần** — Luyện đọc to: ghi WAV (`record`), gửi `.../segments/{id}/read-aloud`, tô chữ xanh / vàng / xám, nút Đọc lại; nút 🎤 luôn hiện như web, 403 thì toast + ẩn. Chưa thử trên máy thật (web không ghi âm). Lệch web: kết quả hiện thành dãy chữ dưới đoạn văn (web tô ngay trên đoạn văn); RolePlay chưa ghi âm.
 - [ ] Hoàn thành truyện: chọn cảm xúc, quiz (trắc nghiệm, đúng/sai, trả lời ngắn), ghi âm kể lại, đánh dấu tối đa 5 cảnh còn thắc mắc.
 - [ ] EXP, 7 huy hiệu, cây tri thức 5 giai đoạn, sổ tay từ vựng; đọc xong mở bước lộ trình tiếp theo.
 - [ ] Gửi điều ước bằng thẻ.

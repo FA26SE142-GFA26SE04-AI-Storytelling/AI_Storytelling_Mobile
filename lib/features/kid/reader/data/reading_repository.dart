@@ -1,8 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../models/listening_dto.dart';
+import '../../../../models/read_aloud_dto.dart';
 import '../../../../models/reading_content_dto.dart';
 import '../../../../models/reading_start_dto.dart';
 import '../../data/kid_session_controller.dart';
@@ -53,6 +57,18 @@ abstract class ReadingRepository {
     required String token,
     required int sessionId,
     required int vocabularyId,
+  });
+  Future<ListeningAttemptResultDto> attemptInteraction({
+    required String token,
+    required int sessionId,
+    required int interactionId,
+    required ListeningAttemptRequestDto body,
+  });
+  Future<ReadAloudResultDto> readAloud({
+    required String token,
+    required int sessionId,
+    required int segmentId,
+    required Uint8List wavBytes,
   });
 }
 
@@ -241,6 +257,47 @@ class ApiReadingRepository implements ReadingRepository {
         );
         final data = _unwrap(response) as Map<String, dynamic>;
         return VocabularyDefinitionDto.fromJson(data);
+      });
+
+  @override
+  Future<ListeningAttemptResultDto> attemptInteraction({
+    required String token,
+    required int sessionId,
+    required int interactionId,
+    required ListeningAttemptRequestDto body,
+  }) =>
+      _childCall(() async {
+        final response = await dio.post<dynamic>(
+          '/child/reading/sessions/$sessionId/interactions/$interactionId/attempts',
+          data: body.toJson(),
+          options: _childOptions(token),
+        );
+        final data = _unwrap(response) as Map<String, dynamic>;
+        return ListeningAttemptResultDto.fromJson(data);
+      });
+
+  @override
+  Future<ReadAloudResultDto> readAloud({
+    required String token,
+    required int sessionId,
+    required int segmentId,
+    required Uint8List wavBytes,
+  }) =>
+      _childCall(() async {
+        final formData = FormData.fromMap({
+          'Audio': MultipartFile.fromBytes(
+            wavBytes,
+            filename: 'read-aloud.wav',
+            contentType: DioMediaType('audio', 'wav'),
+          ),
+        });
+        final response = await dio.post<dynamic>(
+          '/child/reading/sessions/$sessionId/segments/$segmentId/read-aloud',
+          data: formData,
+          options: _childOptions(token),
+        );
+        final data = _unwrap(response) as Map<String, dynamic>;
+        return ReadAloudResultDto.fromJson(data);
       });
 }
 

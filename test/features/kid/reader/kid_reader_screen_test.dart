@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +9,8 @@ import 'package:ai_storytelling_mobile/features/kid/data/kid_session_controller.
 import 'package:ai_storytelling_mobile/features/kid/data/stored_kid_session.dart';
 import 'package:ai_storytelling_mobile/features/kid/reader/data/reading_repository.dart';
 import 'package:ai_storytelling_mobile/features/kid/reader/kid_reader_screen.dart';
+import 'package:ai_storytelling_mobile/models/listening_dto.dart';
+import 'package:ai_storytelling_mobile/models/read_aloud_dto.dart';
 import 'package:ai_storytelling_mobile/models/reading_content_dto.dart';
 import 'package:ai_storytelling_mobile/models/reading_start_dto.dart';
 
@@ -97,6 +101,22 @@ class FakeReadingRepository implements ReadingRepository {
   }) async {
     return ReadingFlagsDto(isBookmarked: value);
   }
+
+  @override
+  Future<ListeningAttemptResultDto> attemptInteraction({
+    required String token,
+    required int sessionId,
+    required int interactionId,
+    required ListeningAttemptRequestDto body,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<ReadAloudResultDto> readAloud({
+    required String token,
+    required int sessionId,
+    required int segmentId,
+    required Uint8List wavBytes,
+  }) => throw UnimplementedError();
 
   @override
   Future<ReadingFlagsDto> setFavorite({
@@ -246,7 +266,7 @@ void main() {
       expect(nextInkWell.onTap, isNull);
     });
 
-    testWidgets('Nút "Nghe đọc" tồn tại; nút "Sắp có" (mic) bị vô hiệu',
+    testWidgets('Nút "Nghe đọc" và nút "Đọc to" hiện khi máy hỗ trợ ghi âm',
         (tester) async {
       await pumpReader(tester);
 
@@ -259,14 +279,7 @@ void main() {
       );
       expect(listenInkWell.onTap, isNotNull);
 
-      expect(find.byTooltip('Sắp có'), findsOneWidget);
-      final micInkWell = tester.widget<InkWell>(
-        find.descendant(
-          of: find.byTooltip('Sắp có'),
-          matching: find.byType(InkWell),
-        ),
-      );
-      expect(micInkWell.onTap, isNull);
+      expect(find.byTooltip('Đọc to'), findsOneWidget);
     });
 
     testWidgets('Mở lại truyện ở lastPage = 3', (tester) async {

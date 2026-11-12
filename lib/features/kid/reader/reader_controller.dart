@@ -4,13 +4,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../models/listening_dto.dart';
+import '../../../models/read_aloud_dto.dart';
 import '../../../models/reading_content_dto.dart';
+import '../../../models/reading_interaction_dto.dart';
 import '../../../models/reading_start_dto.dart';
 import '../data/kid_session_controller.dart';
 import 'data/reading_repository.dart';
 import 'media/authed_media.dart';
 import 'reader_narrator.dart';
 import 'reader_pages.dart';
+import 'reader_recorder.dart';
+
+/// Trạng thái ghi âm đọc to của bé.
+enum AloudState {
+  /// Đang rảnh rỗi, không ghi âm.
+  idle,
+
+  /// Đang trong quá trình ghi âm giọng đọc của bé.
+  recording,
+
+  /// Đang xử lý hoặc gửi âm thanh lên máy chủ để chấm điểm.
+  busy,
+}
 
 /// Trạng thái bất biến của màn hình đọc truyện.
 class ReaderState {
@@ -31,6 +47,13 @@ class ReaderState {
     this.completed,
     this.activeSegmentId,
     this.content,
+    this.pendingInteraction,
+    this.attemptResult,
+    this.attemptedInteractionIds = const [],
+    this.voiceEnabled = false,
+    this.aloudState = AloudState.idle,
+    this.aloudResult,
+    this.notice,
   });
 
   /// Mã phiên đọc truyện hiện tại.
@@ -81,6 +104,27 @@ class ReaderState {
   /// Nội dung câu chuyện đọc được tải về.
   final ReadingContentDto? content;
 
+  /// Tương tác đang chờ bé trả lời hoặc hiển thị.
+  final ReadingInteractionDto? pendingInteraction;
+
+  /// Kết quả làm bài tương tác vừa gửi.
+  final ListeningAttemptResultDto? attemptResult;
+
+  /// Danh sách mã các tương tác đã hoàn thành trong phiên đọc.
+  final List<int> attemptedInteractionIds;
+
+  /// Cho phép tương tác hoặc đọc to bằng giọng nói.
+  final bool voiceEnabled;
+
+  /// Trạng thái tiến trình đọc to bằng micro.
+  final AloudState aloudState;
+
+  /// Kết quả đọc to vừa nhận.
+  final ReadAloudResultDto? aloudResult;
+
+  /// Thông báo ngắn cho toast cảnh báo.
+  final String? notice;
+
   /// Trang đọc hiện tại hoặc `null` nếu chưa có trang.
   ReaderPage? get current => pages.isEmpty ? null : pages[index];
 
@@ -102,6 +146,13 @@ class ReaderState {
     Object? completed = _sentinel,
     Object? activeSegmentId = _sentinel,
     Object? content = _sentinel,
+    Object? pendingInteraction = _sentinel,
+    Object? attemptResult = _sentinel,
+    List<int>? attemptedInteractionIds,
+    bool? voiceEnabled,
+    AloudState? aloudState,
+    Object? aloudResult = _sentinel,
+    Object? notice = _sentinel,
   }) {
     return ReaderState(
       sessionId: sessionId ?? this.sessionId,
@@ -127,6 +178,20 @@ class ReaderState {
       content: identical(content, _sentinel)
           ? this.content
           : content as ReadingContentDto?,
+      pendingInteraction: identical(pendingInteraction, _sentinel)
+          ? this.pendingInteraction
+          : pendingInteraction as ReadingInteractionDto?,
+      attemptResult: identical(attemptResult, _sentinel)
+          ? this.attemptResult
+          : attemptResult as ListeningAttemptResultDto?,
+      attemptedInteractionIds:
+          attemptedInteractionIds ?? this.attemptedInteractionIds,
+      voiceEnabled: voiceEnabled ?? this.voiceEnabled,
+      aloudState: aloudState ?? this.aloudState,
+      aloudResult: identical(aloudResult, _sentinel)
+          ? this.aloudResult
+          : aloudResult as ReadAloudResultDto?,
+      notice: identical(notice, _sentinel) ? this.notice : notice as String?,
     );
   }
 
@@ -147,6 +212,8 @@ class ReaderController extends Notifier<ReaderState> {
   final int storyId;
 
   ReaderNarrator? _narrator;
+  AudioPlayer? _feedbackPlayer;
+  ReaderRecorder? _recorder;
   bool _narratorListening = false;
   Timer? _signalTimer;
   Timer? _activeSecondsTimer;
@@ -160,6 +227,8 @@ class ReaderController extends Notifier<ReaderState> {
     ref.onDispose(() {
       _cancelTimers();
       _narrator?.dispose();
+      _feedbackPlayer?.dispose();
+      _recorder?.dispose();
     });
     return const ReaderState();
   }
@@ -229,6 +298,8 @@ class ReaderController extends Notifier<ReaderState> {
         const Duration(seconds: 1),
         (_) => _activeSeconds++,
       );
+
+      state = state.copyWith(voiceEnabled: kMicSupported);
     } on ApiException catch (e) {
       state = state.copyWith(loading: false, error: e.message);
     }
@@ -258,7 +329,13 @@ class ReaderController extends Notifier<ReaderState> {
     }
 
     await _narrator?.stop();
-    state = state.copyWith(index: target, playing: false);
+    state = state.copyWith(
+      index: target,
+      playing: false,
+      aloudResult: null,
+      attemptResult: null,
+      pendingInteraction: null,
+    );
 
     if (state.readingMode == 'ListenFirst') {
       await _play();
@@ -400,8 +477,223 @@ class ReaderController extends Notifier<ReaderState> {
   /// Dừng phiên đọc và lưu tiến độ khi rời màn hình.
   Future<void> leave() async {
     await _narrator?.stop();
+    _feedbackPlayer?.stop();
+    await _recorder?.dispose();
+    _recorder = null;
     _cancelTimers();
     await saveNow();
+  }
+
+  /// Kiểm tra xem trang hiện tại có cần hiển thị tương tác hay không.
+  bool needsInteraction() {
+    if (state.listenOnly) return false;
+    final pages = state.pages;
+    final index = state.index;
+    if (pages.isEmpty || index < 0 || index >= pages.length) return false;
+
+    final currentPage = pages[index];
+    final isLastPageOfScene = index == pages.length - 1 ||
+        pages[index + 1].sceneIndex != currentPage.sceneIndex;
+    if (!isLastPageOfScene) return false;
+
+    final content = state.content;
+    if (content == null) return false;
+
+    ReadingSceneDto? scene;
+    for (final s in content.scenes) {
+      if (s.sceneIndex == currentPage.sceneIndex) {
+        scene = s;
+        break;
+      }
+    }
+    if (scene == null) return false;
+
+    final interaction = scene.interaction;
+    if (interaction == null) return false;
+    if (scene.attemptedInSession) return false;
+    if (state.attemptedInteractionIds.contains(interaction.id)) return false;
+
+    return true;
+  }
+
+  /// Lấy tương tác cần hiển thị của trang hiện tại nếu có.
+  ReadingInteractionDto? get currentInteraction {
+    if (!needsInteraction()) return null;
+    final pages = state.pages;
+    final index = state.index;
+    if (pages.isEmpty || index < 0 || index >= pages.length) return null;
+    final currentSceneIndex = pages[index].sceneIndex;
+    final content = state.content;
+    if (content == null) return null;
+    for (final s in content.scenes) {
+      if (s.sceneIndex == currentSceneIndex) {
+        return s.interaction;
+      }
+    }
+    return null;
+  }
+
+  /// Gửi câu trả lời cho câu hỏi tương tác.
+  Future<ListeningAttemptResultDto?> submitAttempt(
+    ReadingInteractionDto q,
+    ListeningAttemptRequestDto body,
+  ) async {
+    final token = _token();
+    final sessionId = state.sessionId;
+    if (token == null || sessionId == null) return null;
+
+    try {
+      final result = await _repo.attemptInteraction(
+        token: token,
+        sessionId: sessionId,
+        interactionId: q.id,
+        body: body,
+      );
+      state = state.copyWith(
+        attemptResult: result,
+        attemptedInteractionIds: [...state.attemptedInteractionIds, q.id],
+      );
+      final audioUrl = result.feedbackAudioUrl;
+      if (audioUrl != null && audioUrl.trim().isNotEmpty) {
+        unawaited(_playFeedback(audioUrl));
+      }
+      return result;
+    } on ApiException catch (e) {
+      state = state.copyWith(notice: e.message);
+      return null;
+    }
+  }
+
+  /// Phát âm thanh phản hồi cho tương tác bằng AudioPlayer riêng.
+  Future<void> _playFeedback(String url) async {
+    try {
+      final player = _feedbackPlayer ??= AudioPlayer();
+      await player.stop();
+      final source = await _resolveSource(url);
+      await player.setAudioSource(source);
+      await player.play();
+    } catch (_) {
+      // Bỏ qua lỗi phát âm thanh phản hồi
+    }
+  }
+
+  /// Đóng tương tác hiện tại và dừng phát âm thanh phản hồi.
+  void closeInteraction() {
+    _feedbackPlayer?.stop();
+    state = state.copyWith(
+      pendingInteraction: null,
+      attemptResult: null,
+    );
+  }
+
+  /// Phát lại cảnh từ trang đầu tiên của cảnh có chỉ số [sceneIndex].
+  Future<void> replayScene(int sceneIndex) async {
+    final idx = state.pages.indexWhere((p) => p.sceneIndex == sceneIndex);
+    closeInteraction();
+    if (idx != -1) {
+      await goTo(idx);
+    }
+  }
+
+  /// Bật hoặc dừng chế độ đọc to bằng giọng nói qua micro.
+  Future<void> toggleReadAloud() async {
+    if (!state.voiceEnabled) return;
+    if (!kMicSupported) return;
+
+    if (state.aloudState == AloudState.idle) {
+      final rec = _recorder ??= ReaderRecorder();
+
+      await _narrator?.stop();
+      state = state.copyWith(playing: false);
+
+      final ok = await rec.start(
+        onLimit: () {
+          if (state.aloudState == AloudState.recording) {
+            toggleReadAloud();
+          }
+        },
+      );
+      if (!ok) {
+        state = state.copyWith(notice: 'Em cho phép dùng micro để đọc to nhé.');
+        return;
+      }
+
+      state = state.copyWith(
+        aloudState: AloudState.recording,
+        aloudResult: null,
+      );
+      return;
+    }
+
+    if (state.aloudState == AloudState.recording) {
+      state = state.copyWith(aloudState: AloudState.busy);
+      final rec = _recorder;
+      final bytes = await rec?.stop();
+
+      if (state.pages.isEmpty ||
+          state.index < 0 ||
+          state.index >= state.pages.length) {
+        state = state.copyWith(
+          notice: 'Em thử đọc lại nhé.',
+          aloudState: AloudState.idle,
+        );
+        return;
+      }
+
+      final segment = segmentAtPageStart(state.pages[state.index]);
+      if (segment == null || bytes == null) {
+        state = state.copyWith(
+          notice: 'Em thử đọc lại nhé.',
+          aloudState: AloudState.idle,
+        );
+        return;
+      }
+
+      final segmentId = segment.segmentId;
+
+      final token = _token();
+      final sessionId = state.sessionId;
+      if (token == null || sessionId == null) {
+        state = state.copyWith(aloudState: AloudState.idle);
+        return;
+      }
+
+      try {
+        final r = await _repo.readAloud(
+          token: token,
+          sessionId: sessionId,
+          segmentId: segmentId,
+          wavBytes: bytes,
+        );
+        state = state.copyWith(
+          aloudResult: r,
+          notice: r.message.isEmpty ? null : r.message,
+        );
+      } on ApiException catch (e) {
+        final isDenied = e.statusCode == 401 || e.statusCode == 403;
+        state = state.copyWith(
+          notice: e.message,
+          voiceEnabled: isDenied ? false : state.voiceEnabled,
+        );
+      } finally {
+        state = state.copyWith(aloudState: AloudState.idle);
+      }
+    }
+  }
+
+  /// Xóa kết quả đọc to hiện tại.
+  void clearReadAloud() {
+    state = state.copyWith(aloudResult: null);
+  }
+
+  /// Xóa thông báo toast hiện tại sau khi hiển thị.
+  void clearNotice() {
+    state = state.copyWith(notice: null);
+  }
+
+  /// Gán tương tác đang chờ phản hồi.
+  void setPendingInteraction(ReadingInteractionDto? interaction) {
+    state = state.copyWith(pendingInteraction: interaction);
   }
 
   /// Lên lịch lưu tiến độ đọc (debounce 1.5 giây).
