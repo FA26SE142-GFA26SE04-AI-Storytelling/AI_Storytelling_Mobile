@@ -65,9 +65,12 @@ assets/
 - [x] Theme: `TtColors` light / dark theo token của web (`styles/tokens.css`), font Baloo 2 + Nunito, có màu vàng mật `#ffd166`.
 - [x] API client: base URL, gắn token, tự refresh token, đổi mã lỗi thành câu dễ hiểu và hiện bằng toast.
 - [x] Component dùng chung: nút (lá sen), thẻ có viền rõ và nền trong suốt, popup xác nhận, toast, ảnh có hình mặc định, trạng thái rỗng / đang tải.
-- [ ] Router: khu phụ huynh có thanh đáy (Trang chủ · Thư viện · (+) Tạo · Bé · Tài khoản); Chế độ của bé là route toàn màn hình, không có thanh đáy.
-- [ ] Đăng nhập, đăng ký, xác thực email, quên / đặt lại mật khẩu (nhập mã OTP gửi qua email, như web).
-- [ ] Chặn tài khoản Moderator / Admin / Creator ở mobile: báo dùng web (Creator làm ở giai đoạn 6).
+- [x] Router: khu phụ huynh có thanh đáy (Trang chủ · Thư viện · (+) Tạo · Bé · Tài khoản); Chế độ của bé là route toàn màn hình, không có thanh đáy.
+- [x] Đăng nhập, đăng ký, xác thực email, quên / đặt lại mật khẩu (nhập mã OTP gửi qua email, như web).
+- [x] Chặn tài khoản Moderator / Admin / Creator ở mobile: báo dùng web (Creator làm ở giai đoạn 6).
+- [x] Linh vật ếch (SVG chuyển từ `Frog.tsx` của web: idle / happy / think) trong `TtFrog`.
+- [x] Thêm nền tảng web (`web/`) chỉ để chụp màn hình kiểm tra UI bằng Playwright; app chính vẫn là Android / iOS. Chạy thử trên web cần Backend cho phép CORS origin localhost (hiện chưa có, app thật không bị).
+- [ ] Nút đang gửi chưa hiện vòng quay (TtButton.isLoading) ở màn đăng nhập — sửa ở giai đoạn sau.
 
 ## Giai đoạn 2: Bé (F-02, F-08, F-13, F-14)
 

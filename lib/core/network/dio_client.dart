@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ai_storytelling_mobile/features/auth/application/auth_controller.dart';
 
 import '../config/env.dart';
 import '../storage/token_storage.dart';
@@ -41,6 +42,8 @@ final dioProvider = Provider<Dio>((ref) {
       storage: storage,
       refreshDio: refreshDio,
       dio: dio,
+      onSessionExpired: () =>
+          ref.read(authControllerProvider.notifier).sessionExpired(),
     ),
   );
 
@@ -103,10 +106,11 @@ class AuthInterceptor extends Interceptor {
     final options = err.requestOptions;
 
     final bool is401 = statusCode == 401;
+    final bool isAnonymous = options.extra['anonymous'] == true;
     final bool alreadyRetried = options.extra['retried'] == true;
     final bool isRefreshEndpoint = options.path.contains('/Auth/refresh-token');
 
-    if (is401 && !alreadyRetried && !isRefreshEndpoint) {
+    if (is401 && !isAnonymous && !alreadyRetried && !isRefreshEndpoint) {
       final refreshToken = await storage.readRefreshToken();
 
       if (refreshToken == null || refreshToken.isEmpty) {
@@ -190,10 +194,25 @@ class AuthInterceptor extends Interceptor {
 // ─── Hàm tiện ích ────────────────────────────────────────────────────────────
 
 /// Bọc mọi lời gọi API, chuyển DioException thành ApiException.
+///
+/// Trên Flutter Web, lỗi CORS hoặc mạng đôi khi là [TypeError] (JS native)
+/// hoặc [Exception] thông thường, không phải [DioException].
+/// Chúng bị bắt bởi nhánh thứ hai và chuyển thành [ApiException] mã 0
+/// (mất mạng) để UI luôn hiển thị đúng thông báo.
 Future<T> runApi<T>(Future<T> Function() request) async {
   try {
     return await request();
   } on DioException catch (e) {
     throw ApiException.fromDioException(e);
+  } on ApiException {
+    // ApiException từ _unwrap() hoặc tầng khác: giữ nguyên, không bọc lại.
+    rethrow;
+  } catch (e) {
+    // Lỗi không xác định (TypeError CORS trên web, v.v.) → coi là mất mạng.
+    throw ApiException(
+      statusCode: 0,
+      message: ApiException.statusMessages[0] ??
+          'Không có kết nối mạng. Kiểm tra mạng rồi thử lại.',
+    );
   }
 }
