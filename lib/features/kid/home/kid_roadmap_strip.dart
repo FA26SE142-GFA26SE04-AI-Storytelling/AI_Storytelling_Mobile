@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/tt_cropped_image.dart';
 import '../../../core/widgets/tt_frog.dart';
-import '../../../core/widgets/tt_network_image.dart';
 import '../../../core/widgets/tt_toast.dart';
 import '../../../models/my_roadmap_dto.dart';
 
@@ -186,11 +186,10 @@ class _RoadmapStepItem extends StatelessWidget {
         ),
       ),
       child: ClipOval(
-        child: TtNetworkImage(
+        child: TtCroppedImage(
           url: item.coverImageUrl,
           width: 84,
           height: 84,
-          fit: BoxFit.cover,
           radius: BorderRadius.circular(TtRadius.full),
         ),
       ),

@@ -17,7 +17,9 @@ import 'package:ai_storytelling_mobile/features/kid/data/kid_session_controller.
 import 'package:ai_storytelling_mobile/features/kid/home/kid_home_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/entry/kid_qr_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/home/kid_coming_soon_screen.dart';
-import 'package:ai_storytelling_mobile/features/kid/reader/kid_reader_placeholder_screen.dart';
+import 'package:ai_storytelling_mobile/features/kid/reader/kid_reader_screen.dart';
+import 'package:ai_storytelling_mobile/features/kid/reader/kid_read_done_screen.dart';
+import 'package:ai_storytelling_mobile/models/reading_start_dto.dart';
 import 'package:ai_storytelling_mobile/features/children/presentation/children_tab_screen.dart';
 
 // ---------------------------------------------------------------------------
@@ -39,6 +41,7 @@ abstract final class AppRoutes {
   static const String kidMode = '/kid';
   static const String kidEntry = '/kid-entry';
   static const String kidRead = '/kid/read/:storyId';
+  static const String kidReadDone = '/kid/read-done';
   static const String kidSoon = '/kid/soon';
 }
 
@@ -173,8 +176,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.kidRead,
-        builder: (context, state) => KidReaderPlaceholderScreen(
+        builder: (context, state) => KidReaderScreen(
           storyId: int.parse(state.pathParameters['storyId']!),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.kidReadDone,
+        builder: (context, state) => KidReadDoneScreen(
+          completed: state.extra as ReadingCompletedDto,
         ),
       ),
       GoRoute(

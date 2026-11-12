@@ -4,8 +4,8 @@ import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_card.dart';
+import '../../../core/widgets/tt_cropped_image.dart';
 import '../../../core/widgets/tt_frog.dart';
-import '../../../core/widgets/tt_network_image.dart';
 import '../../../models/my_roadmap_dto.dart';
 
 /// Thẻ lớn "Hôm nay em đọc" cho Chế độ của bé (màn dọc điện thoại, chữ lớn, nút to).
@@ -68,11 +68,10 @@ class KidTodayCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
-        TtNetworkImage(
+        TtCroppedImage(
           url: open.coverImageUrl,
           height: 200,
           width: double.infinity,
-          fit: BoxFit.cover,
           radius: BorderRadius.circular(TtRadius.lg),
         ),
         const SizedBox(height: 14),

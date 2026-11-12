@@ -80,9 +80,11 @@ Tham khảo web: `features/kid/*`, `childAccessService.ts`, `childReadingService
 - [x] Phụ huynh giao máy: tab Bé có danh sách hồ sơ + nút "Cho bé đọc" (`POST /ChildAccessCredential/{id}/handover`); mở lại app vẫn ở Chế độ của bé. Chưa có "Cho bé đọc ngay" kèm truyện (giai đoạn 3/4).
 - [x] Cổng phụ huynh khi thoát (`POST /ParentalGate/verify`) khi `parentalGateEnabled` bật; chặn nút Back của Android. Phiên bé hết hạn → màn "Phiên đọc đã kết thúc".
 - [ ] **Một phần** — Trang chính của bé (bố cục A đã chốt): thẻ "Hôm nay em đọc", hàng lá sen hành trình (`GET /MyRoadmap`), lưới 2×2 đã xong; các ô Truyện / Sổ tay / Điều ước / Phần thưởng còn mở màn "Sắp có" (2b/2c).
-- [ ] Hỏi lại phiên bé định kỳ như web (`GET /ChildAccessCredential/me` mỗi 15 giây, hết hạn khi không hoạt động) — hiện chỉ biết khi Backend trả 401/403.
-- [ ] Ảnh bìa có đuôi `#crop=x,y,w,h` (Backend) — web cắt ảnh theo đuôi này, mobile chưa cắt.
-- [ ] Màn đọc (bố cục A đã chốt: tranh trên, chữ dưới, thanh ◀ 🔊 🎤 ▶ ở đáy): vuốt lật trang, ListenFirst / ReadFirst, giọng đọc TTS, từ vựng, lưu tiến độ, dấu trang, yêu thích. Hỗ trợ màn dọc và ngang, máy tính bảng hiện hai trang.
+- [x] Hỏi lại phiên bé định kỳ như web (`GET /ChildAccessCredential/me` mỗi 15 giây); màn đọc hỏi `signal` mỗi 8 giây, `shouldExit` thì dừng và về trang bé.
+- [x] Ảnh bìa có đuôi `#crop=x,y,w,h` được cắt như web (`TtCroppedImage`).
+- [x] Màn đọc (bố cục A: tranh trên, chữ dưới, thanh ◀ 🔊 🎤 ▶ ở đáy; màn ngang tranh trái chữ phải): mỗi tranh một trang như web, vuốt lật trang, giọng đọc (just_audio, dừng cuối trang, tô vàng chữ đang đọc), từ vựng gạch chân → sheet nghĩa, lưu tiến độ + mở lại đúng trang, dấu trang, yêu thích, dải mờ báo còn chữ, nút "Em đọc xong rồi!" → màn chúc mừng tạm (+EXP). Đã chụp với Backend local (truyện 908).
+- [ ] Giọng đọc với file cần token (truyện gia đình tự soạn) chưa thử trên máy thật.
+- [ ] Sheet từ vựng chưa có nút "Thêm vào sổ tay" (2c).
 - [ ] 5 loại tương tác khi nghe: Checkpoint, RolePlay, FillBlank, EventOrdering, PicturePrediction.
 - [ ] Luyện đọc to bằng micro (ghi WAV, chấm từng chữ xanh / vàng / xám).
 - [ ] Hoàn thành truyện: chọn cảm xúc, quiz (trắc nghiệm, đúng/sai, trả lời ngắn), ghi âm kể lại, đánh dấu tối đa 5 cảnh còn thắc mắc.

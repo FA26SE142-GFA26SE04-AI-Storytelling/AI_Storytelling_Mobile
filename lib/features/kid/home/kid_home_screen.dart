@@ -11,6 +11,7 @@ import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_state_views.dart';
 import '../../auth/application/auth_controller.dart';
 import '../data/kid_session_controller.dart';
+import '../data/kid_session_watcher.dart';
 import '../gate/parental_gate_dialog.dart';
 import 'kid_home_providers.dart';
 import 'kid_roadmap_strip.dart';
@@ -58,6 +59,7 @@ class KidHomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(kidSessionWatcherProvider);
     final sessionState = ref.watch(kidSessionProvider);
     final tt = context.tt;
 
