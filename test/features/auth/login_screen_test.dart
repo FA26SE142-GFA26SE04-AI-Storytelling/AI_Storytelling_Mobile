@@ -33,7 +33,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Bấm nút chính có chữ 'Đăng nhập'
-      await tester.tap(find.byType(TtButton));
+      await tester.tap(find.widgetWithText(TtButton, 'Đăng nhập'));
       await tester.pumpAndSettle();
 
       // Kiểm tra thông báo lỗi kiểm tra hợp lệ
@@ -78,7 +78,7 @@ void main() {
       await tester.enterText(textFields.at(1), '12345678');
 
       // Bấm nút chính để thực hiện đăng nhập
-      await tester.tap(find.byType(TtButton));
+      await tester.tap(find.widgetWithText(TtButton, 'Đăng nhập'));
       await tester.pumpAndSettle();
 
       // Kiểm tra hiển thị thông báo lỗi

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ai_storytelling_mobile/features/auth/application/auth_controller.dart';
 
@@ -104,6 +105,8 @@ class AuthInterceptor extends Interceptor {
   ) async {
     final statusCode = err.response?.statusCode;
     final options = err.requestOptions;
+    // Request của bé dùng token phiên của bé: không refresh bằng token phụ huynh.
+    if (options.extra['child'] == true) return handler.next(err);
 
     final bool is401 = statusCode == 401;
     final bool isAnonymous = options.extra['anonymous'] == true;
@@ -208,11 +211,9 @@ Future<T> runApi<T>(Future<T> Function() request) async {
     // ApiException từ _unwrap() hoặc tầng khác: giữ nguyên, không bọc lại.
     rethrow;
   } catch (e) {
-    // Lỗi không xác định (TypeError CORS trên web, v.v.) → coi là mất mạng.
-    throw ApiException(
-      statusCode: 0,
-      message: ApiException.statusMessages[0] ??
-          'Không có kết nối mạng. Kiểm tra mạng rồi thử lại.',
-    );
+    // Mất mạng / CORS đã là DioException ở trên. Còn lại thường là dữ liệu trả về
+    // không đọc được (thiếu trường, sai kiểu) → không báo nhầm là mất mạng.
+    debugPrint('runApi: lỗi đọc dữ liệu: $e');
+    throw const ApiException(message: ApiException.defaultFallbackMessage);
   }
 }
