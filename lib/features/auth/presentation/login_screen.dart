@@ -156,6 +156,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             const SizedBox(height: 12),
 
+            // Nút vào bằng mã QR cho bé
+            TtButton(
+              label: 'Bé vào bằng mã QR',
+              icon: Icons.qr_code_scanner_rounded,
+              variant: TtButtonVariant.secondary,
+              expanded: true,
+              onPressed: () => context.push('/kid-entry'),
+            ),
+            const SizedBox(height: 12),
+
             // Điều hướng sang màn hình đăng ký
             Wrap(
               alignment: WrapAlignment.center,

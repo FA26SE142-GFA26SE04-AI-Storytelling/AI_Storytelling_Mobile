@@ -76,10 +76,12 @@ assets/
 
 Tham khảo web: `features/kid/*`, `childAccessService.ts`, `childReadingService.ts`, `storyWishService.ts`.
 
-- [ ] Vào app bằng quét QR EasyLogin (khoá thiết bị 5 phút khi quét sai nhiều lần).
-- [ ] Phụ huynh giao máy ("Vào trang bé", "Cho bé đọc ngay"); mở lại app vẫn ở Chế độ của bé.
-- [ ] Cổng phụ huynh khi thoát (nhập lại email + mật khẩu) khi `parentalGateEnabled` bật.
-- [ ] Trang chính của bé (bố cục A đã chốt: thẻ "Hôm nay em đọc", hàng lá sen hành trình, lưới 2×2): truyện hôm nay, hành trình (lộ trình), kệ truyện, sổ tay, điều ước, phần thưởng.
+- [x] Vào app bằng quét QR EasyLogin (đọc link `?kid=` của web hoặc mã trần; lỗi / khoá do Backend trả hiện bằng toast). Chưa thử camera thật.
+- [x] Phụ huynh giao máy: tab Bé có danh sách hồ sơ + nút "Cho bé đọc" (`POST /ChildAccessCredential/{id}/handover`); mở lại app vẫn ở Chế độ của bé. Chưa có "Cho bé đọc ngay" kèm truyện (giai đoạn 3/4).
+- [x] Cổng phụ huynh khi thoát (`POST /ParentalGate/verify`) khi `parentalGateEnabled` bật; chặn nút Back của Android. Phiên bé hết hạn → màn "Phiên đọc đã kết thúc".
+- [ ] **Một phần** — Trang chính của bé (bố cục A đã chốt): thẻ "Hôm nay em đọc", hàng lá sen hành trình (`GET /MyRoadmap`), lưới 2×2 đã xong; các ô Truyện / Sổ tay / Điều ước / Phần thưởng còn mở màn "Sắp có" (2b/2c).
+- [ ] Hỏi lại phiên bé định kỳ như web (`GET /ChildAccessCredential/me` mỗi 15 giây, hết hạn khi không hoạt động) — hiện chỉ biết khi Backend trả 401/403.
+- [ ] Ảnh bìa có đuôi `#crop=x,y,w,h` (Backend) — web cắt ảnh theo đuôi này, mobile chưa cắt.
 - [ ] Màn đọc (bố cục A đã chốt: tranh trên, chữ dưới, thanh ◀ 🔊 🎤 ▶ ở đáy): vuốt lật trang, ListenFirst / ReadFirst, giọng đọc TTS, từ vựng, lưu tiến độ, dấu trang, yêu thích. Hỗ trợ màn dọc và ngang, máy tính bảng hiện hai trang.
 - [ ] 5 loại tương tác khi nghe: Checkpoint, RolePlay, FillBlank, EventOrdering, PicturePrediction.
 - [ ] Luyện đọc to bằng micro (ghi WAV, chấm từng chữ xanh / vàng / xám).

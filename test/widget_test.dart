@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ai_storytelling_mobile/app.dart';
 import 'package:ai_storytelling_mobile/features/auth/data/auth_repository.dart';
+import 'package:ai_storytelling_mobile/features/kid/data/kid_session_controller.dart';
 
 import 'support/fake_auth_repository.dart';
 
@@ -13,6 +14,7 @@ void main() {
       ProviderScope(
         overrides: [
           authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+          kidSessionProvider.overrideWith(_NoKidSession.new),
         ],
         child: const TaleTaleApp(),
       ),
@@ -23,3 +25,9 @@ void main() {
     expect(find.text('Đăng nhập'), findsWidgets);
   });
 }
+
+class _NoKidSession extends KidSessionController {
+  @override
+  KidSessionState build() => const KidNone();
+}
+

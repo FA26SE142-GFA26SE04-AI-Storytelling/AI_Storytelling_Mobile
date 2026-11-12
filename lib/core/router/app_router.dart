@@ -13,6 +13,12 @@ import 'package:ai_storytelling_mobile/features/auth/presentation/blocked_screen
 import 'package:ai_storytelling_mobile/features/shell/empty_tab_screen.dart';
 import 'package:ai_storytelling_mobile/features/account/account_screen.dart';
 import 'package:ai_storytelling_mobile/core/router/app_shell.dart';
+import 'package:ai_storytelling_mobile/features/kid/data/kid_session_controller.dart';
+import 'package:ai_storytelling_mobile/features/kid/home/kid_home_screen.dart';
+import 'package:ai_storytelling_mobile/features/kid/entry/kid_qr_screen.dart';
+import 'package:ai_storytelling_mobile/features/kid/home/kid_coming_soon_screen.dart';
+import 'package:ai_storytelling_mobile/features/kid/reader/kid_reader_placeholder_screen.dart';
+import 'package:ai_storytelling_mobile/features/children/presentation/children_tab_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Hằng số đường dẫn tập trung — dùng chung toàn app
@@ -31,6 +37,9 @@ abstract final class AppRoutes {
   static const String kids = '/kids';
   static const String account = '/account';
   static const String kidMode = '/kid';
+  static const String kidEntry = '/kid-entry';
+  static const String kidRead = '/kid/read/:storyId';
+  static const String kidSoon = '/kid/soon';
 }
 
 // ---------------------------------------------------------------------------
@@ -47,7 +56,34 @@ const _authRoutes = {
 // ---------------------------------------------------------------------------
 // authRedirect — hàm thuần tuý, không phụ thuộc Riverpod → dễ unit test
 // ---------------------------------------------------------------------------
-String? authRedirect(AuthState state, String location) {
+String? authRedirect(
+  AuthState state,
+  String location, {
+  KidSessionState kid = const KidNone(),
+}) {
+  if (kid is KidChecking) {
+    return location == AppRoutes.splash ? null : AppRoutes.splash;
+  }
+
+  if (kid is KidActive || kid is KidEnded) {
+    if (location == AppRoutes.kidMode ||
+        location.startsWith('/kid/') ||
+        location == AppRoutes.kidEntry) {
+      return null;
+    }
+    return AppRoutes.kidMode;
+  }
+
+  if (kid is KidNone) {
+    if (location == AppRoutes.kidEntry) {
+      return null;
+    }
+    if ((location == AppRoutes.kidMode || location.startsWith('/kid/')) &&
+        state is AuthSignedIn) {
+      return AppRoutes.home;
+    }
+  }
+
   return switch (state) {
     // Đang kiểm tra phiên: giữ splash, mọi nơi khác về splash
     AuthChecking() =>
@@ -77,6 +113,7 @@ String? authRedirect(AuthState state, String location) {
 class _AuthRefresh extends ChangeNotifier {
   _AuthRefresh(Ref ref) {
     ref.listen(authControllerProvider, (_, _) => notifyListeners());
+    ref.listen(kidSessionProvider, (_, _) => notifyListeners());
   }
 }
 
@@ -87,8 +124,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
     refreshListenable: _AuthRefresh(ref),
-    redirect: (context, state) =>
-        authRedirect(ref.read(authControllerProvider), state.matchedLocation),
+    redirect: (context, state) => authRedirect(
+      ref.read(authControllerProvider),
+      state.matchedLocation,
+      kid: ref.read(kidSessionProvider),
+    ),
     routes: [
       // --- Các route độc lập (không thuộc shell) ---
       GoRoute(
@@ -121,14 +161,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.blocked,
         builder: (context, state) => BlockedScreen(),
       ),
+      GoRoute(
+        path: AppRoutes.kidEntry,
+        builder: (context, state) => const KidQrScreen(),
+      ),
 
       // --- Chế độ bé (toàn màn hình, không thuộc bottom nav) ---
       GoRoute(
         path: AppRoutes.kidMode,
-        builder: (context, state) => EmptyTabScreen(
-          title: 'Chế độ của bé',
-          icon: Icons.face_rounded,
-          message: 'Trang của bé sẽ có ở giai đoạn 2.',
+        builder: (context, state) => const KidHomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.kidRead,
+        builder: (context, state) => KidReaderPlaceholderScreen(
+          storyId: int.parse(state.pathParameters['storyId']!),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.kidSoon,
+        builder: (context, state) => KidComingSoonScreen(
+          title: (state.extra as String?) ?? 'Sắp có',
         ),
       ),
 
@@ -186,12 +238,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.kids,
-                builder: (context, state) => EmptyTabScreen(
-                  title: 'Bé',
-                  icon: Icons.child_care_rounded,
-                  message:
-                      'Hồ sơ bé và các mục quản lý bé sẽ có ở giai đoạn 3.',
-                ),
+                builder: (context, state) => const ChildrenTabScreen(),
               ),
             ],
           ),
