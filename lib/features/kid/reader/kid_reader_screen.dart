@@ -11,9 +11,10 @@ import '../../../core/widgets/tt_state_views.dart';
 import '../../../core/widgets/tt_toast.dart';
 import '../../../models/child_reading_dto.dart';
 import '../data/kid_reading_repository.dart';
+import '../data/kid_session_controller.dart';
+import '../quiz/kid_after_reading_screen.dart';
 import 'kid_reader_audio.dart';
 import 'kid_reader_bottom_bar.dart';
-import 'kid_reader_complete_view.dart';
 import 'kid_reader_controller.dart';
 import 'kid_reader_page.dart';
 import 'kid_vocab_sheet.dart';
@@ -40,11 +41,16 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   /// Cờ để chỉ tự động phát lần đầu khi chuyển sang ready một lần duy nhất.
   bool _didAutoPlay = false;
 
+  late final KidSessionController _kidSession;
+
   @override
   void initState() {
     super.initState();
     _audio = KidReaderAudio();
+    _kidSession = ref.read(kidSessionProvider.notifier);
     _playingSub = _audio.playingStream.listen((playing) {
+      // Đang nghe đọc cũng tính là bé đang dùng, phiên không hết hạn vì "không chạm".
+      _kidSession.narrating = playing;
       if (mounted) setState(() => _isAudioPlaying = playing);
     });
     WidgetsBinding.instance.addObserver(this);
@@ -59,6 +65,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _playingSub?.cancel();
+    _kidSession.narrating = false;
     _audio.dispose();
     _pageController?.dispose();
     super.dispose();
@@ -150,8 +157,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
         _notifier.markPageCompleted();
         setState(() => _activeSegmentId = null);
 
-        final curState =
-            ref.read(kidReaderControllerProvider(widget.storyId));
+        final curState = ref.read(kidReaderControllerProvider(widget.storyId));
         if (curState.readingMode == KidReadingMode.listenFirst &&
             curState.currentPage == pageIndex &&
             pageIndex < curState.totalPages - 1) {
@@ -170,8 +176,9 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   }
 
   bool _isAudioAvailable(ReadingScene scene) {
-    return scene.segments
-        .any((s) => s.audioUrl != null && s.audioUrl!.trim().isNotEmpty);
+    return scene.segments.any(
+      (s) => s.audioUrl != null && s.audioUrl!.trim().isNotEmpty,
+    );
   }
 
   void _onToggleAudio(int currentPage, ReadingContent content) {
@@ -242,6 +249,8 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   Widget build(BuildContext context) {
     // Lắng nghe chuyển sang ready → auto play + jump page
     ref.listen(kidReaderControllerProvider(widget.storyId), (prev, next) {
+      // Đọc xong thì tắt giọng đọc trước khi sang màn sau khi đọc.
+      if (next.isFinished && !(prev?.isFinished ?? false)) _audio.stop();
       if (next.status == KidReaderStatus.ready) {
         // Jump PageController nếu đã tạo
         final pc = _pageController;
@@ -253,8 +262,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
         }
 
         // Auto play lần đầu khi listenFirst
-        if (!_didAutoPlay &&
-            next.readingMode == KidReadingMode.listenFirst) {
+        if (!_didAutoPlay && next.readingMode == KidReadingMode.listenFirst) {
           _didAutoPlay = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) _playPage(next.currentPage);
@@ -294,16 +302,15 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
       body: SafeArea(
         child: switch (state.status) {
           KidReaderStatus.loading => const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: CircularProgressIndicator(),
+          ),
           KidReaderStatus.error => TtErrorState(
-              title: 'Chưa mở được truyện',
-              message:
-                  state.lastErrorMessage?.isNotEmpty == true
-                      ? state.lastErrorMessage!
-                      : 'Em thử lại nhé',
-              onRetry: _notifier.load,
-            ),
+            title: 'Chưa mở được truyện',
+            message: state.lastErrorMessage?.isNotEmpty == true
+                ? state.lastErrorMessage!
+                : 'Em thử lại nhé',
+            onRetry: _notifier.load,
+          ),
           KidReaderStatus.ready => _buildReadyBody(context, state, tt),
         },
       ),
@@ -329,28 +336,24 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
 
     final orientation = MediaQuery.orientationOf(context);
     final width = MediaQuery.sizeOf(context).width;
-    final isWide =
-        orientation == Orientation.landscape || width >= 700;
+    final isWide = orientation == Orientation.landscape || width >= 700;
 
     final currentPage = state.currentPage;
     final totalPages = state.totalPages;
     final scenes = content.scenes;
 
-    final currentScene =
-        (currentPage >= 0 && currentPage < scenes.length)
-            ? scenes[currentPage]
-            : null;
+    final currentScene = (currentPage >= 0 && currentPage < scenes.length)
+        ? scenes[currentPage]
+        : null;
     final audioAvailable =
         currentScene != null && _isAudioAvailable(currentScene);
 
     // Nếu đã hoàn thành
     if (state.isFinished && state.completedResult != null) {
-      return KidReaderCompleteView(
+      return KidAfterReadingScreen(
+        sessionId: content.sessionId,
         result: state.completedResult!,
-        onHome: () {
-          _audio.stop();
-          context.go('/kid');
-        },
+        scenes: content.scenes,
       );
     }
 
@@ -366,9 +369,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                 onPressed: _confirmExit,
                 icon: const Icon(Icons.close_rounded),
                 tooltip: 'Thoát truyện',
-                style: IconButton.styleFrom(
-                  minimumSize: const Size(48, 48),
-                ),
+                style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
               ),
               const SizedBox(width: 4),
 
@@ -390,8 +391,10 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
 
               // Chỉ số trang
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: tt.gold.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -413,8 +416,8 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                 onPressed: () {
                   final newMode =
                       state.readingMode == KidReadingMode.listenFirst
-                          ? KidReadingMode.readFirst
-                          : KidReadingMode.listenFirst;
+                      ? KidReadingMode.readFirst
+                      : KidReadingMode.listenFirst;
                   _notifier.setReadingMode(newMode);
                   if (newMode == KidReadingMode.listenFirst) {
                     _playPage(currentPage);
@@ -436,10 +439,8 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
               // Dấu trang
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, animation) => ScaleTransition(
-                  scale: animation,
-                  child: child,
-                ),
+                transitionBuilder: (child, animation) =>
+                    ScaleTransition(scale: animation, child: child),
                 child: IconButton(
                   key: ValueKey(state.isBookmarked),
                   onPressed: _notifier.toggleBookmark,
@@ -447,8 +448,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                     state.isBookmarked
                         ? Icons.bookmark_rounded
                         : Icons.bookmark_border_rounded,
-                    color:
-                        state.isBookmarked ? tt.goldDeep : tt.muted,
+                    color: state.isBookmarked ? tt.goldDeep : tt.muted,
                   ),
                   tooltip: state.isBookmarked
                       ? 'Bỏ dấu trang'
@@ -460,10 +460,8 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
               // Yêu thích
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, animation) => ScaleTransition(
-                  scale: animation,
-                  child: child,
-                ),
+                transitionBuilder: (child, animation) =>
+                    ScaleTransition(scale: animation, child: child),
                 child: IconButton(
                   key: ValueKey(state.isFavorite),
                   onPressed: _notifier.toggleFavorite,
@@ -473,9 +471,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                         : Icons.favorite_border_rounded,
                     color: state.isFavorite ? tt.danger : tt.muted,
                   ),
-                  tooltip: state.isFavorite
-                      ? 'Bỏ yêu thích'
-                      : 'Thêm yêu thích',
+                  tooltip: state.isFavorite ? 'Bỏ yêu thích' : 'Thêm yêu thích',
                   iconSize: 22,
                 ),
               ),
@@ -500,8 +496,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
               return KidReaderPage(
                 scene: scenes[i],
                 vocabulary: content.vocabulary,
-                activeSegmentId:
-                    i == currentPage ? _activeSegmentId : null,
+                activeSegmentId: i == currentPage ? _activeSegmentId : null,
                 isWide: isWide,
                 onVocabTap: _openVocab,
               );

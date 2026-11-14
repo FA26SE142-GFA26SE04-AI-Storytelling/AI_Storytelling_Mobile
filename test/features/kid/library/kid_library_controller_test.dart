@@ -11,11 +11,7 @@ class StoryPageCall {
   final int pageIndex;
   final int pageSize;
 
-  StoryPageCall({
-    this.search,
-    required this.pageIndex,
-    required this.pageSize,
-  });
+  StoryPageCall({this.search, required this.pageIndex, required this.pageSize});
 }
 
 class FakeKidReadingRepository implements KidReadingRepository {
@@ -50,15 +46,13 @@ class FakeKidReadingRepository implements KidReadingRepository {
     String? search,
     int pageIndex = 1,
     int pageSize = 20,
-  }) =>
-      throw UnimplementedError();
+  }) => throw UnimplementedError();
 
   @override
   Future<ReadingStarted> start({
     String? storyId,
     String? communitySubmissionId,
-  }) =>
-      throw UnimplementedError();
+  }) => throw UnimplementedError();
 
   @override
   Future<ReadingContent> content(String sessionId) =>
@@ -70,52 +64,84 @@ class FakeKidReadingRepository implements KidReadingRepository {
     required int page,
     required String readingMode,
     required int addedSeconds,
-  }) =>
-      throw UnimplementedError();
+  }) => throw UnimplementedError();
 
   @override
   Future<ReadingCompleted> complete(String sessionId) =>
       throw UnimplementedError();
 
   @override
-  Future<ReadingFlags> bookmark(
-    String sessionId, {
-    required bool value,
-  }) =>
+  Future<ReadingFlags> bookmark(String sessionId, {required bool value}) =>
       throw UnimplementedError();
 
   @override
-  Future<ReadingFlags> favorite(
-    String sessionId, {
-    required bool value,
-  }) =>
+  Future<ReadingFlags> favorite(String sessionId, {required bool value}) =>
       throw UnimplementedError();
 
   @override
-  Future<ReadingSignal> signal(String sessionId) =>
-      throw UnimplementedError();
+  Future<ReadingSignal> signal(String sessionId) => throw UnimplementedError();
 
   @override
   Future<void> event(
     String sessionId, {
     required String eventType,
     String? payload,
-  }) =>
-      throw UnimplementedError();
+  }) => throw UnimplementedError();
 
   @override
   Future<VocabularyDefinition> definition(
     String sessionId, {
     required int vocabularyId,
-  }) =>
-      throw UnimplementedError();
+  }) => throw UnimplementedError();
 
   @override
   Future<NotebookEntry> collectWord(
     String sessionId, {
     required int vocabularyId,
-  }) =>
-      throw UnimplementedError();
+  }) => throw UnimplementedError();
+
+  @override
+  Future<ReadingFeelingResult> feeling(
+    String sessionId, {
+    required String feeling,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<ChildQuiz> quiz(String sessionId) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<QuizAnswerResult> quizAnswer(
+    String sessionId, {
+    required int quizItemId,
+    required String answer,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<ChildQuizResult> quizResult(String sessionId) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<StorySummarySent> summaryRecording(
+    String sessionId, {
+    required String filePath,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<StorySummarySent> summaryFlags(
+    String sessionId, {
+    required List<int> sceneIds,
+  }) {
+    throw UnimplementedError();
+  }
 }
 
 List<ChildStory> makeStories(int count, {int startId = 1}) {
@@ -130,9 +156,12 @@ List<ChildStory> makeStories(int count, {int startId = 1}) {
 }
 
 Future<ProviderSubscription<KidLibraryState>> settle(
-    ProviderContainer container) async {
-  final subscription =
-      container.listen(kidLibraryControllerProvider, (_, _) {});
+  ProviderContainer container,
+) async {
+  final subscription = container.listen(
+    kidLibraryControllerProvider,
+    (_, _) {},
+  );
   for (var i = 0; i < 15; i++) {
     await Future<void>.delayed(Duration.zero);
     if (i >= 2 &&
@@ -147,41 +176,44 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('KidLibraryController', () {
-    test('loadInitial goi storyPage voi pageIndex == 1 va state.pageIndex == 1', () async {
-      final fakeRepo = FakeKidReadingRepository();
-      fakeRepo.onStoryPage = (call) => ChildStoryPage(
-            items: makeStories(10),
-            pageIndex: call.pageIndex,
-            pageSize: call.pageSize,
-            totalCount: 10,
-          );
+    test(
+      'loadInitial goi storyPage voi pageIndex == 1 va state.pageIndex == 1',
+      () async {
+        final fakeRepo = FakeKidReadingRepository();
+        fakeRepo.onStoryPage = (call) => ChildStoryPage(
+          items: makeStories(10),
+          pageIndex: call.pageIndex,
+          pageSize: call.pageSize,
+          totalCount: 10,
+        );
 
-      final container = ProviderContainer(
-        overrides: [
-          kidReadingRepositoryProvider.overrideWithValue(fakeRepo),
-        ],
-      );
-      addTearDown(container.dispose);
-      final subscription =
-          container.listen(kidLibraryControllerProvider, (_, _) {});
-      addTearDown(subscription.close);
+        final container = ProviderContainer(
+          overrides: [kidReadingRepositoryProvider.overrideWithValue(fakeRepo)],
+        );
+        addTearDown(container.dispose);
+        final subscription = container.listen(
+          kidLibraryControllerProvider,
+          (_, _) {},
+        );
+        addTearDown(subscription.close);
 
-      await settle(container);
-      fakeRepo.storyPageCalls.clear();
+        await settle(container);
+        fakeRepo.storyPageCalls.clear();
 
-      await container
-          .read(kidLibraryControllerProvider.notifier)
-          .loadInitial();
+        await container
+            .read(kidLibraryControllerProvider.notifier)
+            .loadInitial();
 
-      expect(fakeRepo.storyPageCalls.isNotEmpty, isTrue);
-      final lastCall = fakeRepo.storyPageCalls.last;
-      expect(lastCall.pageIndex, 1);
+        expect(fakeRepo.storyPageCalls.isNotEmpty, isTrue);
+        final lastCall = fakeRepo.storyPageCalls.last;
+        expect(lastCall.pageIndex, 1);
 
-      final state = container.read(kidLibraryControllerProvider);
-      expect(state.pageIndex, 1);
-      expect(state.isLoadingInitial, isFalse);
-      expect(state.stories.length, 10);
-    });
+        final state = container.read(kidLibraryControllerProvider);
+        expect(state.pageIndex, 1);
+        expect(state.isLoadingInitial, isFalse);
+        expect(state.stories.length, 10);
+      },
+    );
 
     test('Tra du 20 truyen -> hasMore true; loadMore goi pageIndex == 2, noi 40 phan tu khong trung', () async {
       final fakeRepo = FakeKidReadingRepository();
@@ -205,21 +237,19 @@ void main() {
       };
 
       final container = ProviderContainer(
-        overrides: [
-          kidReadingRepositoryProvider.overrideWithValue(fakeRepo),
-        ],
+        overrides: [kidReadingRepositoryProvider.overrideWithValue(fakeRepo)],
       );
       addTearDown(container.dispose);
-      final subscription =
-          container.listen(kidLibraryControllerProvider, (_, _) {});
+      final subscription = container.listen(
+        kidLibraryControllerProvider,
+        (_, _) {},
+      );
       addTearDown(subscription.close);
 
       await settle(container);
       fakeRepo.storyPageCalls.clear();
 
-      await container
-          .read(kidLibraryControllerProvider.notifier)
-          .loadInitial();
+      await container.read(kidLibraryControllerProvider.notifier).loadInitial();
 
       expect(container.read(kidLibraryControllerProvider).hasMore, isTrue);
       expect(container.read(kidLibraryControllerProvider).stories.length, 20);
@@ -240,28 +270,26 @@ void main() {
     test('Tra < 20 -> hasMore false; loadMore khong goi repo them', () async {
       final fakeRepo = FakeKidReadingRepository();
       fakeRepo.onStoryPage = (call) => ChildStoryPage(
-            items: makeStories(10),
-            pageIndex: 1,
-            pageSize: 20,
-            totalCount: 10,
-          );
+        items: makeStories(10),
+        pageIndex: 1,
+        pageSize: 20,
+        totalCount: 10,
+      );
 
       final container = ProviderContainer(
-        overrides: [
-          kidReadingRepositoryProvider.overrideWithValue(fakeRepo),
-        ],
+        overrides: [kidReadingRepositoryProvider.overrideWithValue(fakeRepo)],
       );
       addTearDown(container.dispose);
-      final subscription =
-          container.listen(kidLibraryControllerProvider, (_, _) {});
+      final subscription = container.listen(
+        kidLibraryControllerProvider,
+        (_, _) {},
+      );
       addTearDown(subscription.close);
 
       await settle(container);
       fakeRepo.storyPageCalls.clear();
 
-      await container
-          .read(kidLibraryControllerProvider.notifier)
-          .loadInitial();
+      await container.read(kidLibraryControllerProvider.notifier).loadInitial();
 
       final stateAfterInitial = container.read(kidLibraryControllerProvider);
       expect(stateAfterInitial.hasMore, isFalse);
@@ -280,21 +308,19 @@ void main() {
       );
 
       final container = ProviderContainer(
-        overrides: [
-          kidReadingRepositoryProvider.overrideWithValue(fakeRepo),
-        ],
+        overrides: [kidReadingRepositoryProvider.overrideWithValue(fakeRepo)],
       );
       addTearDown(container.dispose);
-      final subscription =
-          container.listen(kidLibraryControllerProvider, (_, _) {});
+      final subscription = container.listen(
+        kidLibraryControllerProvider,
+        (_, _) {},
+      );
       addTearDown(subscription.close);
 
       await settle(container);
       fakeRepo.storyPageCalls.clear();
 
-      await container
-          .read(kidLibraryControllerProvider.notifier)
-          .loadInitial();
+      await container.read(kidLibraryControllerProvider.notifier).loadInitial();
 
       final state = container.read(kidLibraryControllerProvider);
       expect(state.isLoadingInitial, isFalse);
@@ -304,20 +330,20 @@ void main() {
     test("loadInitial(search: 'x') -> reset ve pageIndex 1, truyen search 'x' cho repo", () async {
       final fakeRepo = FakeKidReadingRepository();
       fakeRepo.onStoryPage = (call) => ChildStoryPage(
-            items: makeStories(5),
-            pageIndex: call.pageIndex,
-            pageSize: 20,
-            totalCount: 5,
-          );
+        items: makeStories(5),
+        pageIndex: call.pageIndex,
+        pageSize: 20,
+        totalCount: 5,
+      );
 
       final container = ProviderContainer(
-        overrides: [
-          kidReadingRepositoryProvider.overrideWithValue(fakeRepo),
-        ],
+        overrides: [kidReadingRepositoryProvider.overrideWithValue(fakeRepo)],
       );
       addTearDown(container.dispose);
-      final subscription =
-          container.listen(kidLibraryControllerProvider, (_, _) {});
+      final subscription = container.listen(
+        kidLibraryControllerProvider,
+        (_, _) {},
+      );
       addTearDown(subscription.close);
 
       await settle(container);

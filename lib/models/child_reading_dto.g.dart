@@ -305,3 +305,118 @@ Map<String, dynamic> _$NotebookEntryToJson(_NotebookEntry instance) =>
       'sceneIndex': instance.sceneIndex,
       'collectedAt': instance.collectedAt,
     };
+
+_ReadingFeelingResult _$ReadingFeelingResultFromJson(
+  Map<String, dynamic> json,
+) => _ReadingFeelingResult(
+  sessionId: (json['sessionId'] as num).toInt(),
+  feeling: json['feeling'] as String,
+  label: json['label'] as String,
+);
+
+Map<String, dynamic> _$ReadingFeelingResultToJson(
+  _ReadingFeelingResult instance,
+) => <String, dynamic>{
+  'sessionId': instance.sessionId,
+  'feeling': instance.feeling,
+  'label': instance.label,
+};
+
+_ChildQuizItem _$ChildQuizItemFromJson(Map<String, dynamic> json) =>
+    _ChildQuizItem(
+      quizItemId: (json['quizItemId'] as num).toInt(),
+      type: json['type'] as String? ?? 'MultipleChoice',
+      question: json['question'] as String,
+      choices: (json['choices'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+    );
+
+Map<String, dynamic> _$ChildQuizItemToJson(_ChildQuizItem instance) =>
+    <String, dynamic>{
+      'quizItemId': instance.quizItemId,
+      'type': instance.type,
+      'question': instance.question,
+      'choices': instance.choices,
+    };
+
+_ChildQuiz _$ChildQuizFromJson(Map<String, dynamic> json) => _ChildQuiz(
+  sessionId: (json['sessionId'] as num).toInt(),
+  totalQuestions: (json['totalQuestions'] as num?)?.toInt() ?? 0,
+  bestPercent: (json['bestPercent'] as num?)?.toInt(),
+  questions:
+      (json['questions'] as List<dynamic>?)
+          ?.map((e) => ChildQuizItem.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const <ChildQuizItem>[],
+);
+
+Map<String, dynamic> _$ChildQuizToJson(_ChildQuiz instance) =>
+    <String, dynamic>{
+      'sessionId': instance.sessionId,
+      'totalQuestions': instance.totalQuestions,
+      'bestPercent': instance.bestPercent,
+      'questions': instance.questions,
+    };
+
+_QuizAnswerResult _$QuizAnswerResultFromJson(Map<String, dynamic> json) =>
+    _QuizAnswerResult(
+      quizItemId: (json['quizItemId'] as num).toInt(),
+      isCorrect: json['isCorrect'] as bool? ?? false,
+      feedback: json['feedback'] as String,
+      expGained: (json['expGained'] as num?)?.toInt() ?? 0,
+      newBadges:
+          (json['newBadges'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+      runCompleted: json['runCompleted'] as bool? ?? false,
+      currentPercent: (json['currentPercent'] as num?)?.toInt() ?? 0,
+      bestPercent: (json['bestPercent'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$QuizAnswerResultToJson(_QuizAnswerResult instance) =>
+    <String, dynamic>{
+      'quizItemId': instance.quizItemId,
+      'isCorrect': instance.isCorrect,
+      'feedback': instance.feedback,
+      'expGained': instance.expGained,
+      'newBadges': instance.newBadges,
+      'runCompleted': instance.runCompleted,
+      'currentPercent': instance.currentPercent,
+      'bestPercent': instance.bestPercent,
+    };
+
+_ChildQuizResult _$ChildQuizResultFromJson(Map<String, dynamic> json) =>
+    _ChildQuizResult(
+      sessionId: (json['sessionId'] as num).toInt(),
+      totalQuestions: (json['totalQuestions'] as num?)?.toInt() ?? 0,
+      answered: (json['answered'] as num?)?.toInt() ?? 0,
+      correct: (json['correct'] as num?)?.toInt() ?? 0,
+      currentPercent: (json['currentPercent'] as num?)?.toInt() ?? 0,
+      bestPercent: (json['bestPercent'] as num?)?.toInt(),
+      runCompleted: json['runCompleted'] as bool? ?? false,
+    );
+
+Map<String, dynamic> _$ChildQuizResultToJson(_ChildQuizResult instance) =>
+    <String, dynamic>{
+      'sessionId': instance.sessionId,
+      'totalQuestions': instance.totalQuestions,
+      'answered': instance.answered,
+      'correct': instance.correct,
+      'currentPercent': instance.currentPercent,
+      'bestPercent': instance.bestPercent,
+      'runCompleted': instance.runCompleted,
+    };
+
+_StorySummarySent _$StorySummarySentFromJson(Map<String, dynamic> json) =>
+    _StorySummarySent(
+      summaryId: (json['summaryId'] as num).toInt(),
+      message: json['message'] as String,
+    );
+
+Map<String, dynamic> _$StorySummarySentToJson(_StorySummarySent instance) =>
+    <String, dynamic>{
+      'summaryId': instance.summaryId,
+      'message': instance.message,
+    };

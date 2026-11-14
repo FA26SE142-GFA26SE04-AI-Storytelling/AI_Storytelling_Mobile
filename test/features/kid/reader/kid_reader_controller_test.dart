@@ -172,6 +172,49 @@ class FakeKidReadingRepository implements KidReadingRepository {
     int pageIndex = 1,
     int pageSize = 20,
   }) => throw UnimplementedError();
+
+  @override
+  Future<ReadingFeelingResult> feeling(
+    String sessionId, {
+    required String feeling,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<ChildQuiz> quiz(String sessionId) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<QuizAnswerResult> quizAnswer(
+    String sessionId, {
+    required int quizItemId,
+    required String answer,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<ChildQuizResult> quizResult(String sessionId) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<StorySummarySent> summaryRecording(
+    String sessionId, {
+    required String filePath,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<StorySummarySent> summaryFlags(
+    String sessionId, {
+    required List<int> sceneIds,
+  }) {
+    throw UnimplementedError();
+  }
 }
 
 List<ReadingScene> makeScenes(int count) {

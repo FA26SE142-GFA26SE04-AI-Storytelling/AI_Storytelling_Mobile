@@ -38,16 +38,10 @@ abstract class KidReadingRepository {
   Future<ReadingCompleted> complete(String sessionId);
 
   /// Đánh dấu trang (bookmark) của phiên đọc truyện.
-  Future<ReadingFlags> bookmark(
-    String sessionId, {
-    required bool value,
-  });
+  Future<ReadingFlags> bookmark(String sessionId, {required bool value});
 
   /// Đánh dấu truyện yêu thích (favorite) của bé.
-  Future<ReadingFlags> favorite(
-    String sessionId, {
-    required bool value,
-  });
+  Future<ReadingFlags> favorite(String sessionId, {required bool value});
 
   Future<ReadingSignal> signal(String sessionId);
 
@@ -65,6 +59,31 @@ abstract class KidReadingRepository {
   Future<NotebookEntry> collectWord(
     String sessionId, {
     required int vocabularyId,
+  });
+
+  Future<ReadingFeelingResult> feeling(
+    String sessionId, {
+    required String feeling,
+  });
+
+  Future<ChildQuiz> quiz(String sessionId);
+
+  Future<QuizAnswerResult> quizAnswer(
+    String sessionId, {
+    required int quizItemId,
+    required String answer,
+  });
+
+  Future<ChildQuizResult> quizResult(String sessionId);
+
+  Future<StorySummarySent> summaryRecording(
+    String sessionId, {
+    required String filePath,
+  });
+
+  Future<StorySummarySent> summaryFlags(
+    String sessionId, {
+    required List<int> sceneIds,
   });
 }
 
@@ -93,9 +112,9 @@ class ApiKidReadingRepository implements KidReadingRepository {
   }
 
   Options _childOptions(String childToken) => Options(
-        headers: {'Authorization': 'Bearer $childToken'},
-        extra: {'child': true},
-      );
+    headers: {'Authorization': 'Bearer $childToken'},
+    extra: {'child': true},
+  );
 
   /// Giải nén data từ response theo cấu trúc {"success", "message", "data"}.
   /// Ném [ApiException] nếu success != true hoặc body bị null.
@@ -115,112 +134,109 @@ class ApiKidReadingRepository implements KidReadingRepository {
 
   /// Bọc mọi child call: tự động kích hoạt callback kết thúc phiên khi gặp 401 hoặc 403.
   Future<T> _childCall<T>(Future<T> Function() request) => runApi(() async {
-        try {
-          return await request();
-        } on DioException catch (e) {
-          final statusCode = e.response?.statusCode;
-          if (statusCode == 401 || statusCode == 403) {
-            onChildSessionEnded();
-          }
-          rethrow;
-        }
-      });
+    try {
+      return await request();
+    } on DioException catch (e) {
+      final statusCode = e.response?.statusCode;
+      if (statusCode == 401 || statusCode == 403) {
+        onChildSessionEnded();
+      }
+      rethrow;
+    }
+  });
 
   @override
   Future<List<ChildStory>> stories({
     String? search,
     int pageIndex = 1,
     int pageSize = 20,
-  }) =>
-      _childCall(() async {
-        final queryParams = <String, dynamic>{
-          'pageIndex': pageIndex,
-          'pageSize': pageSize,
-        };
-        if (search != null && search.trim().isNotEmpty) {
-          queryParams['search'] = search.trim();
-        }
+  }) => _childCall(() async {
+    final queryParams = <String, dynamic>{
+      'pageIndex': pageIndex,
+      'pageSize': pageSize,
+    };
+    if (search != null && search.trim().isNotEmpty) {
+      queryParams['search'] = search.trim();
+    }
 
-        final response = await dio.get<dynamic>(
-          '/child/reading/stories',
-          queryParameters: queryParams,
-          options: _childOptions(_token),
-        );
-        final data = _unwrap(response);
-        if (data is Map<String, dynamic>) {
-          final page = ChildStoryPage.fromJson(data);
-          return page.items;
-        }
-        if (data is List) {
-          return data
-              .map((e) => ChildStory.fromJson(e as Map<String, dynamic>))
-              .toList();
-        }
-        return const <ChildStory>[];
-      });
+    final response = await dio.get<dynamic>(
+      '/child/reading/stories',
+      queryParameters: queryParams,
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response);
+    if (data is Map<String, dynamic>) {
+      final page = ChildStoryPage.fromJson(data);
+      return page.items;
+    }
+    if (data is List) {
+      return data
+          .map((e) => ChildStory.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    return const <ChildStory>[];
+  });
 
   @override
   Future<ChildStoryPage> storyPage({
     String? search,
     int pageIndex = 1,
     int pageSize = 20,
-  }) =>
-      _childCall(() async {
-        final queryParams = <String, dynamic>{
-          'pageIndex': pageIndex,
-          'pageSize': pageSize,
-        };
-        if (search != null && search.trim().isNotEmpty) {
-          queryParams['search'] = search.trim();
-        }
+  }) => _childCall(() async {
+    final queryParams = <String, dynamic>{
+      'pageIndex': pageIndex,
+      'pageSize': pageSize,
+    };
+    if (search != null && search.trim().isNotEmpty) {
+      queryParams['search'] = search.trim();
+    }
 
-        final response = await dio.get<dynamic>(
-          '/child/reading/stories',
-          queryParameters: queryParams,
-          options: _childOptions(_token),
-        );
-        final data = _unwrap(response);
-        if (data is Map<String, dynamic>) {
-          return ChildStoryPage.fromJson(data);
-        }
-        return const ChildStoryPage();
-      });
+    final response = await dio.get<dynamic>(
+      '/child/reading/stories',
+      queryParameters: queryParams,
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response);
+    if (data is Map<String, dynamic>) {
+      return ChildStoryPage.fromJson(data);
+    }
+    return const ChildStoryPage();
+  });
 
   @override
   Future<ReadingStarted> start({
     String? storyId,
     String? communitySubmissionId,
-  }) =>
-      _childCall(() async {
-        final body = <String, dynamic>{};
-        if (storyId != null && storyId.trim().isNotEmpty) {
-          body['storyId'] = int.tryParse(storyId.trim()) ?? storyId.trim();
-        }
-        if (communitySubmissionId != null &&
-            communitySubmissionId.trim().isNotEmpty) {
-          body['communitySubmissionId'] =
-              int.tryParse(communitySubmissionId.trim()) ??
-                  communitySubmissionId.trim();
-        }
+  }) => _childCall(() async {
+    final body = <String, dynamic>{};
+    if (storyId != null && storyId.trim().isNotEmpty) {
+      body['storyId'] = int.tryParse(storyId.trim()) ?? storyId.trim();
+    }
+    if (communitySubmissionId != null &&
+        communitySubmissionId.trim().isNotEmpty) {
+      body['communitySubmissionId'] =
+          int.tryParse(communitySubmissionId.trim()) ??
+          communitySubmissionId.trim();
+    }
 
-        final response = await dio.post<dynamic>(
-          '/child/reading/sessions',
-          data: body,
-          options: _childOptions(_token),
-        );
-        final data = _unwrap(response) as Map<String, dynamic>;
-        return ReadingStarted.fromJson(data);
-      });
+    final response = await dio.post<dynamic>(
+      '/child/reading/sessions',
+      data: body,
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ReadingStarted.fromJson(data);
+  });
 
   @override
   Future<ReadingContent> content(String sessionId) => _childCall(() async {
-        final response = await dio.get<dynamic>(
-          '/child/reading/sessions/$sessionId/content',
-          options: _childOptions(_token),
-        );
-        final data = _unwrap(response) as Map<String, dynamic>;
-        return ReadingContent.fromJson(data);
-      });
+    final response = await dio.get<dynamic>(
+      '/child/reading/sessions/$sessionId/content',
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ReadingContent.fromJson(data);
+  });
 
   @override
   Future<ReadingProgress> progress(
@@ -228,36 +244,32 @@ class ApiKidReadingRepository implements KidReadingRepository {
     required int page,
     required String readingMode,
     required int addedSeconds,
-  }) =>
-      _childCall(() async {
-        final response = await dio.put<dynamic>(
-          '/child/reading/sessions/$sessionId/progress',
-          data: {
-            'page': page,
-            'readingMode': readingMode,
-            'addedSeconds': addedSeconds,
-          },
-          options: _childOptions(_token),
-        );
-        final data = _unwrap(response) as Map<String, dynamic>;
-        return ReadingProgress.fromJson(data);
-      });
+  }) => _childCall(() async {
+    final response = await dio.put<dynamic>(
+      '/child/reading/sessions/$sessionId/progress',
+      data: {
+        'page': page,
+        'readingMode': readingMode,
+        'addedSeconds': addedSeconds,
+      },
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ReadingProgress.fromJson(data);
+  });
 
   @override
   Future<ReadingCompleted> complete(String sessionId) => _childCall(() async {
-        final response = await dio.post<dynamic>(
-          '/child/reading/sessions/$sessionId/complete',
-          options: _childOptions(_token),
-        );
-        final data = _unwrap(response) as Map<String, dynamic>;
-        return ReadingCompleted.fromJson(data);
-      });
+    final response = await dio.post<dynamic>(
+      '/child/reading/sessions/$sessionId/complete',
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ReadingCompleted.fromJson(data);
+  });
 
   @override
-  Future<ReadingFlags> bookmark(
-    String sessionId, {
-    required bool value,
-  }) =>
+  Future<ReadingFlags> bookmark(String sessionId, {required bool value}) =>
       _childCall(() async {
         final response = await dio.put<dynamic>(
           '/child/reading/sessions/$sessionId/bookmark',
@@ -269,10 +281,7 @@ class ApiKidReadingRepository implements KidReadingRepository {
       });
 
   @override
-  Future<ReadingFlags> favorite(
-    String sessionId, {
-    required bool value,
-  }) =>
+  Future<ReadingFlags> favorite(String sessionId, {required bool value}) =>
       _childCall(() async {
         final response = await dio.put<dynamic>(
           '/child/reading/sessions/$sessionId/favorite',
@@ -285,60 +294,134 @@ class ApiKidReadingRepository implements KidReadingRepository {
 
   @override
   Future<ReadingSignal> signal(String sessionId) => _childCall(() async {
-        final response = await dio.get<dynamic>(
-          '/child/reading/sessions/$sessionId/signal',
-          options: _childOptions(_token),
-        );
-        final data = _unwrap(response) as Map<String, dynamic>;
-        return ReadingSignal.fromJson(data);
-      });
+    final response = await dio.get<dynamic>(
+      '/child/reading/sessions/$sessionId/signal',
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ReadingSignal.fromJson(data);
+  });
 
   @override
   Future<void> event(
     String sessionId, {
     required String eventType,
     String? payload,
-  }) =>
-      _childCall(() async {
-        final response = await dio.post<dynamic>(
-          '/child/reading/sessions/$sessionId/events',
-          data: {
-            'eventType': eventType,
-            'payload': ?payload,
-          },
-          options: _childOptions(_token),
-        );
-        _unwrap(response);
-      });
+  }) => _childCall(() async {
+    final response = await dio.post<dynamic>(
+      '/child/reading/sessions/$sessionId/events',
+      data: {'eventType': eventType, 'payload': ?payload},
+      options: _childOptions(_token),
+    );
+    _unwrap(response);
+  });
 
   @override
   Future<VocabularyDefinition> definition(
     String sessionId, {
     required int vocabularyId,
-  }) =>
-      _childCall(() async {
-        final response = await dio.get<dynamic>(
-          '/child/reading/sessions/$sessionId/vocabulary/$vocabularyId',
-          options: _childOptions(_token),
-        );
-        final data = _unwrap(response) as Map<String, dynamic>;
-        return VocabularyDefinition.fromJson(data);
-      });
+  }) => _childCall(() async {
+    final response = await dio.get<dynamic>(
+      '/child/reading/sessions/$sessionId/vocabulary/$vocabularyId',
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return VocabularyDefinition.fromJson(data);
+  });
 
   @override
   Future<NotebookEntry> collectWord(
     String sessionId, {
     required int vocabularyId,
-  }) =>
-      _childCall(() async {
-        final response = await dio.post<dynamic>(
-          '/child/notebook/sessions/$sessionId/words',
-          data: {'vocabularyId': vocabularyId},
-          options: _childOptions(_token),
-        );
-        final data = _unwrap(response) as Map<String, dynamic>;
-        return NotebookEntry.fromJson(data);
-      });
+  }) => _childCall(() async {
+    final response = await dio.post<dynamic>(
+      '/child/notebook/sessions/$sessionId/words',
+      data: {'vocabularyId': vocabularyId},
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return NotebookEntry.fromJson(data);
+  });
+
+  @override
+  Future<ReadingFeelingResult> feeling(
+    String sessionId, {
+    required String feeling,
+  }) => _childCall(() async {
+    final response = await dio.put<dynamic>(
+      '/child/reading/sessions/$sessionId/feeling',
+      data: {'feeling': feeling},
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ReadingFeelingResult.fromJson(data);
+  });
+
+  @override
+  Future<ChildQuiz> quiz(String sessionId) => _childCall(() async {
+    final response = await dio.get<dynamic>(
+      '/child/quiz/sessions/$sessionId',
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ChildQuiz.fromJson(data);
+  });
+
+  @override
+  Future<QuizAnswerResult> quizAnswer(
+    String sessionId, {
+    required int quizItemId,
+    required String answer,
+  }) => _childCall(() async {
+    final response = await dio.post<dynamic>(
+      '/child/quiz/sessions/$sessionId/answers',
+      data: {'quizItemId': quizItemId, 'answer': answer},
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return QuizAnswerResult.fromJson(data);
+  });
+
+  @override
+  Future<ChildQuizResult> quizResult(String sessionId) => _childCall(() async {
+    final response = await dio.get<dynamic>(
+      '/child/quiz/sessions/$sessionId/result',
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ChildQuizResult.fromJson(data);
+  });
+
+  @override
+  Future<StorySummarySent> summaryRecording(
+    String sessionId, {
+    required String filePath,
+  }) => _childCall(() async {
+    final formData = FormData.fromMap({
+      'audio': await MultipartFile.fromFile(filePath, filename: 'summary.wav'),
+    });
+    final response = await dio.post<dynamic>(
+      '/child/reading/sessions/$sessionId/summary/recording',
+      data: formData,
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return StorySummarySent.fromJson(data);
+  });
+
+  @override
+  Future<StorySummarySent> summaryFlags(
+    String sessionId, {
+    required List<int> sceneIds,
+  }) => _childCall(() async {
+    final response = await dio.post<dynamic>(
+      '/child/reading/sessions/$sessionId/summary/flags',
+      data: {'sceneIds': sceneIds},
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return StorySummarySent.fromJson(data);
+  });
 }
 
 // ─── Provider ────────────────────────────────────────────────────────────────

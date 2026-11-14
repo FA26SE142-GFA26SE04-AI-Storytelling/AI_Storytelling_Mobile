@@ -4300,4 +4300,1710 @@ as String,
 
 }
 
+
+/// @nodoc
+mixin _$ReadingFeelingResult {
+
+ int get sessionId; String get feeling; String get label;
+/// Create a copy of ReadingFeelingResult
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ReadingFeelingResultCopyWith<ReadingFeelingResult> get copyWith => _$ReadingFeelingResultCopyWithImpl<ReadingFeelingResult>(this as ReadingFeelingResult, _$identity);
+
+  /// Serializes this ReadingFeelingResult to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ReadingFeelingResult;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadingFeelingResult&&(identical(other.sessionId, _this.sessionId) || other.sessionId == _this.sessionId)&&(identical(other.feeling, _this.feeling) || other.feeling == _this.feeling)&&(identical(other.label, _this.label) || other.label == _this.label));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ReadingFeelingResult;
+  return Object.hash(runtimeType,_this.sessionId,_this.feeling,_this.label);
+}
+
+@override
+String toString() {
+  final _this = this as ReadingFeelingResult;
+  return 'ReadingFeelingResult(sessionId: ${_this.sessionId}, feeling: ${_this.feeling}, label: ${_this.label})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ReadingFeelingResultCopyWith<$Res>  {
+  factory $ReadingFeelingResultCopyWith(ReadingFeelingResult value, $Res Function(ReadingFeelingResult) _then) = _$ReadingFeelingResultCopyWithImpl;
+@useResult
+$Res call({
+ int sessionId, String feeling, String label
+});
+
+
+
+
+}
+/// @nodoc
+class _$ReadingFeelingResultCopyWithImpl<$Res>
+    implements $ReadingFeelingResultCopyWith<$Res> {
+  _$ReadingFeelingResultCopyWithImpl(this._self, this._then);
+
+  final ReadingFeelingResult _self;
+  final $Res Function(ReadingFeelingResult) _then;
+
+/// Create a copy of ReadingFeelingResult
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = null,Object? feeling = null,Object? label = null,}) {
+  return _then(ReadingFeelingResult(
+sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
+as int,feeling: null == feeling ? _self.feeling : feeling // ignore: cast_nullable_to_non_nullable
+as String,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ReadingFeelingResult].
+extension ReadingFeelingResultPatterns on ReadingFeelingResult {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ReadingFeelingResult value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ReadingFeelingResult() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ReadingFeelingResult value)  $default,){
+final _that = this;
+switch (_that) {
+case _ReadingFeelingResult():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ReadingFeelingResult value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ReadingFeelingResult() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int sessionId,  String feeling,  String label)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ReadingFeelingResult() when $default != null:
+return $default(_that.sessionId,_that.feeling,_that.label);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int sessionId,  String feeling,  String label)  $default,) {final _that = this;
+switch (_that) {
+case _ReadingFeelingResult():
+return $default(_that.sessionId,_that.feeling,_that.label);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int sessionId,  String feeling,  String label)?  $default,) {final _that = this;
+switch (_that) {
+case _ReadingFeelingResult() when $default != null:
+return $default(_that.sessionId,_that.feeling,_that.label);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ReadingFeelingResult implements ReadingFeelingResult {
+  const _ReadingFeelingResult({required this.sessionId, required this.feeling, required this.label});
+  factory _ReadingFeelingResult.fromJson(Map<String, dynamic> json) => _$ReadingFeelingResultFromJson(json);
+
+@override final  int sessionId;
+@override final  String feeling;
+@override final  String label;
+
+/// Create a copy of ReadingFeelingResult
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ReadingFeelingResultCopyWith<_ReadingFeelingResult> get copyWith => __$ReadingFeelingResultCopyWithImpl<_ReadingFeelingResult>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ReadingFeelingResultToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadingFeelingResult&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.feeling, feeling) || other.feeling == feeling)&&(identical(other.label, label) || other.label == label));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,sessionId,feeling,label);
+}
+
+@override
+String toString() {
+    return 'ReadingFeelingResult(sessionId: $sessionId, feeling: $feeling, label: $label)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ReadingFeelingResultCopyWith<$Res> implements $ReadingFeelingResultCopyWith<$Res> {
+  factory _$ReadingFeelingResultCopyWith(_ReadingFeelingResult value, $Res Function(_ReadingFeelingResult) _then) = __$ReadingFeelingResultCopyWithImpl;
+@override @useResult
+$Res call({
+ int sessionId, String feeling, String label
+});
+
+
+
+
+}
+/// @nodoc
+class __$ReadingFeelingResultCopyWithImpl<$Res>
+    implements _$ReadingFeelingResultCopyWith<$Res> {
+  __$ReadingFeelingResultCopyWithImpl(this._self, this._then);
+
+  final _ReadingFeelingResult _self;
+  final $Res Function(_ReadingFeelingResult) _then;
+
+/// Create a copy of ReadingFeelingResult
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = null,Object? feeling = null,Object? label = null,}) {
+  return _then(_ReadingFeelingResult(
+sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
+as int,feeling: null == feeling ? _self.feeling : feeling // ignore: cast_nullable_to_non_nullable
+as String,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$ChildQuizItem {
+
+ int get quizItemId; String get type; String get question; List<String>? get choices;
+/// Create a copy of ChildQuizItem
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ChildQuizItemCopyWith<ChildQuizItem> get copyWith => _$ChildQuizItemCopyWithImpl<ChildQuizItem>(this as ChildQuizItem, _$identity);
+
+  /// Serializes this ChildQuizItem to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ChildQuizItem;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChildQuizItem&&(identical(other.quizItemId, _this.quizItemId) || other.quizItemId == _this.quizItemId)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.question, _this.question) || other.question == _this.question)&&const DeepCollectionEquality().equals(other.choices, _this.choices));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ChildQuizItem;
+  return Object.hash(runtimeType,_this.quizItemId,_this.type,_this.question,const DeepCollectionEquality().hash(_this.choices));
+}
+
+@override
+String toString() {
+  final _this = this as ChildQuizItem;
+  return 'ChildQuizItem(quizItemId: ${_this.quizItemId}, type: ${_this.type}, question: ${_this.question}, choices: ${_this.choices})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ChildQuizItemCopyWith<$Res>  {
+  factory $ChildQuizItemCopyWith(ChildQuizItem value, $Res Function(ChildQuizItem) _then) = _$ChildQuizItemCopyWithImpl;
+@useResult
+$Res call({
+ int quizItemId, String type, String question, List<String>? choices
+});
+
+
+
+
+}
+/// @nodoc
+class _$ChildQuizItemCopyWithImpl<$Res>
+    implements $ChildQuizItemCopyWith<$Res> {
+  _$ChildQuizItemCopyWithImpl(this._self, this._then);
+
+  final ChildQuizItem _self;
+  final $Res Function(ChildQuizItem) _then;
+
+/// Create a copy of ChildQuizItem
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? quizItemId = null,Object? type = null,Object? question = null,Object? choices = freezed,}) {
+  return _then(ChildQuizItem(
+quizItemId: null == quizItemId ? _self.quizItemId : quizItemId // ignore: cast_nullable_to_non_nullable
+as int,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as String,question: null == question ? _self.question : question // ignore: cast_nullable_to_non_nullable
+as String,choices: freezed == choices ? _self.choices : choices // ignore: cast_nullable_to_non_nullable
+as List<String>?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ChildQuizItem].
+extension ChildQuizItemPatterns on ChildQuizItem {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ChildQuizItem value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ChildQuizItem() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ChildQuizItem value)  $default,){
+final _that = this;
+switch (_that) {
+case _ChildQuizItem():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ChildQuizItem value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ChildQuizItem() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int quizItemId,  String type,  String question,  List<String>? choices)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ChildQuizItem() when $default != null:
+return $default(_that.quizItemId,_that.type,_that.question,_that.choices);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int quizItemId,  String type,  String question,  List<String>? choices)  $default,) {final _that = this;
+switch (_that) {
+case _ChildQuizItem():
+return $default(_that.quizItemId,_that.type,_that.question,_that.choices);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int quizItemId,  String type,  String question,  List<String>? choices)?  $default,) {final _that = this;
+switch (_that) {
+case _ChildQuizItem() when $default != null:
+return $default(_that.quizItemId,_that.type,_that.question,_that.choices);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ChildQuizItem implements ChildQuizItem {
+  const _ChildQuizItem({required this.quizItemId, this.type = 'MultipleChoice', required this.question,  List<String>? choices}): _choices = choices;
+  factory _ChildQuizItem.fromJson(Map<String, dynamic> json) => _$ChildQuizItemFromJson(json);
+
+@override final  int quizItemId;
+@override@JsonKey() final  String type;
+@override final  String question;
+ final  List<String>? _choices;
+@override List<String>? get choices {
+  final value = _choices;
+  if (value == null) return null;
+  if (_choices is EqualUnmodifiableListView) return _choices;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(value);
+}
+
+
+/// Create a copy of ChildQuizItem
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ChildQuizItemCopyWith<_ChildQuizItem> get copyWith => __$ChildQuizItemCopyWithImpl<_ChildQuizItem>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ChildQuizItemToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChildQuizItem&&(identical(other.quizItemId, quizItemId) || other.quizItemId == quizItemId)&&(identical(other.type, type) || other.type == type)&&(identical(other.question, question) || other.question == question)&&const DeepCollectionEquality().equals(other.choices, _choices));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,quizItemId,type,question,const DeepCollectionEquality().hash(_choices));
+}
+
+@override
+String toString() {
+    return 'ChildQuizItem(quizItemId: $quizItemId, type: $type, question: $question, choices: $choices)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ChildQuizItemCopyWith<$Res> implements $ChildQuizItemCopyWith<$Res> {
+  factory _$ChildQuizItemCopyWith(_ChildQuizItem value, $Res Function(_ChildQuizItem) _then) = __$ChildQuizItemCopyWithImpl;
+@override @useResult
+$Res call({
+ int quizItemId, String type, String question, List<String>? choices
+});
+
+
+
+
+}
+/// @nodoc
+class __$ChildQuizItemCopyWithImpl<$Res>
+    implements _$ChildQuizItemCopyWith<$Res> {
+  __$ChildQuizItemCopyWithImpl(this._self, this._then);
+
+  final _ChildQuizItem _self;
+  final $Res Function(_ChildQuizItem) _then;
+
+/// Create a copy of ChildQuizItem
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? quizItemId = null,Object? type = null,Object? question = null,Object? choices = freezed,}) {
+  return _then(_ChildQuizItem(
+quizItemId: null == quizItemId ? _self.quizItemId : quizItemId // ignore: cast_nullable_to_non_nullable
+as int,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as String,question: null == question ? _self.question : question // ignore: cast_nullable_to_non_nullable
+as String,choices: freezed == choices ? _self._choices : choices // ignore: cast_nullable_to_non_nullable
+as List<String>?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$ChildQuiz {
+
+ int get sessionId; int get totalQuestions; int? get bestPercent; List<ChildQuizItem> get questions;
+/// Create a copy of ChildQuiz
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ChildQuizCopyWith<ChildQuiz> get copyWith => _$ChildQuizCopyWithImpl<ChildQuiz>(this as ChildQuiz, _$identity);
+
+  /// Serializes this ChildQuiz to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ChildQuiz;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChildQuiz&&(identical(other.sessionId, _this.sessionId) || other.sessionId == _this.sessionId)&&(identical(other.totalQuestions, _this.totalQuestions) || other.totalQuestions == _this.totalQuestions)&&(identical(other.bestPercent, _this.bestPercent) || other.bestPercent == _this.bestPercent)&&const DeepCollectionEquality().equals(other.questions, _this.questions));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ChildQuiz;
+  return Object.hash(runtimeType,_this.sessionId,_this.totalQuestions,_this.bestPercent,const DeepCollectionEquality().hash(_this.questions));
+}
+
+@override
+String toString() {
+  final _this = this as ChildQuiz;
+  return 'ChildQuiz(sessionId: ${_this.sessionId}, totalQuestions: ${_this.totalQuestions}, bestPercent: ${_this.bestPercent}, questions: ${_this.questions})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ChildQuizCopyWith<$Res>  {
+  factory $ChildQuizCopyWith(ChildQuiz value, $Res Function(ChildQuiz) _then) = _$ChildQuizCopyWithImpl;
+@useResult
+$Res call({
+ int sessionId, int totalQuestions, int? bestPercent, List<ChildQuizItem> questions
+});
+
+
+
+
+}
+/// @nodoc
+class _$ChildQuizCopyWithImpl<$Res>
+    implements $ChildQuizCopyWith<$Res> {
+  _$ChildQuizCopyWithImpl(this._self, this._then);
+
+  final ChildQuiz _self;
+  final $Res Function(ChildQuiz) _then;
+
+/// Create a copy of ChildQuiz
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = null,Object? totalQuestions = null,Object? bestPercent = freezed,Object? questions = null,}) {
+  return _then(ChildQuiz(
+sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
+as int,totalQuestions: null == totalQuestions ? _self.totalQuestions : totalQuestions // ignore: cast_nullable_to_non_nullable
+as int,bestPercent: freezed == bestPercent ? _self.bestPercent : bestPercent // ignore: cast_nullable_to_non_nullable
+as int?,questions: null == questions ? _self.questions : questions // ignore: cast_nullable_to_non_nullable
+as List<ChildQuizItem>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ChildQuiz].
+extension ChildQuizPatterns on ChildQuiz {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ChildQuiz value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ChildQuiz() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ChildQuiz value)  $default,){
+final _that = this;
+switch (_that) {
+case _ChildQuiz():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ChildQuiz value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ChildQuiz() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int sessionId,  int totalQuestions,  int? bestPercent,  List<ChildQuizItem> questions)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ChildQuiz() when $default != null:
+return $default(_that.sessionId,_that.totalQuestions,_that.bestPercent,_that.questions);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int sessionId,  int totalQuestions,  int? bestPercent,  List<ChildQuizItem> questions)  $default,) {final _that = this;
+switch (_that) {
+case _ChildQuiz():
+return $default(_that.sessionId,_that.totalQuestions,_that.bestPercent,_that.questions);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int sessionId,  int totalQuestions,  int? bestPercent,  List<ChildQuizItem> questions)?  $default,) {final _that = this;
+switch (_that) {
+case _ChildQuiz() when $default != null:
+return $default(_that.sessionId,_that.totalQuestions,_that.bestPercent,_that.questions);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ChildQuiz implements ChildQuiz {
+  const _ChildQuiz({required this.sessionId, this.totalQuestions = 0, this.bestPercent,  List<ChildQuizItem> questions = const <ChildQuizItem>[]}): _questions = questions;
+  factory _ChildQuiz.fromJson(Map<String, dynamic> json) => _$ChildQuizFromJson(json);
+
+@override final  int sessionId;
+@override@JsonKey() final  int totalQuestions;
+@override final  int? bestPercent;
+ final  List<ChildQuizItem> _questions;
+@override@JsonKey() List<ChildQuizItem> get questions {
+  if (_questions is EqualUnmodifiableListView) return _questions;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_questions);
+}
+
+
+/// Create a copy of ChildQuiz
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ChildQuizCopyWith<_ChildQuiz> get copyWith => __$ChildQuizCopyWithImpl<_ChildQuiz>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ChildQuizToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChildQuiz&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.totalQuestions, totalQuestions) || other.totalQuestions == totalQuestions)&&(identical(other.bestPercent, bestPercent) || other.bestPercent == bestPercent)&&const DeepCollectionEquality().equals(other.questions, _questions));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,sessionId,totalQuestions,bestPercent,const DeepCollectionEquality().hash(_questions));
+}
+
+@override
+String toString() {
+    return 'ChildQuiz(sessionId: $sessionId, totalQuestions: $totalQuestions, bestPercent: $bestPercent, questions: $questions)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ChildQuizCopyWith<$Res> implements $ChildQuizCopyWith<$Res> {
+  factory _$ChildQuizCopyWith(_ChildQuiz value, $Res Function(_ChildQuiz) _then) = __$ChildQuizCopyWithImpl;
+@override @useResult
+$Res call({
+ int sessionId, int totalQuestions, int? bestPercent, List<ChildQuizItem> questions
+});
+
+
+
+
+}
+/// @nodoc
+class __$ChildQuizCopyWithImpl<$Res>
+    implements _$ChildQuizCopyWith<$Res> {
+  __$ChildQuizCopyWithImpl(this._self, this._then);
+
+  final _ChildQuiz _self;
+  final $Res Function(_ChildQuiz) _then;
+
+/// Create a copy of ChildQuiz
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = null,Object? totalQuestions = null,Object? bestPercent = freezed,Object? questions = null,}) {
+  return _then(_ChildQuiz(
+sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
+as int,totalQuestions: null == totalQuestions ? _self.totalQuestions : totalQuestions // ignore: cast_nullable_to_non_nullable
+as int,bestPercent: freezed == bestPercent ? _self.bestPercent : bestPercent // ignore: cast_nullable_to_non_nullable
+as int?,questions: null == questions ? _self._questions : questions // ignore: cast_nullable_to_non_nullable
+as List<ChildQuizItem>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$QuizAnswerResult {
+
+ int get quizItemId; bool get isCorrect; String get feedback; int get expGained; List<String> get newBadges; bool get runCompleted; int get currentPercent; int? get bestPercent;
+/// Create a copy of QuizAnswerResult
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$QuizAnswerResultCopyWith<QuizAnswerResult> get copyWith => _$QuizAnswerResultCopyWithImpl<QuizAnswerResult>(this as QuizAnswerResult, _$identity);
+
+  /// Serializes this QuizAnswerResult to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as QuizAnswerResult;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuizAnswerResult&&(identical(other.quizItemId, _this.quizItemId) || other.quizItemId == _this.quizItemId)&&(identical(other.isCorrect, _this.isCorrect) || other.isCorrect == _this.isCorrect)&&(identical(other.feedback, _this.feedback) || other.feedback == _this.feedback)&&(identical(other.expGained, _this.expGained) || other.expGained == _this.expGained)&&const DeepCollectionEquality().equals(other.newBadges, _this.newBadges)&&(identical(other.runCompleted, _this.runCompleted) || other.runCompleted == _this.runCompleted)&&(identical(other.currentPercent, _this.currentPercent) || other.currentPercent == _this.currentPercent)&&(identical(other.bestPercent, _this.bestPercent) || other.bestPercent == _this.bestPercent));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as QuizAnswerResult;
+  return Object.hash(runtimeType,_this.quizItemId,_this.isCorrect,_this.feedback,_this.expGained,const DeepCollectionEquality().hash(_this.newBadges),_this.runCompleted,_this.currentPercent,_this.bestPercent);
+}
+
+@override
+String toString() {
+  final _this = this as QuizAnswerResult;
+  return 'QuizAnswerResult(quizItemId: ${_this.quizItemId}, isCorrect: ${_this.isCorrect}, feedback: ${_this.feedback}, expGained: ${_this.expGained}, newBadges: ${_this.newBadges}, runCompleted: ${_this.runCompleted}, currentPercent: ${_this.currentPercent}, bestPercent: ${_this.bestPercent})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $QuizAnswerResultCopyWith<$Res>  {
+  factory $QuizAnswerResultCopyWith(QuizAnswerResult value, $Res Function(QuizAnswerResult) _then) = _$QuizAnswerResultCopyWithImpl;
+@useResult
+$Res call({
+ int quizItemId, bool isCorrect, String feedback, int expGained, List<String> newBadges, bool runCompleted, int currentPercent, int? bestPercent
+});
+
+
+
+
+}
+/// @nodoc
+class _$QuizAnswerResultCopyWithImpl<$Res>
+    implements $QuizAnswerResultCopyWith<$Res> {
+  _$QuizAnswerResultCopyWithImpl(this._self, this._then);
+
+  final QuizAnswerResult _self;
+  final $Res Function(QuizAnswerResult) _then;
+
+/// Create a copy of QuizAnswerResult
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? quizItemId = null,Object? isCorrect = null,Object? feedback = null,Object? expGained = null,Object? newBadges = null,Object? runCompleted = null,Object? currentPercent = null,Object? bestPercent = freezed,}) {
+  return _then(QuizAnswerResult(
+quizItemId: null == quizItemId ? _self.quizItemId : quizItemId // ignore: cast_nullable_to_non_nullable
+as int,isCorrect: null == isCorrect ? _self.isCorrect : isCorrect // ignore: cast_nullable_to_non_nullable
+as bool,feedback: null == feedback ? _self.feedback : feedback // ignore: cast_nullable_to_non_nullable
+as String,expGained: null == expGained ? _self.expGained : expGained // ignore: cast_nullable_to_non_nullable
+as int,newBadges: null == newBadges ? _self.newBadges : newBadges // ignore: cast_nullable_to_non_nullable
+as List<String>,runCompleted: null == runCompleted ? _self.runCompleted : runCompleted // ignore: cast_nullable_to_non_nullable
+as bool,currentPercent: null == currentPercent ? _self.currentPercent : currentPercent // ignore: cast_nullable_to_non_nullable
+as int,bestPercent: freezed == bestPercent ? _self.bestPercent : bestPercent // ignore: cast_nullable_to_non_nullable
+as int?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [QuizAnswerResult].
+extension QuizAnswerResultPatterns on QuizAnswerResult {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _QuizAnswerResult value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _QuizAnswerResult() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _QuizAnswerResult value)  $default,){
+final _that = this;
+switch (_that) {
+case _QuizAnswerResult():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _QuizAnswerResult value)?  $default,){
+final _that = this;
+switch (_that) {
+case _QuizAnswerResult() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int quizItemId,  bool isCorrect,  String feedback,  int expGained,  List<String> newBadges,  bool runCompleted,  int currentPercent,  int? bestPercent)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _QuizAnswerResult() when $default != null:
+return $default(_that.quizItemId,_that.isCorrect,_that.feedback,_that.expGained,_that.newBadges,_that.runCompleted,_that.currentPercent,_that.bestPercent);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int quizItemId,  bool isCorrect,  String feedback,  int expGained,  List<String> newBadges,  bool runCompleted,  int currentPercent,  int? bestPercent)  $default,) {final _that = this;
+switch (_that) {
+case _QuizAnswerResult():
+return $default(_that.quizItemId,_that.isCorrect,_that.feedback,_that.expGained,_that.newBadges,_that.runCompleted,_that.currentPercent,_that.bestPercent);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int quizItemId,  bool isCorrect,  String feedback,  int expGained,  List<String> newBadges,  bool runCompleted,  int currentPercent,  int? bestPercent)?  $default,) {final _that = this;
+switch (_that) {
+case _QuizAnswerResult() when $default != null:
+return $default(_that.quizItemId,_that.isCorrect,_that.feedback,_that.expGained,_that.newBadges,_that.runCompleted,_that.currentPercent,_that.bestPercent);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _QuizAnswerResult implements QuizAnswerResult {
+  const _QuizAnswerResult({required this.quizItemId, this.isCorrect = false, required this.feedback, this.expGained = 0,  List<String> newBadges = const <String>[], this.runCompleted = false, this.currentPercent = 0, this.bestPercent}): _newBadges = newBadges;
+  factory _QuizAnswerResult.fromJson(Map<String, dynamic> json) => _$QuizAnswerResultFromJson(json);
+
+@override final  int quizItemId;
+@override@JsonKey() final  bool isCorrect;
+@override final  String feedback;
+@override@JsonKey() final  int expGained;
+ final  List<String> _newBadges;
+@override@JsonKey() List<String> get newBadges {
+  if (_newBadges is EqualUnmodifiableListView) return _newBadges;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_newBadges);
+}
+
+@override@JsonKey() final  bool runCompleted;
+@override@JsonKey() final  int currentPercent;
+@override final  int? bestPercent;
+
+/// Create a copy of QuizAnswerResult
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$QuizAnswerResultCopyWith<_QuizAnswerResult> get copyWith => __$QuizAnswerResultCopyWithImpl<_QuizAnswerResult>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$QuizAnswerResultToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuizAnswerResult&&(identical(other.quizItemId, quizItemId) || other.quizItemId == quizItemId)&&(identical(other.isCorrect, isCorrect) || other.isCorrect == isCorrect)&&(identical(other.feedback, feedback) || other.feedback == feedback)&&(identical(other.expGained, expGained) || other.expGained == expGained)&&const DeepCollectionEquality().equals(other.newBadges, _newBadges)&&(identical(other.runCompleted, runCompleted) || other.runCompleted == runCompleted)&&(identical(other.currentPercent, currentPercent) || other.currentPercent == currentPercent)&&(identical(other.bestPercent, bestPercent) || other.bestPercent == bestPercent));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,quizItemId,isCorrect,feedback,expGained,const DeepCollectionEquality().hash(_newBadges),runCompleted,currentPercent,bestPercent);
+}
+
+@override
+String toString() {
+    return 'QuizAnswerResult(quizItemId: $quizItemId, isCorrect: $isCorrect, feedback: $feedback, expGained: $expGained, newBadges: $newBadges, runCompleted: $runCompleted, currentPercent: $currentPercent, bestPercent: $bestPercent)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$QuizAnswerResultCopyWith<$Res> implements $QuizAnswerResultCopyWith<$Res> {
+  factory _$QuizAnswerResultCopyWith(_QuizAnswerResult value, $Res Function(_QuizAnswerResult) _then) = __$QuizAnswerResultCopyWithImpl;
+@override @useResult
+$Res call({
+ int quizItemId, bool isCorrect, String feedback, int expGained, List<String> newBadges, bool runCompleted, int currentPercent, int? bestPercent
+});
+
+
+
+
+}
+/// @nodoc
+class __$QuizAnswerResultCopyWithImpl<$Res>
+    implements _$QuizAnswerResultCopyWith<$Res> {
+  __$QuizAnswerResultCopyWithImpl(this._self, this._then);
+
+  final _QuizAnswerResult _self;
+  final $Res Function(_QuizAnswerResult) _then;
+
+/// Create a copy of QuizAnswerResult
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? quizItemId = null,Object? isCorrect = null,Object? feedback = null,Object? expGained = null,Object? newBadges = null,Object? runCompleted = null,Object? currentPercent = null,Object? bestPercent = freezed,}) {
+  return _then(_QuizAnswerResult(
+quizItemId: null == quizItemId ? _self.quizItemId : quizItemId // ignore: cast_nullable_to_non_nullable
+as int,isCorrect: null == isCorrect ? _self.isCorrect : isCorrect // ignore: cast_nullable_to_non_nullable
+as bool,feedback: null == feedback ? _self.feedback : feedback // ignore: cast_nullable_to_non_nullable
+as String,expGained: null == expGained ? _self.expGained : expGained // ignore: cast_nullable_to_non_nullable
+as int,newBadges: null == newBadges ? _self._newBadges : newBadges // ignore: cast_nullable_to_non_nullable
+as List<String>,runCompleted: null == runCompleted ? _self.runCompleted : runCompleted // ignore: cast_nullable_to_non_nullable
+as bool,currentPercent: null == currentPercent ? _self.currentPercent : currentPercent // ignore: cast_nullable_to_non_nullable
+as int,bestPercent: freezed == bestPercent ? _self.bestPercent : bestPercent // ignore: cast_nullable_to_non_nullable
+as int?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$ChildQuizResult {
+
+ int get sessionId; int get totalQuestions; int get answered; int get correct; int get currentPercent; int? get bestPercent; bool get runCompleted;
+/// Create a copy of ChildQuizResult
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ChildQuizResultCopyWith<ChildQuizResult> get copyWith => _$ChildQuizResultCopyWithImpl<ChildQuizResult>(this as ChildQuizResult, _$identity);
+
+  /// Serializes this ChildQuizResult to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ChildQuizResult;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChildQuizResult&&(identical(other.sessionId, _this.sessionId) || other.sessionId == _this.sessionId)&&(identical(other.totalQuestions, _this.totalQuestions) || other.totalQuestions == _this.totalQuestions)&&(identical(other.answered, _this.answered) || other.answered == _this.answered)&&(identical(other.correct, _this.correct) || other.correct == _this.correct)&&(identical(other.currentPercent, _this.currentPercent) || other.currentPercent == _this.currentPercent)&&(identical(other.bestPercent, _this.bestPercent) || other.bestPercent == _this.bestPercent)&&(identical(other.runCompleted, _this.runCompleted) || other.runCompleted == _this.runCompleted));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ChildQuizResult;
+  return Object.hash(runtimeType,_this.sessionId,_this.totalQuestions,_this.answered,_this.correct,_this.currentPercent,_this.bestPercent,_this.runCompleted);
+}
+
+@override
+String toString() {
+  final _this = this as ChildQuizResult;
+  return 'ChildQuizResult(sessionId: ${_this.sessionId}, totalQuestions: ${_this.totalQuestions}, answered: ${_this.answered}, correct: ${_this.correct}, currentPercent: ${_this.currentPercent}, bestPercent: ${_this.bestPercent}, runCompleted: ${_this.runCompleted})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ChildQuizResultCopyWith<$Res>  {
+  factory $ChildQuizResultCopyWith(ChildQuizResult value, $Res Function(ChildQuizResult) _then) = _$ChildQuizResultCopyWithImpl;
+@useResult
+$Res call({
+ int sessionId, int totalQuestions, int answered, int correct, int currentPercent, int? bestPercent, bool runCompleted
+});
+
+
+
+
+}
+/// @nodoc
+class _$ChildQuizResultCopyWithImpl<$Res>
+    implements $ChildQuizResultCopyWith<$Res> {
+  _$ChildQuizResultCopyWithImpl(this._self, this._then);
+
+  final ChildQuizResult _self;
+  final $Res Function(ChildQuizResult) _then;
+
+/// Create a copy of ChildQuizResult
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = null,Object? totalQuestions = null,Object? answered = null,Object? correct = null,Object? currentPercent = null,Object? bestPercent = freezed,Object? runCompleted = null,}) {
+  return _then(ChildQuizResult(
+sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
+as int,totalQuestions: null == totalQuestions ? _self.totalQuestions : totalQuestions // ignore: cast_nullable_to_non_nullable
+as int,answered: null == answered ? _self.answered : answered // ignore: cast_nullable_to_non_nullable
+as int,correct: null == correct ? _self.correct : correct // ignore: cast_nullable_to_non_nullable
+as int,currentPercent: null == currentPercent ? _self.currentPercent : currentPercent // ignore: cast_nullable_to_non_nullable
+as int,bestPercent: freezed == bestPercent ? _self.bestPercent : bestPercent // ignore: cast_nullable_to_non_nullable
+as int?,runCompleted: null == runCompleted ? _self.runCompleted : runCompleted // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ChildQuizResult].
+extension ChildQuizResultPatterns on ChildQuizResult {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ChildQuizResult value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ChildQuizResult() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ChildQuizResult value)  $default,){
+final _that = this;
+switch (_that) {
+case _ChildQuizResult():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ChildQuizResult value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ChildQuizResult() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int sessionId,  int totalQuestions,  int answered,  int correct,  int currentPercent,  int? bestPercent,  bool runCompleted)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ChildQuizResult() when $default != null:
+return $default(_that.sessionId,_that.totalQuestions,_that.answered,_that.correct,_that.currentPercent,_that.bestPercent,_that.runCompleted);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int sessionId,  int totalQuestions,  int answered,  int correct,  int currentPercent,  int? bestPercent,  bool runCompleted)  $default,) {final _that = this;
+switch (_that) {
+case _ChildQuizResult():
+return $default(_that.sessionId,_that.totalQuestions,_that.answered,_that.correct,_that.currentPercent,_that.bestPercent,_that.runCompleted);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int sessionId,  int totalQuestions,  int answered,  int correct,  int currentPercent,  int? bestPercent,  bool runCompleted)?  $default,) {final _that = this;
+switch (_that) {
+case _ChildQuizResult() when $default != null:
+return $default(_that.sessionId,_that.totalQuestions,_that.answered,_that.correct,_that.currentPercent,_that.bestPercent,_that.runCompleted);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ChildQuizResult implements ChildQuizResult {
+  const _ChildQuizResult({required this.sessionId, this.totalQuestions = 0, this.answered = 0, this.correct = 0, this.currentPercent = 0, this.bestPercent, this.runCompleted = false});
+  factory _ChildQuizResult.fromJson(Map<String, dynamic> json) => _$ChildQuizResultFromJson(json);
+
+@override final  int sessionId;
+@override@JsonKey() final  int totalQuestions;
+@override@JsonKey() final  int answered;
+@override@JsonKey() final  int correct;
+@override@JsonKey() final  int currentPercent;
+@override final  int? bestPercent;
+@override@JsonKey() final  bool runCompleted;
+
+/// Create a copy of ChildQuizResult
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ChildQuizResultCopyWith<_ChildQuizResult> get copyWith => __$ChildQuizResultCopyWithImpl<_ChildQuizResult>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ChildQuizResultToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChildQuizResult&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.totalQuestions, totalQuestions) || other.totalQuestions == totalQuestions)&&(identical(other.answered, answered) || other.answered == answered)&&(identical(other.correct, correct) || other.correct == correct)&&(identical(other.currentPercent, currentPercent) || other.currentPercent == currentPercent)&&(identical(other.bestPercent, bestPercent) || other.bestPercent == bestPercent)&&(identical(other.runCompleted, runCompleted) || other.runCompleted == runCompleted));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,sessionId,totalQuestions,answered,correct,currentPercent,bestPercent,runCompleted);
+}
+
+@override
+String toString() {
+    return 'ChildQuizResult(sessionId: $sessionId, totalQuestions: $totalQuestions, answered: $answered, correct: $correct, currentPercent: $currentPercent, bestPercent: $bestPercent, runCompleted: $runCompleted)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ChildQuizResultCopyWith<$Res> implements $ChildQuizResultCopyWith<$Res> {
+  factory _$ChildQuizResultCopyWith(_ChildQuizResult value, $Res Function(_ChildQuizResult) _then) = __$ChildQuizResultCopyWithImpl;
+@override @useResult
+$Res call({
+ int sessionId, int totalQuestions, int answered, int correct, int currentPercent, int? bestPercent, bool runCompleted
+});
+
+
+
+
+}
+/// @nodoc
+class __$ChildQuizResultCopyWithImpl<$Res>
+    implements _$ChildQuizResultCopyWith<$Res> {
+  __$ChildQuizResultCopyWithImpl(this._self, this._then);
+
+  final _ChildQuizResult _self;
+  final $Res Function(_ChildQuizResult) _then;
+
+/// Create a copy of ChildQuizResult
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = null,Object? totalQuestions = null,Object? answered = null,Object? correct = null,Object? currentPercent = null,Object? bestPercent = freezed,Object? runCompleted = null,}) {
+  return _then(_ChildQuizResult(
+sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
+as int,totalQuestions: null == totalQuestions ? _self.totalQuestions : totalQuestions // ignore: cast_nullable_to_non_nullable
+as int,answered: null == answered ? _self.answered : answered // ignore: cast_nullable_to_non_nullable
+as int,correct: null == correct ? _self.correct : correct // ignore: cast_nullable_to_non_nullable
+as int,currentPercent: null == currentPercent ? _self.currentPercent : currentPercent // ignore: cast_nullable_to_non_nullable
+as int,bestPercent: freezed == bestPercent ? _self.bestPercent : bestPercent // ignore: cast_nullable_to_non_nullable
+as int?,runCompleted: null == runCompleted ? _self.runCompleted : runCompleted // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$StorySummarySent {
+
+ int get summaryId; String get message;
+/// Create a copy of StorySummarySent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$StorySummarySentCopyWith<StorySummarySent> get copyWith => _$StorySummarySentCopyWithImpl<StorySummarySent>(this as StorySummarySent, _$identity);
+
+  /// Serializes this StorySummarySent to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as StorySummarySent;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StorySummarySent&&(identical(other.summaryId, _this.summaryId) || other.summaryId == _this.summaryId)&&(identical(other.message, _this.message) || other.message == _this.message));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as StorySummarySent;
+  return Object.hash(runtimeType,_this.summaryId,_this.message);
+}
+
+@override
+String toString() {
+  final _this = this as StorySummarySent;
+  return 'StorySummarySent(summaryId: ${_this.summaryId}, message: ${_this.message})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $StorySummarySentCopyWith<$Res>  {
+  factory $StorySummarySentCopyWith(StorySummarySent value, $Res Function(StorySummarySent) _then) = _$StorySummarySentCopyWithImpl;
+@useResult
+$Res call({
+ int summaryId, String message
+});
+
+
+
+
+}
+/// @nodoc
+class _$StorySummarySentCopyWithImpl<$Res>
+    implements $StorySummarySentCopyWith<$Res> {
+  _$StorySummarySentCopyWithImpl(this._self, this._then);
+
+  final StorySummarySent _self;
+  final $Res Function(StorySummarySent) _then;
+
+/// Create a copy of StorySummarySent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? summaryId = null,Object? message = null,}) {
+  return _then(StorySummarySent(
+summaryId: null == summaryId ? _self.summaryId : summaryId // ignore: cast_nullable_to_non_nullable
+as int,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [StorySummarySent].
+extension StorySummarySentPatterns on StorySummarySent {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _StorySummarySent value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _StorySummarySent() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _StorySummarySent value)  $default,){
+final _that = this;
+switch (_that) {
+case _StorySummarySent():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _StorySummarySent value)?  $default,){
+final _that = this;
+switch (_that) {
+case _StorySummarySent() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int summaryId,  String message)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _StorySummarySent() when $default != null:
+return $default(_that.summaryId,_that.message);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int summaryId,  String message)  $default,) {final _that = this;
+switch (_that) {
+case _StorySummarySent():
+return $default(_that.summaryId,_that.message);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int summaryId,  String message)?  $default,) {final _that = this;
+switch (_that) {
+case _StorySummarySent() when $default != null:
+return $default(_that.summaryId,_that.message);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _StorySummarySent implements StorySummarySent {
+  const _StorySummarySent({required this.summaryId, required this.message});
+  factory _StorySummarySent.fromJson(Map<String, dynamic> json) => _$StorySummarySentFromJson(json);
+
+@override final  int summaryId;
+@override final  String message;
+
+/// Create a copy of StorySummarySent
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$StorySummarySentCopyWith<_StorySummarySent> get copyWith => __$StorySummarySentCopyWithImpl<_StorySummarySent>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$StorySummarySentToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StorySummarySent&&(identical(other.summaryId, summaryId) || other.summaryId == summaryId)&&(identical(other.message, message) || other.message == message));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,summaryId,message);
+}
+
+@override
+String toString() {
+    return 'StorySummarySent(summaryId: $summaryId, message: $message)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$StorySummarySentCopyWith<$Res> implements $StorySummarySentCopyWith<$Res> {
+  factory _$StorySummarySentCopyWith(_StorySummarySent value, $Res Function(_StorySummarySent) _then) = __$StorySummarySentCopyWithImpl;
+@override @useResult
+$Res call({
+ int summaryId, String message
+});
+
+
+
+
+}
+/// @nodoc
+class __$StorySummarySentCopyWithImpl<$Res>
+    implements _$StorySummarySentCopyWith<$Res> {
+  __$StorySummarySentCopyWithImpl(this._self, this._then);
+
+  final _StorySummarySent _self;
+  final $Res Function(_StorySummarySent) _then;
+
+/// Create a copy of StorySummarySent
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? summaryId = null,Object? message = null,}) {
+  return _then(_StorySummarySent(
+summaryId: null == summaryId ? _self.summaryId : summaryId // ignore: cast_nullable_to_non_nullable
+as int,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
 // dart format on

@@ -36,10 +36,8 @@ abstract class ChildStoryPage with _$ChildStoryPage {
 /// Body gửi đi khi bắt đầu phiên đọc
 @freezed
 abstract class ReadingStartBody with _$ReadingStartBody {
-  const factory ReadingStartBody({
-    int? storyId,
-    int? communitySubmissionId,
-  }) = _ReadingStartBody;
+  const factory ReadingStartBody({int? storyId, int? communitySubmissionId}) =
+      _ReadingStartBody;
 
   factory ReadingStartBody.fromJson(Map<String, dynamic> json) =>
       _$ReadingStartBodyFromJson(json);
@@ -92,10 +90,8 @@ abstract class ReadingContent with _$ReadingContent {
 
 @freezed
 abstract class ReadingVocabulary with _$ReadingVocabulary {
-  const factory ReadingVocabulary({
-    required int id,
-    required String term,
-  }) = _ReadingVocabulary;
+  const factory ReadingVocabulary({required int id, required String term}) =
+      _ReadingVocabulary;
 
   factory ReadingVocabulary.fromJson(Map<String, dynamic> json) =>
       _$ReadingVocabularyFromJson(json);
@@ -217,3 +213,88 @@ abstract class NotebookEntry with _$NotebookEntry {
   factory NotebookEntry.fromJson(Map<String, dynamic> json) =>
       _$NotebookEntryFromJson(json);
 }
+
+@freezed
+abstract class ReadingFeelingResult with _$ReadingFeelingResult {
+  const factory ReadingFeelingResult({
+    required int sessionId,
+    required String feeling,
+    required String label,
+  }) = _ReadingFeelingResult;
+
+  factory ReadingFeelingResult.fromJson(Map<String, dynamic> json) =>
+      _$ReadingFeelingResultFromJson(json);
+}
+
+@freezed
+abstract class ChildQuizItem with _$ChildQuizItem {
+  const factory ChildQuizItem({
+    required int quizItemId,
+    @Default('MultipleChoice') String type,
+    required String question,
+    List<String>? choices,
+  }) = _ChildQuizItem;
+
+  factory ChildQuizItem.fromJson(Map<String, dynamic> json) =>
+      _$ChildQuizItemFromJson(json);
+}
+
+@freezed
+abstract class ChildQuiz with _$ChildQuiz {
+  const factory ChildQuiz({
+    required int sessionId,
+    @Default(0) int totalQuestions,
+    int? bestPercent,
+    @Default(<ChildQuizItem>[]) List<ChildQuizItem> questions,
+  }) = _ChildQuiz;
+
+  factory ChildQuiz.fromJson(Map<String, dynamic> json) =>
+      _$ChildQuizFromJson(json);
+}
+
+@freezed
+abstract class QuizAnswerResult with _$QuizAnswerResult {
+  const factory QuizAnswerResult({
+    required int quizItemId,
+    @Default(false) bool isCorrect,
+    required String feedback,
+    @Default(0) int expGained,
+    @Default(<String>[]) List<String> newBadges,
+    @Default(false) bool runCompleted,
+    @Default(0) int currentPercent,
+    int? bestPercent,
+  }) = _QuizAnswerResult;
+
+  factory QuizAnswerResult.fromJson(Map<String, dynamic> json) =>
+      _$QuizAnswerResultFromJson(json);
+}
+
+@freezed
+abstract class ChildQuizResult with _$ChildQuizResult {
+  const factory ChildQuizResult({
+    required int sessionId,
+    @Default(0) int totalQuestions,
+    @Default(0) int answered,
+    @Default(0) int correct,
+    @Default(0) int currentPercent,
+    int? bestPercent,
+    @Default(false) bool runCompleted,
+  }) = _ChildQuizResult;
+
+  factory ChildQuizResult.fromJson(Map<String, dynamic> json) =>
+      _$ChildQuizResultFromJson(json);
+}
+
+@freezed
+abstract class StorySummarySent with _$StorySummarySent {
+  const factory StorySummarySent({
+    required int summaryId,
+    required String message,
+  }) = _StorySummarySent;
+
+  factory StorySummarySent.fromJson(Map<String, dynamic> json) =>
+      _$StorySummarySentFromJson(json);
+}
+
+const int kSummaryMaxBytes = 3000000;
+const int kSummaryMaxFlags = 5;
