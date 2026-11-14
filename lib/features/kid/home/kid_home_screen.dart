@@ -213,7 +213,7 @@ class KidHomeScreen extends ConsumerWidget {
                 KidTodayCard(
                   roadmap: data.roadmap,
                   onRead: (storyId) => context.push('/kid/read/$storyId'),
-                  onChooseStory: () => context.push('/kid/soon', extra: 'Truyện'),
+                  onChooseStory: () => context.push('/kid/library'),
                 ),
                 delayMs: 0,
               );
@@ -230,7 +230,13 @@ class KidHomeScreen extends ConsumerWidget {
               final tileGrid = _animateBlock(
                 context,
                 KidTileGrid(
-                  onOpen: (title) => context.push('/kid/soon', extra: title),
+                  onOpen: (title) {
+                    if (title == 'Truyện') {
+                      context.push('/kid/library');
+                    } else {
+                      context.push('/kid/soon', extra: title);
+                    }
+                  },
                 ),
                 delayMs: 200,
               );

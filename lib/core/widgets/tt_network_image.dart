@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../theme/tt_colors.dart';
 import '../theme/tt_radius.dart';
-import 'tt_state_views.dart';
 
 /// Thành phần hiển thị hình ảnh từ internet kèm hiệu ứng tải và ảnh dự phòng.
 class TtNetworkImage extends StatelessWidget {
@@ -69,13 +68,11 @@ class TtNetworkImage extends StatelessWidget {
         fit: fit,
         width: width,
         height: height,
+        // Đang tải thì hiện ảnh mặc định: ảnh treo không tải xong (mạng chậm,
+        // bị chặn) vẫn có hình, không để khung trống.
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
-          return TtSkeleton(
-            width: width,
-            height: height ?? 120,
-            radius: radius,
-          );
+          return _buildPlaceholder(context);
         },
         errorBuilder: (context, error, stackTrace) =>
             _buildPlaceholder(context),
