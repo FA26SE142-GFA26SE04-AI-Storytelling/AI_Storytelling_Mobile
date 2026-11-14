@@ -126,19 +126,14 @@ class KidLibraryController extends Notifier<KidLibraryState> {
           ? e.message
           : 'Không thể tải thư viện truyện. Em hãy thử lại nhé.';
 
-      state = state.copyWith(
-        isLoadingInitial: false,
-        errorMessage: message,
-      );
+      state = state.copyWith(isLoadingInitial: false, errorMessage: message);
       if (onErrorToast != null) {
         onErrorToast(message);
       }
     }
   }
 
-  Future<void> loadMore({
-    void Function(String message)? onErrorToast,
-  }) async {
+  Future<void> loadMore({void Function(String message)? onErrorToast}) async {
     if (state.isLoadingInitial ||
         state.isLoadingMore ||
         !state.hasMore ||
@@ -188,8 +183,8 @@ class KidLibraryController extends Notifier<KidLibraryState> {
 
 final kidLibraryControllerProvider =
     NotifierProvider.autoDispose<KidLibraryController, KidLibraryState>(
-  KidLibraryController.new,
-);
+      KidLibraryController.new,
+    );
 
 // ─── Screen Widget ──────────────────────────────────────────────────────────
 
@@ -227,13 +222,15 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
     if (maxScroll - currentScroll <= 200) {
-      ref.read(kidLibraryControllerProvider.notifier).loadMore(
-        onErrorToast: (message) {
-          if (mounted) {
-            showTtToast(context, message, type: TtToastType.error);
-          }
-        },
-      );
+      ref
+          .read(kidLibraryControllerProvider.notifier)
+          .loadMore(
+            onErrorToast: (message) {
+              if (mounted) {
+                showTtToast(context, message, type: TtToastType.error);
+              }
+            },
+          );
     }
   }
 
@@ -250,14 +247,16 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
   void _triggerSearch(String query) {
     _debounceTimer?.cancel();
     _lastSubmittedQuery = query;
-    ref.read(kidLibraryControllerProvider.notifier).loadInitial(
-      search: query,
-      onErrorToast: (message) {
-        if (mounted) {
-          showTtToast(context, message, type: TtToastType.error);
-        }
-      },
-    );
+    ref
+        .read(kidLibraryControllerProvider.notifier)
+        .loadInitial(
+          search: query,
+          onErrorToast: (message) {
+            if (mounted) {
+              showTtToast(context, message, type: TtToastType.error);
+            }
+          },
+        );
   }
 
   @override
@@ -273,9 +272,7 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
           children: [
             _buildHeader(context),
             _buildSearchBar(context),
-            Expanded(
-              child: _buildContent(context, state),
-            ),
+            Expanded(child: _buildContent(context, state)),
           ],
         ),
       ),
@@ -335,6 +332,20 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
               validator: null,
             ),
           ),
+          // Nút xoá nhanh chỉ hiện khi đã gõ chữ; xoá xong listener tự tải lại danh sách.
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: _searchController,
+            builder: (context, value, _) => value.text.isEmpty
+                ? const SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(left: 8, bottom: 2),
+                    child: TtIconButton(
+                      icon: Icons.close_rounded,
+                      tooltip: 'Xoá tìm kiếm',
+                      onPressed: _searchController.clear,
+                    ),
+                  ),
+          ),
           const SizedBox(width: 8),
           Padding(
             padding: const EdgeInsets.only(bottom: 2),
@@ -364,9 +375,8 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
             mainAxisSpacing: 12,
             childAspectRatio: 0.72,
           ),
-          itemBuilder: (context, index) => TtSkeleton(
-            radius: BorderRadius.circular(TtRadius.lg),
-          ),
+          itemBuilder: (context, index) =>
+              TtSkeleton(radius: BorderRadius.circular(TtRadius.lg)),
         ),
       );
     }
@@ -435,9 +445,7 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           if (state.isLocked)
-            SliverToBoxAdapter(
-              child: _buildLockedCard(context, state),
-            ),
+            SliverToBoxAdapter(child: _buildLockedCard(context, state)),
           SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverGrid(
@@ -447,13 +455,10 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
                 mainAxisSpacing: 12,
                 childAspectRatio: 0.72,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final story = state.stories[index];
-                  return _buildStoryCard(context, story);
-                },
-                childCount: state.stories.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final story = state.stories[index];
+                return _buildStoryCard(context, story);
+              }, childCount: state.stories.length),
             ),
           ),
           if (state.isLoadingMore)
@@ -473,9 +478,7 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
               ),
             )
           else
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 16),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
         ],
       ),
     );
@@ -518,8 +521,8 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
 
   Widget _buildLockedCard(BuildContext context, KidLibraryState state) {
     final tt = context.tt;
-    final message = (state.lockedMessage != null &&
-            state.lockedMessage!.trim().isNotEmpty)
+    final message =
+        (state.lockedMessage != null && state.lockedMessage!.trim().isNotEmpty)
         ? state.lockedMessage!.trim()
         : 'Thư viện đang tạm khoá. Em hoàn thành truyện đang mở trước nhé!';
 
@@ -540,11 +543,7 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.lock_rounded,
-                color: tt.goldDeep,
-                size: 28,
-              ),
+              Icon(Icons.lock_rounded, color: tt.goldDeep, size: 28),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
