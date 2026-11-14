@@ -1,6 +1,6 @@
 # Mobile (Flutter): chức năng theo vai trò
 
-Cập nhật: 12/11/2026.
+Cập nhật: 14/11/2026.
 
 Căn cứ:
 
@@ -79,16 +79,17 @@ Tham khảo web: `features/kid/*`, `childAccessService.ts`, `childReadingService
 - [x] Vào app bằng quét QR EasyLogin (đọc link `?kid=` của web hoặc mã trần; lỗi / khoá do Backend trả hiện bằng toast). Chưa thử camera thật.
 - [x] Phụ huynh giao máy: tab Bé có danh sách hồ sơ + nút "Cho bé đọc" (`POST /ChildAccessCredential/{id}/handover`); mở lại app vẫn ở Chế độ của bé. Chưa có "Cho bé đọc ngay" kèm truyện (giai đoạn 3/4).
 - [x] Cổng phụ huynh khi thoát (`POST /ParentalGate/verify`) khi `parentalGateEnabled` bật; chặn nút Back của Android. Phiên bé hết hạn → màn "Phiên đọc đã kết thúc".
-- [ ] **Một phần** — Trang chính của bé (bố cục A đã chốt): thẻ "Hôm nay em đọc", hàng lá sen hành trình (`GET /MyRoadmap`), lưới 2×2 đã xong; các ô Truyện / Sổ tay / Điều ước / Phần thưởng còn mở màn "Sắp có" (2b/2c).
-- [ ] Hỏi lại phiên bé định kỳ như web (`GET /ChildAccessCredential/me` mỗi 15 giây, hết hạn khi không hoạt động) — hiện chỉ biết khi Backend trả 401/403.
-- [ ] Ảnh bìa có đuôi `#crop=x,y,w,h` (Backend) — web cắt ảnh theo đuôi này, mobile chưa cắt.
-- [ ] Màn đọc (bố cục A đã chốt: tranh trên, chữ dưới, thanh ◀ 🔊 🎤 ▶ ở đáy): vuốt lật trang, ListenFirst / ReadFirst, giọng đọc TTS, từ vựng, lưu tiến độ, dấu trang, yêu thích. Hỗ trợ màn dọc và ngang, máy tính bảng hiện hai trang.
+- [x] Trang chính của bé (bố cục A đã chốt): thẻ "Hôm nay em đọc", hàng lá sen hành trình (`GET /MyRoadmap`), lưới 2×2; bốn ô mở Thư viện, Sổ tay, Điều ước, Phần thưởng.
+- [x] Thư viện của bé (`GET /child/reading/stories`, trang đánh số từ 1 như Backend): lưới bìa, tìm kiếm, tải thêm khi cuộn, nút xoá nhanh ô tìm kiếm.
+- [x] Hỏi lại phiên bé định kỳ như web: kiểm tra mỗi 15 giây, chỉ gọi `GET /ChildAccessCredential/me` (tối đa 1 lần/phút) khi bé vừa chạm màn hình; 20 phút không hoạt động → "Phiên đọc đã kết thúc". Mất mạng thì giữ phiên.
+- [x] Ảnh bìa có đuôi `#crop=x,y,w,h`: `TtNetworkImage` tự cắt đúng vùng như web.
+- [ ] **Một phần** — Màn đọc (bố cục A: tranh trên, chữ dưới, thanh ◀ 🔊 🎤 ▶ ở đáy): xong vuốt lật trang, ListenFirst / ReadFirst, phát giọng đọc có sẵn (`just_audio`, tô sáng đoạn đang đọc), từ vựng (xem nghĩa, cất vào sổ tay), lưu tiến độ (1-based, tối đa 600 giây/lần), dấu trang, yêu thích, theo dõi tín hiệu dừng đọc (`/signal` mỗi 8 giây), sự kiện `PageCompleted` / `TtsStarted` / `TtsCompleted`, nút "Em đọc xong rồi" → màn +EXP. Màn rộng hiện tranh và chữ cạnh nhau. Còn thiếu: hai trang cho máy tính bảng, nút 🎤 (luyện đọc to) đang báo "sắp có", cảnh có `interaction` chưa hiển thị (DTO còn để Map).
 - [ ] 5 loại tương tác khi nghe: Checkpoint, RolePlay, FillBlank, EventOrdering, PicturePrediction.
 - [ ] Luyện đọc to bằng micro (ghi WAV, chấm từng chữ xanh / vàng / xám).
-- [ ] Hoàn thành truyện: chọn cảm xúc, quiz (trắc nghiệm, đúng/sai, trả lời ngắn), ghi âm kể lại, đánh dấu tối đa 5 cảnh còn thắc mắc.
-- [ ] EXP, 7 huy hiệu, cây tri thức 5 giai đoạn, sổ tay từ vựng; đọc xong mở bước lộ trình tiếp theo.
-- [ ] Gửi điều ước bằng thẻ.
-- [ ] Đọc truyện cộng đồng đã duyệt.
+- [x] Hoàn thành truyện (phương án A, từng bước toàn màn hình, có Bỏ qua): cảm xúc (kèm +EXP, huy hiệu mới, bước lộ trình) → quiz (đáp án xáo trộn, trả lời ngắn, kết quả, làm lại) → ghi âm kể lại (`record`, WAV 16 kHz, tự dừng ở 3 MB) → đánh dấu tối đa 5 cảnh còn thắc mắc. Giọng đọc đang phát cũng tính là bé đang hoạt động. Chưa thử ghi âm trên máy thật; trên web không ghi âm được (báo bằng toast). Huy hiệu mới chỉ hiện số lượng, chưa hiện tên.
+- [x] Phần thưởng (phương án A: cây trên, huy hiệu dưới): EXP, chuỗi ngày đọc, cây tri thức 5 giai đoạn (`TtKnowledgeTree` chuyển từ web) và tưới cây, 7 huy hiệu lưới 2 cột. Sổ tay từ vựng: danh sách, xoá có xác nhận. Đọc xong mở bước lộ trình tiếp theo do Backend xử lý, mobile báo ở bước Cảm xúc.
+- [x] Gửi điều ước bằng thẻ (phương án A: lưới thẻ + thanh đáy): Nhân vật → Nơi chốn → Thử thách → Bài học (hoặc "Để bố mẹ chọn"), phát âm thanh thẻ, danh sách điều ước đã gửi kèm nút đọc truyện. Gợi ý chỉ có truyện cộng đồng tạm ẩn (xem mục đọc truyện cộng đồng).
+- [ ] Đọc truyện cộng đồng đã duyệt. Lưu ý: Backend `StartReadingRequestDto` chưa có `communitySubmissionId` (web và mobile đều gửi trường này) — cần hỏi Backend.
 - [ ] Tắt thông báo của app khi bé đang đọc; nút tối thiểu 64dp, chữ 22–28sp.
 
 ## Giai đoạn 3: Phụ huynh, phần cốt lõi (F-01, F-02, F-08, F-12)

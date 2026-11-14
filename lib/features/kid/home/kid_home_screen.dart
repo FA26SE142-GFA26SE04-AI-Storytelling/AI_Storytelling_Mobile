@@ -42,11 +42,7 @@ class KidHomeScreen extends ConsumerWidget {
     }
   }
 
-  Widget _animateBlock(
-    BuildContext context,
-    Widget child, {
-    int delayMs = 0,
-  }) {
+  Widget _animateBlock(BuildContext context, Widget child, {int delayMs = 0}) {
     if (MediaQuery.disableAnimationsOf(context)) {
       return child;
     }
@@ -63,57 +59,52 @@ class KidHomeScreen extends ConsumerWidget {
 
     return switch (sessionState) {
       KidChecking() => Scaffold(
+        backgroundColor: tt.bg,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const TtFrog(mood: TtFrogMood.think, size: 120),
+              const SizedBox(height: 16),
+              Text(
+                'Đang mở cửa vào đầm sen…',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Baloo2',
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: tt.text,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      KidNone() || KidEnded() => Scaffold(
+        backgroundColor: tt.bg,
+        body: _EndedView(
+          onGoHome: () => ref.read(kidSessionProvider.notifier).end(),
+        ),
+      ),
+      KidActive() => PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) {
+            _exit(context, ref);
+          }
+        },
+        child: Scaffold(
           backgroundColor: tt.bg,
-          body: Center(
+          body: SafeArea(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                const TtFrog(
-                  mood: TtFrogMood.think,
-                  size: 120,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Đang mở cửa vào đầm sen…',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Baloo2',
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    color: tt.text,
-                  ),
-                ),
+                _buildHeader(context, ref),
+                Expanded(child: _buildContent(context, ref)),
               ],
             ),
           ),
         ),
-      KidNone() || KidEnded() => Scaffold(
-          backgroundColor: tt.bg,
-          body: _EndedView(
-            onGoHome: () => ref.read(kidSessionProvider.notifier).end(),
-          ),
-        ),
-      KidActive() => PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, result) {
-            if (!didPop) {
-              _exit(context, ref);
-            }
-          },
-          child: Scaffold(
-            backgroundColor: tt.bg,
-            body: SafeArea(
-              child: Column(
-                children: [
-                  _buildHeader(context, ref),
-                  Expanded(
-                    child: _buildContent(context, ref),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+      ),
     };
   }
 
@@ -121,8 +112,9 @@ class KidHomeScreen extends ConsumerWidget {
     final tt = context.tt;
     final homeDataAsync = ref.watch(kidHomeDataProvider);
     final nickname = homeDataAsync.value?.nickname;
-    final displayName =
-        (nickname != null && nickname.trim().isNotEmpty) ? nickname : 'Chào em!';
+    final displayName = (nickname != null && nickname.trim().isNotEmpty)
+        ? nickname
+        : 'Chào em!';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -170,15 +162,9 @@ class KidHomeScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           children: [
-            TtSkeleton(
-              height: 220,
-              radius: BorderRadius.circular(TtRadius.xl),
-            ),
+            TtSkeleton(height: 220, radius: BorderRadius.circular(TtRadius.xl)),
             const SizedBox(height: 24),
-            TtSkeleton(
-              height: 140,
-              radius: BorderRadius.circular(TtRadius.lg),
-            ),
+            TtSkeleton(height: 140, radius: BorderRadius.circular(TtRadius.lg)),
           ],
         ),
       ),
@@ -213,7 +199,7 @@ class KidHomeScreen extends ConsumerWidget {
                 KidTodayCard(
                   roadmap: data.roadmap,
                   onRead: (storyId) => context.push('/kid/read/$storyId'),
-                  onChooseStory: () => context.push('/kid/soon', extra: 'Truyện'),
+                  onChooseStory: () => context.push('/kid/library'),
                 ),
                 delayMs: 0,
               );
@@ -230,7 +216,20 @@ class KidHomeScreen extends ConsumerWidget {
               final tileGrid = _animateBlock(
                 context,
                 KidTileGrid(
-                  onOpen: (title) => context.push('/kid/soon', extra: title),
+                  onOpen: (title) {
+                    const routes = {
+                      'Truyện': '/kid/library',
+                      'Sổ tay': '/kid/notebook',
+                      'Điều ước': '/kid/wish',
+                      'Phần thưởng': '/kid/rewards',
+                    };
+                    final route = routes[title];
+                    if (route != null) {
+                      context.push(route);
+                    } else {
+                      context.push('/kid/soon', extra: title);
+                    }
+                  },
                 ),
                 delayMs: 200,
               );
@@ -250,9 +249,7 @@ class KidHomeScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 24),
-                    Expanded(
-                      child: tileGrid,
-                    ),
+                    Expanded(child: tileGrid),
                   ],
                 );
               }
@@ -291,10 +288,7 @@ class _EndedView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const TtFrog(
-              mood: TtFrogMood.idle,
-              size: 150,
-            ),
+            const TtFrog(mood: TtFrogMood.idle, size: 150),
             const SizedBox(height: 24),
             Text(
               'Phiên đọc đã kết thúc',

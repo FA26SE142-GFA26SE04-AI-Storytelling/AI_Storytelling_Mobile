@@ -44,6 +44,9 @@ dependencies:
   rive: ^0.14.11
   flutter_svg: ^2.3.4
   mobile_scanner: ^7.5.0
+  just_audio: ^0.10.6
+  record: ^7.2.0
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
