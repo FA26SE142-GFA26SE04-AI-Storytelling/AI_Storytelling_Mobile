@@ -19,6 +19,9 @@ import 'package:ai_storytelling_mobile/features/kid/entry/kid_qr_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/home/kid_coming_soon_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/reader/kid_reader_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/library/kid_library_screen.dart';
+import 'package:ai_storytelling_mobile/features/kid/rewards/kid_notebook_screen.dart';
+import 'package:ai_storytelling_mobile/features/kid/rewards/kid_rewards_screen.dart';
+import 'package:ai_storytelling_mobile/features/kid/wish/kid_wish_screen.dart';
 import 'package:ai_storytelling_mobile/features/children/presentation/children_tab_screen.dart';
 
 // ---------------------------------------------------------------------------
@@ -42,6 +45,9 @@ abstract final class AppRoutes {
   static const String kidRead = '/kid/read/:storyId';
   static const String kidLibrary = '/kid/library';
   static const String kidSoon = '/kid/soon';
+  static const String kidRewards = '/kid/rewards';
+  static const String kidNotebook = '/kid/notebook';
+  static const String kidWish = '/kid/wish';
 }
 
 // ---------------------------------------------------------------------------
@@ -182,6 +188,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.kidLibrary,
         builder: (context, state) => const KidLibraryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.kidRewards,
+        builder: (context, state) => const KidRewardsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.kidNotebook,
+        builder: (context, state) => const KidNotebookScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.kidWish,
+        builder: (context, state) => const KidWishScreen(),
       ),
       GoRoute(
         path: AppRoutes.kidSoon,
