@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'child_interaction_dto.dart';
 
 part 'child_reading_dto.freezed.dart';
 part 'child_reading_dto.g.dart';
@@ -106,7 +107,7 @@ abstract class ReadingScene with _$ReadingScene {
     String? illustrationUrl,
     List<SceneIllustration>? illustrations,
     @Default(<ReadingSegment>[]) List<ReadingSegment> segments,
-    Map<String, dynamic>? interaction,
+    ReadingInteraction? interaction,
     @Default(false) bool attemptedInSession,
   }) = _ReadingScene;
 

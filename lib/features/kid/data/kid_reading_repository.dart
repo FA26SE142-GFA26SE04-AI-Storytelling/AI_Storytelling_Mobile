@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../models/child_reading_dto.dart';
+import '../../../models/child_interaction_dto.dart';
+import '../../../models/child_read_aloud_dto.dart';
 import 'kid_session_controller.dart';
 
 // ─── Abstract contract ───────────────────────────────────────────────────────
@@ -84,6 +86,22 @@ abstract class KidReadingRepository {
   Future<StorySummarySent> summaryFlags(
     String sessionId, {
     required List<int> sceneIds,
+  });
+
+  /// Trẻ trả lời một tương tác lúc nghe. Chỉ truyền trường cần thiết: Checkpoint/PicturePrediction truyền optionId; FillBlank truyền answer; EventOrdering truyền orderedOptionIds; RolePlay không truyền gì (body rỗng).
+  Future<ListeningAttemptResult> attemptInteraction(
+    String sessionId,
+    int interactionId, {
+    int? optionId,
+    String? answer,
+    List<int>? orderedOptionIds,
+  });
+
+  /// Trẻ đọc to một đoạn; filePath là file WAV đã ghi âm.
+  Future<ReadAloudResult> readAloud(
+    String sessionId,
+    int segmentId, {
+    required String filePath,
   });
 }
 
@@ -421,6 +439,49 @@ class ApiKidReadingRepository implements KidReadingRepository {
     );
     final data = _unwrap(response) as Map<String, dynamic>;
     return StorySummarySent.fromJson(data);
+  });
+
+  @override
+  Future<ListeningAttemptResult> attemptInteraction(
+    String sessionId,
+    int interactionId, {
+    int? optionId,
+    String? answer,
+    List<int>? orderedOptionIds,
+  }) => _childCall(() async {
+    final response = await dio.post<dynamic>(
+      '/child/reading/sessions/$sessionId/interactions/$interactionId/attempts',
+      data: {
+        'optionId': ?optionId,
+        'answer': ?answer,
+        'orderedOptionIds': ?orderedOptionIds,
+      },
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ListeningAttemptResult.fromJson(data);
+  });
+
+  @override
+  Future<ReadAloudResult> readAloud(
+    String sessionId,
+    int segmentId, {
+    required String filePath,
+  }) => _childCall(() async {
+    final formData = FormData.fromMap({
+      'Audio': await MultipartFile.fromFile(
+        filePath,
+        filename: 'read-aloud.wav',
+        contentType: DioMediaType('audio', 'wav'),
+      ),
+    });
+    final response = await dio.post<dynamic>(
+      '/child/reading/sessions/$sessionId/segments/$segmentId/read-aloud',
+      data: formData,
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ReadAloudResult.fromJson(data);
   });
 }
 
