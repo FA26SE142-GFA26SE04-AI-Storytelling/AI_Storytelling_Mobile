@@ -162,7 +162,7 @@ void main() {
         'actorUserId': 1001,
         'action': 'update_safety_policy',
         'entityType': 'ChildProfile',
-        'entityId': 'child_123',
+        'entityId': 123,
         'occurredAt': '2026-11-15T09:15:00.000Z',
       };
       final dto = AuditLogEntryDto.fromJson(json);
@@ -171,7 +171,7 @@ void main() {
       expect(dto.actorUserId, 1001);
       expect(dto.action, 'update_safety_policy');
       expect(dto.entityType, 'ChildProfile');
-      expect(dto.entityId, 'child_123');
+      expect(dto.entityId, 123);
       expect(dto.occurredAt, DateTime.parse('2026-11-15T09:15:00.000Z'));
     });
 
@@ -183,7 +183,7 @@ void main() {
           'actorUserId': null,
           'action': 'system_sync',
           'entityType': 'ChildProfile',
-          'entityId': 'child_123',
+          'entityId': 123,
           'occurredAt': '2026-11-15T09:20:00.000Z',
         };
         final dto = AuditLogEntryDto.fromJson(json);
@@ -192,7 +192,7 @@ void main() {
         expect(dto.actorUserId, isNull);
         expect(dto.action, 'system_sync');
         expect(dto.entityType, 'ChildProfile');
-        expect(dto.entityId, 'child_123');
+        expect(dto.entityId, 123);
         expect(dto.occurredAt, DateTime.parse('2026-11-15T09:20:00.000Z'));
       },
     );

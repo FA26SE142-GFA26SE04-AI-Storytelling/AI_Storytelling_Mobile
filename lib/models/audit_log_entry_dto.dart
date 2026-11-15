@@ -10,7 +10,7 @@ abstract class AuditLogEntryDto with _$AuditLogEntryDto {
     int? actorUserId,
     required String action,
     required String entityType,
-    required String entityId,
+    required int entityId,
     required DateTime occurredAt,
   }) = _AuditLogEntryDto;
 

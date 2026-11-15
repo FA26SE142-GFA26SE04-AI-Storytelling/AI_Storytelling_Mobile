@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AuditLogEntryDto {
 
- int get id; int? get actorUserId; String get action; String get entityType; String get entityId; DateTime get occurredAt;
+ int get id; int? get actorUserId; String get action; String get entityType; int get entityId; DateTime get occurredAt;
 /// Create a copy of AuditLogEntryDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $AuditLogEntryDtoCopyWith<$Res>  {
   factory $AuditLogEntryDtoCopyWith(AuditLogEntryDto value, $Res Function(AuditLogEntryDto) _then) = _$AuditLogEntryDtoCopyWithImpl;
 @useResult
 $Res call({
- int id, int? actorUserId, String action, String entityType, String entityId, DateTime occurredAt
+ int id, int? actorUserId, String action, String entityType, int entityId, DateTime occurredAt
 });
 
 
@@ -78,7 +78,7 @@ as int,actorUserId: freezed == actorUserId ? _self.actorUserId : actorUserId // 
 as int?,action: null == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
 as String,entityType: null == entityType ? _self.entityType : entityType // ignore: cast_nullable_to_non_nullable
 as String,entityId: null == entityId ? _self.entityId : entityId // ignore: cast_nullable_to_non_nullable
-as String,occurredAt: null == occurredAt ? _self.occurredAt : occurredAt // ignore: cast_nullable_to_non_nullable
+as int,occurredAt: null == occurredAt ? _self.occurredAt : occurredAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
@@ -164,7 +164,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  int? actorUserId,  String action,  String entityType,  String entityId,  DateTime occurredAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  int? actorUserId,  String action,  String entityType,  int entityId,  DateTime occurredAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuditLogEntryDto() when $default != null:
 return $default(_that.id,_that.actorUserId,_that.action,_that.entityType,_that.entityId,_that.occurredAt);case _:
@@ -185,7 +185,7 @@ return $default(_that.id,_that.actorUserId,_that.action,_that.entityType,_that.e
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  int? actorUserId,  String action,  String entityType,  String entityId,  DateTime occurredAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  int? actorUserId,  String action,  String entityType,  int entityId,  DateTime occurredAt)  $default,) {final _that = this;
 switch (_that) {
 case _AuditLogEntryDto():
 return $default(_that.id,_that.actorUserId,_that.action,_that.entityType,_that.entityId,_that.occurredAt);case _:
@@ -205,7 +205,7 @@ return $default(_that.id,_that.actorUserId,_that.action,_that.entityType,_that.e
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  int? actorUserId,  String action,  String entityType,  String entityId,  DateTime occurredAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  int? actorUserId,  String action,  String entityType,  int entityId,  DateTime occurredAt)?  $default,) {final _that = this;
 switch (_that) {
 case _AuditLogEntryDto() when $default != null:
 return $default(_that.id,_that.actorUserId,_that.action,_that.entityType,_that.entityId,_that.occurredAt);case _:
@@ -227,7 +227,7 @@ class _AuditLogEntryDto implements AuditLogEntryDto {
 @override final  int? actorUserId;
 @override final  String action;
 @override final  String entityType;
-@override final  String entityId;
+@override final  int entityId;
 @override final  DateTime occurredAt;
 
 /// Create a copy of AuditLogEntryDto
@@ -265,7 +265,7 @@ abstract mixin class _$AuditLogEntryDtoCopyWith<$Res> implements $AuditLogEntryD
   factory _$AuditLogEntryDtoCopyWith(_AuditLogEntryDto value, $Res Function(_AuditLogEntryDto) _then) = __$AuditLogEntryDtoCopyWithImpl;
 @override @useResult
 $Res call({
- int id, int? actorUserId, String action, String entityType, String entityId, DateTime occurredAt
+ int id, int? actorUserId, String action, String entityType, int entityId, DateTime occurredAt
 });
 
 
@@ -289,7 +289,7 @@ as int,actorUserId: freezed == actorUserId ? _self.actorUserId : actorUserId // 
 as int?,action: null == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
 as String,entityType: null == entityType ? _self.entityType : entityType // ignore: cast_nullable_to_non_nullable
 as String,entityId: null == entityId ? _self.entityId : entityId // ignore: cast_nullable_to_non_nullable
-as String,occurredAt: null == occurredAt ? _self.occurredAt : occurredAt // ignore: cast_nullable_to_non_nullable
+as int,occurredAt: null == occurredAt ? _self.occurredAt : occurredAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }

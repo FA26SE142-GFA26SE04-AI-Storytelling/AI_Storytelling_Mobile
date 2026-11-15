@@ -32,7 +32,7 @@ abstract class ChildProfileRepository {
   Future<void> restore(int id);
   Future<({List<AuditLogEntryDto> items, int totalPages})> auditLog(
     int id, {
-    int pageIndex = 0,
+    int pageIndex = 1, // Backend đánh số trang từ 1
   });
   Future<LearningProfileDto> fetchLearning(int id);
   Future<LearningProfileDto> setLearning(
@@ -168,7 +168,7 @@ class ApiChildProfileRepository implements ChildProfileRepository {
   @override
   Future<({List<AuditLogEntryDto> items, int totalPages})> auditLog(
     int id, {
-    int pageIndex = 0,
+    int pageIndex = 1, // Backend đánh số trang từ 1
   }) =>
       runApi(() async {
         final response = await dio.get<dynamic>(

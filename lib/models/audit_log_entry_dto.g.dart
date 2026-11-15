@@ -12,7 +12,7 @@ _AuditLogEntryDto _$AuditLogEntryDtoFromJson(Map<String, dynamic> json) =>
       actorUserId: (json['actorUserId'] as num?)?.toInt(),
       action: json['action'] as String,
       entityType: json['entityType'] as String,
-      entityId: json['entityId'] as String,
+      entityId: (json['entityId'] as num).toInt(),
       occurredAt: DateTime.parse(json['occurredAt'] as String),
     );
 
