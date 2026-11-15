@@ -35,7 +35,7 @@ abstract class AccountRepository {
   Future<void> logoutAllDevices();
 
   Future<({List<AuditLogEntryDto> items, int totalPages})> accountAudit({
-    int pageIndex = 0,
+    int pageIndex = 1, // Backend đánh số trang từ 1
   });
 }
 
@@ -154,7 +154,7 @@ class ApiAccountRepository implements AccountRepository {
 
   @override
   Future<({List<AuditLogEntryDto> items, int totalPages})> accountAudit({
-    int pageIndex = 0,
+    int pageIndex = 1, // Backend đánh số trang từ 1
   }) =>
       runApi(() async {
         final response = await dio.get<dynamic>(
