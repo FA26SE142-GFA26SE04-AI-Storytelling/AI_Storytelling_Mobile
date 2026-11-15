@@ -1,6 +1,6 @@
 # Mobile (Flutter): chức năng theo vai trò
 
-Cập nhật: 14/11/2026.
+Cập nhật: 15/11/2026.
 
 Căn cứ:
 
@@ -9,7 +9,11 @@ Căn cứ:
 - Sản phẩm: `PRODUCT.md` (người dùng chính là Phụ huynh và Bé).
 - API: REST `/api/v1`. Hàm gọi API tham khảo từ `AI_Storytelling_Frontend/src/app/services/*.ts`, kiểu dữ liệu từ `src/app/types/*.ts`.
 
-Phạm vi đã chốt (12/11): **ưu tiên Phụ huynh và Bé**. Creator làm sau (chỉ màn theo dõi). Moderator và Admin dùng web, không làm trên mobile.
+Phạm vi đã chốt (15/11): app mobile **chỉ dành cho Bé và Phụ huynh, không dùng để tạo truyện**.
+
+- **Bé**: trọng tâm là trải nghiệm đọc (màn đọc, nghe, tương tác, quiz, phần thưởng, điều ước).
+- **Phụ huynh**: xem thống kê học tập và quản lý thông tin của bé; giao máy cho bé đọc.
+- Tạo truyện (Studio AI, nhập truyện, tự viết), sửa lộ trình, gói và thanh toán, Creator, Moderator, Admin: dùng web.
 
 Ký hiệu: `[x]` xong · `[ ]` chưa làm · **Một phần** ghi rõ còn thiếu gì.
 
@@ -30,18 +34,13 @@ lib/
 ├─ models/           freezed + json_serializable, sinh từ types/*.ts của web
 └─ features/
    ├─ auth/          đăng nhập, đăng ký, xác thực email, quên / đặt lại mật khẩu
-   ├─ home/          trang chủ phụ huynh: "Cho bé đọc", truyện làm dở, việc cần làm
+   ├─ home/          trang chủ phụ huynh: "Cho bé đọc", tóm tắt hôm nay của từng bé
    ├─ children/      hồ sơ bé, Learning Profile, vòng đời hồ sơ
    ├─ safety/        Safety Policy
    ├─ access/        mã QR EasyLogin, giao máy cho bé
-   ├─ learning/      học tập của bé: tổng quan, kết quả đọc
-   ├─ roadmap/       lộ trình, thư viện lộ trình mẫu
-   ├─ wishes/        điều ước của bé (phía phụ huynh)
-   ├─ studio/        tạo truyện bằng AI dạng wizard, nhập truyện có sẵn
-   ├─ stories/       Truyện của tôi, gửi cộng đồng
-   ├─ library/       thư viện cộng đồng, báo cáo nội dung
+   ├─ learning/      thống kê học tập của bé: tổng quan, kết quả đọc, lộ trình (chỉ xem)
+   ├─ wishes/        điều ước của bé (phía phụ huynh, chỉ xem)
    ├─ account/       hồ sơ tài khoản, phiên đăng nhập, đổi mật khẩu / email
-   ├─ payment/       gói, lượt AI, thanh toán QR, lịch sử giao dịch
    ├─ notifications/ thông báo trong app và thông báo đẩy
    └─ kid/
       ├─ entry/      quét QR EasyLogin
@@ -65,19 +64,20 @@ assets/
 - [x] Theme: `TtColors` light / dark theo token của web (`styles/tokens.css`), font Baloo 2 + Nunito, có màu vàng mật `#ffd166`.
 - [x] API client: base URL, gắn token, tự refresh token, đổi mã lỗi thành câu dễ hiểu và hiện bằng toast.
 - [x] Component dùng chung: nút (lá sen), thẻ có viền rõ và nền trong suốt, popup xác nhận, toast, ảnh có hình mặc định, trạng thái rỗng / đang tải.
-- [x] Router: khu phụ huynh có thanh đáy (Trang chủ · Thư viện · (+) Tạo · Bé · Tài khoản); Chế độ của bé là route toàn màn hình, không có thanh đáy.
+- [x] Router: khu phụ huynh có thanh đáy; Chế độ của bé là route toàn màn hình, không có thanh đáy.
+- [x] Thanh đáy phụ huynh: **Trang chủ · Bé · Học tập · Tài khoản** (bỏ tab "(+) Tạo" và "Thư viện"; tab Học tập tạm là màn trống tới giai đoạn 4). Đã xoá thư mục rỗng `studio/`, `stories/`, `library/`, `payment/`, `roadmap/`.
 - [x] Đăng nhập, đăng ký, xác thực email, quên / đặt lại mật khẩu (nhập mã OTP gửi qua email, như web).
-- [x] Chặn tài khoản Moderator / Admin / Creator ở mobile: báo dùng web (Creator làm ở giai đoạn 6).
+- [x] Chặn tài khoản Moderator / Admin / Creator ở mobile: báo dùng web.
 - [x] Linh vật ếch (SVG chuyển từ `Frog.tsx` của web: idle / happy / think) trong `TtFrog`.
 - [x] Thêm nền tảng web (`web/`) chỉ để chụp màn hình kiểm tra UI bằng Playwright; app chính vẫn là Android / iOS. Chạy thử trên web cần Backend cho phép CORS origin localhost (hiện chưa có, app thật không bị).
-- [ ] Nút đang gửi chưa hiện vòng quay (TtButton.isLoading) ở màn đăng nhập — sửa ở giai đoạn sau.
+- [x] Nút đăng nhập có hiện vòng quay khi đang gửi (đã có test `login_loading_test.dart`; ghi chú cũ là do lúc chụp màn hình bản build web bị thiếu file).
 
-## Giai đoạn 2: Bé (F-02, F-08, F-13, F-14)
+## Giai đoạn 2: Bé, trải nghiệm đọc (F-02, F-08, F-13, F-14)
 
 Tham khảo web: `features/kid/*`, `childAccessService.ts`, `childReadingService.ts`, `storyWishService.ts`.
 
 - [x] Vào app bằng quét QR EasyLogin (đọc link `?kid=` của web hoặc mã trần; lỗi / khoá do Backend trả hiện bằng toast). Chưa thử camera thật.
-- [x] Phụ huynh giao máy: tab Bé có danh sách hồ sơ + nút "Cho bé đọc" (`POST /ChildAccessCredential/{id}/handover`); mở lại app vẫn ở Chế độ của bé. Chưa có "Cho bé đọc ngay" kèm truyện (giai đoạn 3/4).
+- [x] Phụ huynh giao máy: tab Bé có danh sách hồ sơ + nút "Cho bé đọc" (`POST /ChildAccessCredential/{id}/handover`); mở lại app vẫn ở Chế độ của bé. Chưa có "Cho bé đọc ngay" kèm truyện (giai đoạn 3).
 - [x] Cổng phụ huynh khi thoát (`POST /ParentalGate/verify`) khi `parentalGateEnabled` bật; chặn nút Back của Android. Phiên bé hết hạn → màn "Phiên đọc đã kết thúc".
 - [x] Trang chính của bé (bố cục A đã chốt): thẻ "Hôm nay em đọc", hàng lá sen hành trình (`GET /MyRoadmap`), lưới 2×2; bốn ô mở Thư viện, Sổ tay, Điều ước, Phần thưởng.
 - [x] Thư viện của bé (`GET /child/reading/stories`, trang đánh số từ 1 như Backend): lưới bìa, tìm kiếm, tải thêm khi cuộn, nút xoá nhanh ô tìm kiếm.
@@ -92,54 +92,35 @@ Tham khảo web: `features/kid/*`, `childAccessService.ts`, `childReadingService
 - [ ] Đọc truyện cộng đồng đã duyệt. Lưu ý: Backend `StartReadingRequestDto` chưa có `communitySubmissionId` (web và mobile đều gửi trường này) — cần hỏi Backend.
 - [ ] Tắt thông báo của app khi bé đang đọc; nút tối thiểu 64dp, chữ 22–28sp.
 
-## Giai đoạn 3: Phụ huynh, phần cốt lõi (F-01, F-02, F-08, F-12)
+## Giai đoạn 3: Phụ huynh, thông tin của bé (F-01, F-02, F-12)
 
-Tham khảo web: `features/children`, `features/safety`, `features/learning`, `childProfileService.ts`, `guardianService.ts`, `profileLifecycleService.ts`.
+Tham khảo web: `features/children`, `features/safety`, `childProfileService.ts`, `guardianService.ts`, `profileLifecycleService.ts`.
 
-- [ ] Trang chủ: lời chào, thẻ "Cho bé đọc", truyện làm dở, việc cần làm (truyện chờ duyệt, điều ước mới), kéo xuống để tải lại.
+- [ ] Trang chủ: lời chào, thẻ "Cho bé đọc" (chọn bé, kèm truyện làm dở nếu có), tóm tắt hôm nay của từng bé (lấy từ API học tập), kéo xuống để tải lại.
 - [ ] Hồ sơ bé: tạo (tên, ảnh, nhóm tuổi), sửa, kích hoạt / tạm dừng / tiếp tục / lưu trữ / khôi phục, lịch sử hoạt động.
 - [ ] Learning Profile: mức đọc, chế độ đọc, mục tiêu, chủ đề yêu thích / cần chú ý.
-- [ ] Safety Policy: chủ đề Cho phép / Chặn, chế độ duyệt, độ dài truyện, cổng phụ huynh, điều ước, tương tác khi nghe, trả lời bằng giọng nói, ngưỡng tự duyệt; đồng ý điều khoản. Tự lưu như web.
+- [ ] Safety Policy: các mục ảnh hưởng tới lúc bé đọc (cổng phụ huynh, điều ước, tương tác khi nghe, trả lời bằng giọng nói, chủ đề Cho phép / Chặn); đồng ý điều khoản. Tự lưu như web. Các mục chỉ dùng khi tạo truyện (chế độ duyệt, độ dài truyện, ngưỡng tự duyệt) để trên web.
 - [ ] Mã QR EasyLogin: tạo, tạo lại, thu hồi.
-- [ ] Học tập của bé: tổng quan, kết quả đọc (câu trả lời, nghe bản kể lại, chỗ còn thắc mắc, xoá bản kể lại).
-- [ ] Điều ước: xem, dùng truyện có sẵn, tạo truyện mới bằng AI, từ chối.
-- [ ] Thông báo: danh sách, đánh dấu đã đọc, xoá; thông báo đẩy (AI viết xong, bé gửi điều ước, gói sắp hết hạn).
 - [ ] Tài khoản: hồ sơ, đổi mật khẩu / email, phiên đăng nhập, đăng xuất. Xoá tài khoản mở trang web.
 
-## Giai đoạn 4: Phụ huynh, tạo truyện (F-06, F-07, F-09, F-10, F-12)
+## Giai đoạn 4: Phụ huynh, thống kê học tập (F-08)
 
-Tham khảo web: `features/studio`, `features/story-workflow`, `aiStoryCreationService.ts`, `existingStoryService.ts`, `roadmapService.ts`.
+Tham khảo web: `features/learning`, `roadmapService.ts`, `storyWishService.ts`.
 
-- [ ] Studio AI dạng wizard: ① Ý tưởng → ② Tiến trình → ③ Dàn ý (sửa, viết lại, duyệt, từ chối) → ④ Duyệt cảnh (vuốt từng cảnh, sửa trong bottom sheet) → ⑤ Tranh và giọng đọc → xác nhận gói media → Ready. Mở lại app vẫn tiếp tục được.
-- [ ] Hết lượt AI: báo rõ kèm nút "Nâng cấp gói"; nhãn "Còn N lượt AI".
-- [ ] Nhập truyện có sẵn: chỉ dán văn bản (không tải .docx trên mobile), xem đánh giá, tiếp tục / nhờ AI chỉnh / giữ nguyên.
-- [ ] Truyện của tôi theo kệ (Đã xong / Chờ bạn duyệt / Đang soạn), ảnh bìa.
-- [ ] Gửi truyện Ready lên cộng đồng, rút lại; thư viện cộng đồng, báo cáo nội dung.
-- [ ] Lộ trình: thêm truyện, đổi thứ tự, gỡ bước, làm trống; thư viện lộ trình mẫu (xem, sao chép cho bé).
-- Để trên web: Tự viết truyện (soạn dài, nhiều phiên bản, trợ lý AI), Giao cho nhiều bé.
-
-## Giai đoạn 5: Phụ huynh, gói và thanh toán (F-03, F-04, F-05)
-
-Tham khảo web: `features/account/PaymentSection.tsx`, `paymentService.ts`.
-
-- [ ] Gói của bạn và lượt còn lại (`GET /TokenQuota/me`).
-- [ ] Mua gói / gia hạn / nâng cấp / Add-on, popup xác nhận kèm hệ quả.
-- [ ] Thanh toán QR: vì không quét được QR trên chính máy đang hiện, cần nút **lưu ảnh QR**, **chép số tài khoản / nội dung chuyển khoản**, mở app ngân hàng nếu được; đếm ngược 15 phút, tự kiểm tra trạng thái mỗi 5 giây.
-- [ ] Lịch sử giao dịch, "Tiếp tục thanh toán" cho giao dịch chờ còn hạn.
-
-## Giai đoạn 6: Creator (làm sau, tuỳ thời gian)
-
-- [ ] Thống kê doanh thu (F-20) và lượt đọc (F-21).
-- [ ] Lượt còn lại và mua gói Creator.
-- [ ] Thông báo kết quả duyệt, rút yêu cầu duyệt.
-- Để trên web: soạn truyện, media từng đoạn, gửi duyệt.
+- [ ] Tổng quan học tập của từng bé: EXP, chuỗi ngày đọc, số truyện đã đọc, huy hiệu, cây tri thức (số liệu lấy hoàn toàn từ API, không tự tính).
+- [ ] Kết quả đọc từng truyện: câu trả lời quiz, cảm xúc, nghe bản kể lại, chỗ còn thắc mắc, xoá bản kể lại (có popup xác nhận).
+- [ ] Tiến độ lộ trình của bé (chỉ xem; sửa lộ trình trên web).
+- [ ] Điều ước bé đã gửi (chỉ xem; dùng truyện có sẵn / tạo truyện / từ chối làm trên web).
+- [ ] Thông báo: danh sách, đánh dấu đã đọc, xoá; thông báo đẩy khi bé gửi điều ước, bé đọc xong truyện.
 
 ---
 
 ## Không làm trên mobile
 
-- Moderator, Admin: dùng web.
-- Tự viết truyện dài, Giao cho nhiều bé: dùng web.
+- Tạo truyện: Studio AI, nhập truyện có sẵn, tự viết, Truyện của tôi, gửi cộng đồng, giao cho nhiều bé (F-06, F-07, F-09, F-10).
+- Sửa lộ trình, thư viện lộ trình mẫu.
+- Gói, lượt AI, thanh toán, lịch sử giao dịch (F-03, F-04, F-05).
+- Creator, Moderator, Admin: dùng web.
 - Ngoài phạm vi chung (tài liệu 6): đa ngôn ngữ, nhân bản giọng nói, đọc offline.
 
 ## Cần sửa trong DESIGN.md (mục Mobile)
@@ -147,4 +128,4 @@ Tham khảo web: `features/account/PaymentSection.tsx`, `paymentService.ts`.
 - [x] Bỏ "3 chỉ số", "biểu đồ 7 ngày" và tab "Báo cáo" của phụ huynh (dashboard, báo cáo tuần đã bỏ).
 - [x] Bỏ nút "Lưu trữ" ở màn Duyệt (đã bỏ thao tác lưu trữ truyện của phụ huynh).
 - [x] Cài đặt an toàn tự lưu, bỏ nút "Lưu" cố định.
-- [x] Thanh đáy đổi thành Trang chủ · Thư viện · (+) Tạo · Bé · Tài khoản; "Duyệt" vào danh sách việc cần làm ở Trang chủ.
+- [x] Theo phạm vi mới (15/11): thanh đáy là Trang chủ · Bé · Học tập · Tài khoản; bỏ màn Studio, Duyệt, Thư viện, Thanh toán của phụ huynh.

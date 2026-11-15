@@ -87,9 +87,9 @@ void main() {
         );
       });
 
-      test('/library -> null (đã đăng nhập, truy cập trang nội dung bình thường)', () {
+      test('/learning -> null (đã đăng nhập, truy cập trang nội dung bình thường)', () {
         expect(
-          authRedirect(AuthSignedIn(fakeUser()), '/library'),
+          authRedirect(AuthSignedIn(fakeUser()), '/learning'),
           isNull,
         );
       });

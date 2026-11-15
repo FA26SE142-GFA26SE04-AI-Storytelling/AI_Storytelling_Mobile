@@ -36,9 +36,8 @@ abstract final class AppRoutes {
   static const String resetPassword = '/reset-password';
   static const String blocked = '/blocked';
   static const String home = '/home';
-  static const String library = '/library';
-  static const String create = '/create';
   static const String kids = '/kids';
+  static const String learning = '/learning';
   static const String account = '/account';
   static const String kidMode = '/kid';
   static const String kidEntry = '/kid-entry';
@@ -228,36 +227,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
-          // Tab 1: Thư viện
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.library,
-                builder: (context, state) => EmptyTabScreen(
-                  title: 'Thư viện',
-                  icon: Icons.auto_stories_rounded,
-                  message:
-                      'Truyện của tôi và thư viện cộng đồng sẽ có ở giai đoạn 4.',
-                ),
-              ),
-            ],
-          ),
-
-          // Tab 2: Tạo truyện
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.create,
-                builder: (context, state) => EmptyTabScreen(
-                  title: 'Tạo truyện',
-                  icon: Icons.add_circle_rounded,
-                  message: 'Studio tạo truyện bằng AI sẽ có ở giai đoạn 4.',
-                ),
-              ),
-            ],
-          ),
-
-          // Tab 3: Bé
+          // Tab 1: Bé
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -267,7 +237,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
-          // Tab 4: Tài khoản
+          // Tab 2: Học tập
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.learning,
+                builder: (context, state) => EmptyTabScreen(
+                  title: 'Học tập',
+                  icon: Icons.insights_rounded,
+                  message: 'Thống kê học tập của bé sẽ có ở giai đoạn 4.',
+                ),
+              ),
+            ],
+          ),
+
+          // Tab 3: Tài khoản
           StatefulShellBranch(
             routes: [
               GoRoute(
