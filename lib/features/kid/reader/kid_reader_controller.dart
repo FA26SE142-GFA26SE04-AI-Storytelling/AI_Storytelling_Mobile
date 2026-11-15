@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../models/child_interaction_dto.dart';
 import '../../../models/child_reading_dto.dart';
 import '../data/kid_reading_repository.dart';
 
@@ -32,6 +33,7 @@ class KidReaderState {
     this.isFavorite = false,
     this.flags,
     this.collectedVocabIds = const <int>{},
+    this.answeredInteractionIds = const <int>{},
   });
 
   final KidReaderStatus status;
@@ -71,6 +73,9 @@ class KidReaderState {
   /// Tập vocabularyId đã cất vào sổ tay trong phiên này.
   final Set<int> collectedVocabIds;
 
+  /// interactionId đã trả lời trong phiên này (để không hỏi lại).
+  final Set<int> answeredInteractionIds;
+
   KidReaderState copyWith({
     KidReaderStatus? status,
     ReadingContent? content,
@@ -87,6 +92,7 @@ class KidReaderState {
     bool? isFavorite,
     ReadingFlags? flags,
     Set<int>? collectedVocabIds,
+    Set<int>? answeredInteractionIds,
   }) {
     return KidReaderState(
       status: status ?? this.status,
@@ -108,6 +114,8 @@ class KidReaderState {
       isFavorite: isFavorite ?? this.isFavorite,
       flags: flags ?? this.flags,
       collectedVocabIds: collectedVocabIds ?? this.collectedVocabIds,
+      answeredInteractionIds:
+          answeredInteractionIds ?? this.answeredInteractionIds,
     );
   }
 }
@@ -561,6 +569,40 @@ class KidReaderController extends Notifier<KidReaderState> {
     } finally {
       _collectLock = false;
     }
+  }
+
+  // ─── Tương tác khi nghe ───────────────────────────────────────────────────
+
+  Future<ListeningAttemptResult> attemptInteraction({
+    required int interactionId,
+    int? optionId,
+    String? answer,
+    List<int>? orderedOptionIds,
+  }) async {
+    final sid = state.sessionId;
+    if (sid == null) throw StateError('Chưa có phiên đọc');
+    final result = await _repo.attemptInteraction(
+      sid.toString(),
+      interactionId,
+      optionId: optionId,
+      answer: answer,
+      orderedOptionIds: orderedOptionIds,
+    );
+    if (!_disposed) {
+      _safeSetState(state.copyWith(
+        answeredInteractionIds: {...state.answeredInteractionIds, interactionId},
+      ));
+    }
+    return result;
+  }
+
+  bool isInteractionPending(ReadingScene scene) {
+    final it = scene.interaction;
+    if (it == null) return false;
+    if (scene.attemptedInSession) return false;
+    // Truyện chỉ nghe: không hỏi tương tác (như `pending` của web).
+    if (state.content?.listenOnly ?? false) return false;
+    return !state.answeredInteractionIds.contains(it.id);
   }
 
   // ─── Event helpers ─────────────────────────────────────────────────────────

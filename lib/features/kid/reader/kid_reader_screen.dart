@@ -12,6 +12,7 @@ import '../../../core/widgets/tt_toast.dart';
 import '../../../models/child_reading_dto.dart';
 import '../data/kid_reading_repository.dart';
 import '../data/kid_session_controller.dart';
+import '../interaction/kid_interaction_screen.dart';
 import '../quiz/kid_after_reading_screen.dart';
 import 'kid_reader_audio.dart';
 import 'kid_reader_bottom_bar.dart';
@@ -40,6 +41,9 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
 
   /// Cờ để chỉ tự động phát lần đầu khi chuyển sang ready một lần duy nhất.
   bool _didAutoPlay = false;
+
+  /// Cờ chống mở chồng hộp thoại tương tác.
+  bool _askingInteraction = false;
 
   late final KidSessionController _kidSession;
 
@@ -85,10 +89,29 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   KidReaderController get _notifier =>
       ref.read(kidReaderControllerProvider(widget.storyId).notifier);
 
-  void _goTo(int i) {
+  /// [skipGuard]: bé vừa chọn "Đọc tiếp"/"Để sau" ở màn tương tác thì cho lật
+  /// luôn, không hỏi lại (như `guarded → then` của web).
+  void _goTo(int i, {bool skipGuard = false}) {
     final state = ref.read(kidReaderControllerProvider(widget.storyId));
     final totalPages = state.totalPages;
     if (i < 0 || i >= totalPages) return;
+
+    final cur = state.currentPage;
+    if (!skipGuard &&
+        i > cur &&
+        state.content != null &&
+        cur >= 0 &&
+        cur < state.content!.scenes.length) {
+      final curScene = state.content!.scenes[cur];
+      if (_notifier.isInteractionPending(curScene)) {
+        final pc = _pageController;
+        if (pc != null && pc.hasClients && pc.page?.round() != cur) {
+          pc.jumpToPage(cur);
+        }
+        _askInteraction(cur, nextPage: i);
+        return;
+      }
+    }
 
     _audio.stop();
     setState(() => _activeSegmentId = null);
@@ -106,6 +129,105 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
 
     if (state.readingMode == KidReadingMode.listenFirst) {
       _playPage(i);
+    }
+  }
+
+  void _replayScene(int idx) {
+    final state = ref.read(kidReaderControllerProvider(widget.storyId));
+    if (idx < 0 || idx >= state.totalPages) return;
+
+    _audio.stop();
+    if (mounted) {
+      setState(() => _activeSegmentId = null);
+    }
+
+    _notifier.goToPage(idx);
+
+    final pc = _pageController;
+    if (pc != null && pc.hasClients && pc.page?.round() != idx) {
+      pc.animateToPage(
+        idx,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+
+    _playPage(idx);
+  }
+
+  Future<void> _askInteraction(int sceneIndex, {int? nextPage}) async {
+    if (_askingInteraction) return;
+    _askingInteraction = true;
+    try {
+      final state = ref.read(kidReaderControllerProvider(widget.storyId));
+      final content = state.content;
+      if (content == null ||
+          sceneIndex < 0 ||
+          sceneIndex >= content.scenes.length) {
+        return;
+      }
+
+      final scene = content.scenes[sceneIndex];
+      if (!_notifier.isInteractionPending(scene) || scene.interaction == null) {
+        return;
+      }
+
+      _audio.stop();
+      if (mounted) {
+        setState(() => _activeSegmentId = null);
+      }
+
+      final it = scene.interaction!;
+      final r = await Navigator.of(context).push<KidInteractionResult>(
+        PageRouteBuilder<KidInteractionResult>(
+          opaque: true,
+          transitionDuration: const Duration(milliseconds: 300),
+          pageBuilder: (_, _, _) => KidInteractionScreen(
+            interaction: it,
+            onAttempt: ({optionId, answer, orderedOptionIds}) =>
+                _notifier.attemptInteraction(
+              interactionId: it.id,
+              optionId: optionId,
+              answer: answer,
+              orderedOptionIds: orderedOptionIds,
+            ),
+            onPlayAudio: (url) => unawaited(_audio.playUrls([url])),
+          ),
+          transitionsBuilder: (_, anim, _, child) => SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 1),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: anim,
+                curve: Curves.easeOutCubic,
+              ),
+            ),
+            child: child,
+          ),
+        ),
+      );
+
+      _askingInteraction = false;
+      if (!mounted) return;
+      if (r == null) return;
+
+      if (r.replaySceneIndex != null) {
+        _replayScene(r.replaySceneIndex!);
+      } else if (r.resume) {
+        if (nextPage != null) {
+          _goTo(nextPage, skipGuard: true);
+        } else {
+          final curState =
+              ref.read(kidReaderControllerProvider(widget.storyId));
+          if (curState.readingMode == KidReadingMode.listenFirst &&
+              sceneIndex < curState.totalPages - 1) {
+            _goTo(sceneIndex + 1, skipGuard: true);
+          }
+        }
+      }
+    } finally {
+      _askingInteraction = false;
     }
   }
 
@@ -127,6 +249,11 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     _notifier.markTtsStarted();
 
     if (!hasAudio) {
+      if (_notifier.isInteractionPending(scene)) {
+        _askInteraction(pageIndex);
+        return;
+      }
+
       // Không có audio: vẫn auto-lật trong listenFirst
       Future.delayed(const Duration(milliseconds: 600), () {
         if (!mounted) return;
@@ -158,6 +285,15 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
         setState(() => _activeSegmentId = null);
 
         final curState = ref.read(kidReaderControllerProvider(widget.storyId));
+        final scenes = curState.content?.scenes;
+        if (scenes != null && pageIndex >= 0 && pageIndex < scenes.length) {
+          final sceneNow = scenes[pageIndex];
+          if (_notifier.isInteractionPending(sceneNow)) {
+            _askInteraction(pageIndex);
+            return;
+          }
+        }
+
         if (curState.readingMode == KidReadingMode.listenFirst &&
             curState.currentPage == pageIndex &&
             pageIndex < curState.totalPages - 1) {
