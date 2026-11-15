@@ -13,6 +13,9 @@ abstract class ChildProfileDto with _$ChildProfileDto {
     required String status,
     String? language,
     String? createdAt,
+    int? ownerUserId,
+    bool? shouldReapplyBlockedPreset,
+    String? suggestedReadingMode,
   }) = _ChildProfileDto;
 
   factory ChildProfileDto.fromJson(Map<String, dynamic> json) =>
