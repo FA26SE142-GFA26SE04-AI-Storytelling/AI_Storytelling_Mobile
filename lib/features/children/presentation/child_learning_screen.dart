@@ -214,7 +214,14 @@ class _ChildLearningScreenState extends ConsumerState<ChildLearningScreen> {
         appBar: AppBar(
           title: const Text('Học tập'),
         ),
-        body: _buildBody(isOwner),
+        // Màn rộng: giới hạn 720 như các màn Tài khoản.
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: _buildBody(isOwner),
+          ),
+        ),
         bottomNavigationBar: (_dirty && isOwner)
             ? SafeArea(
                 child: Padding(

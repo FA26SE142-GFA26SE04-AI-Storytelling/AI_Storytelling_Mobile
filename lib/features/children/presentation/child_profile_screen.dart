@@ -346,22 +346,29 @@ class ChildProfileScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: childAsync.when(
-        loading: () => _buildSkeleton(context),
-        error: (err, _) => TtErrorState(
-          message: err is ApiException
-              ? err.message
-              : 'Không thể tải thông tin bé.',
-          onRetry: () => ref.invalidate(childDetailProvider(childId)),
+      // Màn rộng: giới hạn 720 như các màn Tài khoản.
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: childAsync.when(
+            loading: () => _buildSkeleton(context),
+            error: (err, _) => TtErrorState(
+              message: err is ApiException
+                  ? err.message
+                  : 'Không thể tải thông tin bé.',
+              onRetry: () => ref.invalidate(childDetailProvider(childId)),
+            ),
+            data: (child) {
+              final isOwner =
+                  currentUserId != null && child.ownerUserId == currentUserId;
+              return _ChildProfileBody(
+                child: child,
+                isOwner: isOwner,
+              );
+            },
+          ),
         ),
-        data: (child) {
-          final isOwner =
-              currentUserId != null && child.ownerUserId == currentUserId;
-          return _ChildProfileBody(
-            child: child,
-            isOwner: isOwner,
-          );
-        },
       ),
     );
   }

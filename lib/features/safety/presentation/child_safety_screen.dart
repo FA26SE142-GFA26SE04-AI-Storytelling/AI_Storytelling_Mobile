@@ -671,7 +671,14 @@ class _ChildSafetyScreenState extends ConsumerState<ChildSafetyScreen> {
       appBar: AppBar(
         title: const Text('An toàn'),
       ),
-      body: body,
+      // Màn rộng: giới hạn 720 như các màn Tài khoản.
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: body,
+        ),
+      ),
     );
   }
 }

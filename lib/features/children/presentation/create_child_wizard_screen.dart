@@ -422,7 +422,18 @@ class _CreateChildWizardScreenState
         TtCard(
           padding: const EdgeInsets.all(8),
           child: SwitchListTile(
-            title: const Text('Hỏi mật khẩu khi bé thoát chế độ của bé'),
+            // Cùng chữ với màn An toàn (SafetyRulesForm).
+            title: Text(
+              'Hỏi mật khẩu khi thoát',
+              style: textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: tt.text,
+              ),
+            ),
+            subtitle: Text(
+              'Bé cần mật khẩu của bạn để thoát chế độ bé',
+              style: textTheme.bodySmall?.copyWith(color: tt.muted),
+            ),
             value: _gate,
             onChanged: (v) => setState(() => _gate = v),
             contentPadding: const EdgeInsets.symmetric(horizontal: 8),

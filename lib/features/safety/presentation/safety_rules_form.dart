@@ -42,8 +42,10 @@ class SafetyRulesForm extends StatelessWidget {
     return SwitchListTile(
       title: Text(
         title,
-        style: textTheme.bodyLarge
-            ?.copyWith(fontWeight: FontWeight.w600, color: tt.text),
+        style: textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: tt.text,
+        ),
       ),
       subtitle: Text(
         subtitle,
@@ -159,85 +161,94 @@ class SafetyRulesForm extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
-                      vertical: 6,
+                      vertical: 4,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    // Tên chủ đề và nút chọn cùng một hàng cho danh sách gọn.
+                    child: Row(
+                      // Đẩy nút chọn về mép phải ở màn rộng.
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          category.displayName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: tt.text),
+                        Expanded(
+                          child: Text(
+                            category.displayName,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: tt.text),
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: SegmentedButton<String>(
-                            segments: const [
-                              ButtonSegment<String>(
-                                value: 'Allowed',
-                                label: Text('Cho phép'),
+                        const SizedBox(width: 12),
+                        // Flexible: màn hẹp thì nút tự thu nhỏ, không tràn.
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: SegmentedButton<String>(
+                              segments: const [
+                                ButtonSegment<String>(
+                                  value: 'Allowed',
+                                  label: Text('Cho phép'),
+                                ),
+                                ButtonSegment<String>(
+                                  value: 'Blocked',
+                                  label: Text('Chặn'),
+                                ),
+                              ],
+                              selected: {currentRule},
+                              showSelectedIcon: false,
+                              onSelectionChanged: enabled
+                                  ? (newSelection) {
+                                      final newRule = newSelection.first;
+                                      final updatedCategories =
+                                          policy.categories
+                                              .where(
+                                                (r) =>
+                                                    r.contentCategoryId !=
+                                                    category.id,
+                                              )
+                                              .toList()
+                                            ..add(
+                                              SafetyCategoryRuleDto(
+                                                contentCategoryId: category.id,
+                                                rule: newRule,
+                                              ),
+                                            );
+                                      onChanged(
+                                        policy.copyWith(
+                                          categories: updatedCategories,
+                                        ),
+                                      );
+                                    }
+                                  : null,
+                              style: ButtonStyle(
+                                visualDensity: VisualDensity.compact,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                backgroundColor:
+                                    WidgetStateProperty.resolveWith((states) {
+                                      if (states.contains(
+                                        WidgetState.selected,
+                                      )) {
+                                        return isBlockedSelected
+                                            ? tt.danger.withValues(alpha: 0.15)
+                                            : tt.primaryStrong;
+                                      }
+                                      return null;
+                                    }),
+                                foregroundColor:
+                                    WidgetStateProperty.resolveWith((states) {
+                                      if (states.contains(
+                                        WidgetState.selected,
+                                      )) {
+                                        return isBlockedSelected
+                                            ? tt.danger
+                                            : Colors.white;
+                                      }
+                                      return tt.text;
+                                    }),
+                                side: WidgetStateProperty.resolveWith((states) {
+                                  return BorderSide(color: tt.line2);
+                                }),
                               ),
-                              ButtonSegment<String>(
-                                value: 'Blocked',
-                                label: Text('Chặn'),
-                              ),
-                            ],
-                            selected: {currentRule},
-                            showSelectedIcon: false,
-                            onSelectionChanged: enabled
-                                ? (newSelection) {
-                                    final newRule = newSelection.first;
-                                    final updatedCategories =
-                                        policy.categories
-                                            .where(
-                                              (r) =>
-                                                  r.contentCategoryId !=
-                                                  category.id,
-                                            )
-                                            .toList()
-                                          ..add(
-                                            SafetyCategoryRuleDto(
-                                              contentCategoryId: category.id,
-                                              rule: newRule,
-                                            ),
-                                          );
-                                    onChanged(
-                                      policy.copyWith(
-                                        categories: updatedCategories,
-                                      ),
-                                    );
-                                  }
-                                : null,
-                            style: ButtonStyle(
-                              visualDensity: VisualDensity.compact,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              backgroundColor: WidgetStateProperty.resolveWith((
-                                states,
-                              ) {
-                                if (states.contains(WidgetState.selected)) {
-                                  return isBlockedSelected
-                                      ? tt.danger.withValues(alpha: 0.15)
-                                      : tt.primaryStrong;
-                                }
-                                return null;
-                              }),
-                              foregroundColor: WidgetStateProperty.resolveWith((
-                                states,
-                              ) {
-                                if (states.contains(WidgetState.selected)) {
-                                  return isBlockedSelected
-                                      ? tt.danger
-                                      : Colors.white;
-                                }
-                                return tt.text;
-                              }),
-                              side: WidgetStateProperty.resolveWith((states) {
-                                return BorderSide(color: tt.line2);
-                              }),
                             ),
                           ),
                         ),
