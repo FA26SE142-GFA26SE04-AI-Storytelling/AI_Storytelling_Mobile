@@ -97,6 +97,13 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
+  /// Cập nhật thông tin user đang đăng nhập
+  void updateUser(UserProfile user) {
+    if (state is AuthSignedIn) {
+      state = AuthSignedIn(user);
+    }
+  }
+
   /// Áp dụng thông tin người dùng vào state theo role
   void _applyUser(UserProfile user) {
     state = user.role == 'User' ? AuthSignedIn(user) : AuthBlocked(user);

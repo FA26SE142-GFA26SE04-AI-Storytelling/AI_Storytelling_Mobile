@@ -87,9 +87,30 @@ void main() {
         );
       });
 
-      test('/library -> null (đã đăng nhập, truy cập trang nội dung bình thường)', () {
+      test('/learning -> null (đã đăng nhập, truy cập trang nội dung bình thường)', () {
         expect(
-          authRedirect(AuthSignedIn(fakeUser()), '/library'),
+          authRedirect(AuthSignedIn(fakeUser()), '/learning'),
+          isNull,
+        );
+      });
+
+      test('/kids/1/profile -> null (đã đăng nhập role User, không bị redirect)', () {
+        expect(
+          authRedirect(AuthSignedIn(fakeUser(role: 'User')), '/kids/1/profile'),
+          isNull,
+        );
+      });
+
+      test('/kids/new -> null (đã đăng nhập role User, không bị redirect)', () {
+        expect(
+          authRedirect(AuthSignedIn(fakeUser(role: 'User')), '/kids/new'),
+          isNull,
+        );
+      });
+
+      test('/kids/1/learning -> null (đã đăng nhập role User, không bị redirect)', () {
+        expect(
+          authRedirect(AuthSignedIn(fakeUser(role: 'User')), '/kids/1/learning'),
           isNull,
         );
       });

@@ -15,6 +15,9 @@ _ChildProfileDto _$ChildProfileDtoFromJson(Map<String, dynamic> json) =>
       status: json['status'] as String,
       language: json['language'] as String?,
       createdAt: json['createdAt'] as String?,
+      ownerUserId: (json['ownerUserId'] as num?)?.toInt(),
+      shouldReapplyBlockedPreset: json['shouldReapplyBlockedPreset'] as bool?,
+      suggestedReadingMode: json['suggestedReadingMode'] as String?,
     );
 
 Map<String, dynamic> _$ChildProfileDtoToJson(_ChildProfileDto instance) =>
@@ -26,4 +29,7 @@ Map<String, dynamic> _$ChildProfileDtoToJson(_ChildProfileDto instance) =>
       'status': instance.status,
       'language': instance.language,
       'createdAt': instance.createdAt,
+      'ownerUserId': instance.ownerUserId,
+      'shouldReapplyBlockedPreset': instance.shouldReapplyBlockedPreset,
+      'suggestedReadingMode': instance.suggestedReadingMode,
     };

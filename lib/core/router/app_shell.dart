@@ -100,19 +100,14 @@ const _destinations = [
     selectedIcon: Icons.home_rounded,
   ),
   _NavItem(
-    label: 'Thư viện',
-    icon: Icons.auto_stories_outlined,
-    selectedIcon: Icons.auto_stories_rounded,
-  ),
-  _NavItem(
-    label: 'Tạo',
-    icon: Icons.add_circle_outline_rounded,
-    selectedIcon: Icons.add_circle_rounded,
-  ),
-  _NavItem(
     label: 'Bé',
     icon: Icons.child_care_outlined,
     selectedIcon: Icons.child_care_rounded,
+  ),
+  _NavItem(
+    label: 'Học tập',
+    icon: Icons.insights_outlined,
+    selectedIcon: Icons.insights_rounded,
   ),
   _NavItem(
     label: 'Tài khoản',

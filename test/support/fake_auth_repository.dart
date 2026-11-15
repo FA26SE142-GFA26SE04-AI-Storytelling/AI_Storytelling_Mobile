@@ -15,6 +15,9 @@ class FakeAuthRepository implements AuthRepository {
   ApiException? loginError;
   ApiException? meError;
 
+  // Giữ login chờ tới khi future này xong (để test trạng thái đang gửi)
+  Future<void>? loginDelay;
+
   // Đếm số lần logout được gọi
   int logoutCalls = 0;
 
@@ -26,6 +29,7 @@ class FakeAuthRepository implements AuthRepository {
     required String identifier,
     required String password,
   }) async {
+    if (loginDelay != null) await loginDelay;
     if (loginError != null) throw loginError!;
     return loginUser!;
   }
