@@ -448,7 +448,7 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
                   'Bấm nút kể lại những điều em nhớ trong truyện nhé!',
                   style: TextStyle(
                     fontFamily: 'Nunito',
-                    fontSize: 18,
+                    fontSize: 22,
                     fontWeight: FontWeight.w600,
                     color: tt.muted,
                   ),
@@ -588,7 +588,7 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
                   ' / ${_formatDuration(_maxDurationSeconds)}',
                   style: TextStyle(
                     fontFamily: 'Nunito',
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: tt.muted,
                   ),

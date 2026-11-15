@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:ai_storytelling_mobile/core/theme/kid_metrics.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../models/child_reading_dto.dart';
 import './kid_feeling_step.dart';
@@ -118,9 +119,9 @@ class _KidAfterReadingScreenState extends State<KidAfterReadingScreen> {
                           size: 28,
                         ),
                         tooltip: 'Thoát',
-                        constraints: const BoxConstraints(
-                          minWidth: 48,
-                          minHeight: 48,
+                        constraints: const BoxConstraints.tightFor(
+                          width: kKidMinTap,
+                          height: kKidMinTap,
                         ),
                         onPressed: () {
                           if (mounted) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai_storytelling_mobile/core/theme/kid_metrics.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
@@ -144,6 +145,7 @@ class KidHomeScreen extends ConsumerWidget {
           ),
           const SizedBox(width: 8),
           TtIconButton(
+            size: kKidMinTap,
             icon: Icons.refresh_rounded,
             tooltip: 'Tải lại',
             onPressed: () => ref.invalidate(kidHomeDataProvider),

@@ -252,7 +252,7 @@ class _KidFeelingStepState extends ConsumerState<KidFeelingStep> {
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontFamily: 'Nunito',
-                                      fontSize: 18,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.w700,
                                       color: tt.muted,
                                     ),
@@ -300,7 +300,7 @@ class _KidFeelingStepState extends ConsumerState<KidFeelingStep> {
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                             fontFamily: 'Nunito',
-                                            fontSize: 18,
+                                            fontSize: 22,
                                             fontWeight: FontWeight.w700,
                                             color: tt.text,
                                           ),
@@ -329,7 +329,7 @@ class _KidFeelingStepState extends ConsumerState<KidFeelingStep> {
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                             fontFamily: 'Nunito',
-                                            fontSize: 18,
+                                            fontSize: 22,
                                             fontWeight: FontWeight.w700,
                                             color: tt.text,
                                           ),

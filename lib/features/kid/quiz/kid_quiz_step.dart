@@ -551,7 +551,7 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
                       hintText: 'Nhập câu trả lời của em...',
                       hintStyle: TextStyle(
                         fontFamily: 'Nunito',
-                        fontSize: 20,
+                        fontSize: 22,
                         color: tt.faint,
                       ),
                       filled: true,
@@ -623,7 +623,7 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
                                     : 'Mình thử nghĩ lại nhé.'),
                           style: TextStyle(
                             fontFamily: 'Nunito',
-                            fontSize: 18,
+                            fontSize: 22,
                             fontWeight: FontWeight.w700,
                             color: tt.text,
                           ),
