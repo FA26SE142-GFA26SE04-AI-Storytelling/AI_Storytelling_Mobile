@@ -12,6 +12,9 @@ import 'package:ai_storytelling_mobile/features/auth/presentation/reset_password
 import 'package:ai_storytelling_mobile/features/auth/presentation/blocked_screen.dart';
 import 'package:ai_storytelling_mobile/features/shell/empty_tab_screen.dart';
 import 'package:ai_storytelling_mobile/features/account/account_screen.dart';
+import 'package:ai_storytelling_mobile/features/home/presentation/home_screen.dart';
+import 'package:ai_storytelling_mobile/features/account/presentation/account_sessions_screen.dart';
+import 'package:ai_storytelling_mobile/features/account/presentation/account_activity_screen.dart';
 import 'package:ai_storytelling_mobile/core/router/app_shell.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/kid_session_controller.dart';
 import 'package:ai_storytelling_mobile/features/kid/home/kid_home_screen.dart';
@@ -23,6 +26,11 @@ import 'package:ai_storytelling_mobile/features/kid/rewards/kid_notebook_screen.
 import 'package:ai_storytelling_mobile/features/kid/rewards/kid_rewards_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/wish/kid_wish_screen.dart';
 import 'package:ai_storytelling_mobile/features/children/presentation/children_tab_screen.dart';
+import 'package:ai_storytelling_mobile/features/children/presentation/child_profile_screen.dart';
+import 'package:ai_storytelling_mobile/features/children/presentation/child_learning_screen.dart';
+import 'package:ai_storytelling_mobile/features/children/presentation/create_child_wizard_screen.dart';
+import 'package:ai_storytelling_mobile/features/safety/presentation/child_safety_screen.dart';
+import 'package:ai_storytelling_mobile/features/access/presentation/child_access_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Hằng số đường dẫn tập trung — dùng chung toàn app
@@ -37,6 +45,7 @@ abstract final class AppRoutes {
   static const String blocked = '/blocked';
   static const String home = '/home';
   static const String kids = '/kids';
+  static const String kidsNew = '/kids/new';
   static const String learning = '/learning';
   static const String account = '/account';
   static const String kidMode = '/kid';
@@ -127,8 +136,11 @@ class _AuthRefresh extends ChangeNotifier {
 // ---------------------------------------------------------------------------
 // appRouterProvider
 // ---------------------------------------------------------------------------
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
+    navigatorKey: _rootNavigatorKey,
     initialLocation: AppRoutes.splash,
     refreshListenable: _AuthRefresh(ref),
     redirect: (context, state) => authRedirect(
@@ -217,12 +229,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.home,
-                builder: (context, state) => EmptyTabScreen(
-                  title: 'Trang chủ',
-                  icon: Icons.home_rounded,
-                  message:
-                      'Lời chào, thẻ Cho bé đọc và việc cần làm sẽ có ở giai đoạn 3.',
-                ),
+                builder: (context, state) => const HomeScreen(),
               ),
             ],
           ),
@@ -233,6 +240,39 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.kids,
                 builder: (context, state) => const ChildrenTabScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'new',
+                    // Wizard toàn màn hình: đè lên thanh đáy.
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (context, state) =>
+                        const CreateChildWizardScreen(),
+                  ),
+                  GoRoute(
+                    path: ':childId/profile',
+                    builder: (context, state) => ChildProfileScreen(
+                      childId: int.parse(state.pathParameters['childId']!),
+                    ),
+                  ),
+                  GoRoute(
+                    path: ':childId/learning',
+                    builder: (context, state) => ChildLearningScreen(
+                      childId: int.parse(state.pathParameters['childId']!),
+                    ),
+                  ),
+                  GoRoute(
+                    path: ':childId/safety',
+                    builder: (context, state) => ChildSafetyScreen(
+                      childId: int.parse(state.pathParameters['childId']!),
+                    ),
+                  ),
+                  GoRoute(
+                    path: ':childId/access',
+                    builder: (context, state) => ChildAccessScreen(
+                      childId: int.parse(state.pathParameters['childId']!),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -257,6 +297,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.account,
                 builder: (context, state) => AccountScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'sessions',
+                    builder: (context, state) => const AccountSessionsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'activity',
+                    builder: (context, state) => const AccountActivityScreen(),
+                  ),
+                ],
               ),
             ],
           ),

@@ -96,12 +96,12 @@ Tham khảo web: `features/kid/*`, `childAccessService.ts`, `childReadingService
 
 Tham khảo web: `features/children`, `features/safety`, `childProfileService.ts`, `guardianService.ts`, `profileLifecycleService.ts`.
 
-- [ ] Trang chủ: lời chào, thẻ "Cho bé đọc" (chọn bé, kèm truyện làm dở nếu có), tóm tắt hôm nay của từng bé (lấy từ API học tập), kéo xuống để tải lại.
-- [ ] Hồ sơ bé: tạo (tên, ảnh, nhóm tuổi), sửa, kích hoạt / tạm dừng / tiếp tục / lưu trữ / khôi phục, lịch sử hoạt động.
-- [ ] Learning Profile: mức đọc, chế độ đọc, mục tiêu, chủ đề yêu thích / cần chú ý.
-- [ ] Safety Policy: các mục ảnh hưởng tới lúc bé đọc (cổng phụ huynh, điều ước, tương tác khi nghe, trả lời bằng giọng nói, chủ đề Cho phép / Chặn); đồng ý điều khoản. Tự lưu như web. Các mục chỉ dùng khi tạo truyện (chế độ duyệt, độ dài truyện, ngưỡng tự duyệt) để trên web.
-- [ ] Mã QR EasyLogin: tạo, tạo lại, thu hồi.
-- [ ] Tài khoản: hồ sơ, đổi mật khẩu / email, phiên đăng nhập, đăng xuất. Xoá tài khoản mở trang web.
+- [ ] **Một phần** — Trang chủ (phương án A): lời chào theo giờ + ếch, mỗi bé đang hoạt động một thẻ ("📖 N hôm nay", truyện gần nhất kèm cảm xúc và % quiz từ `/ParentReadingFeedback`, bước tiếp theo từ `/ChildRoadmap`, nút "Cho bé đọc" dùng chung với tab Bé), lỗi của một bé chỉ hiện trong thẻ bé đó, kéo xuống để tải lại, màn rộng 2 cột. Còn thiếu: truyện làm dở.
+- [ ] **Một phần** — Hồ sơ bé: tab Bé (phương án A: dải chọn bé, thẻ bé, lưới Hồ sơ / Học tập / An toàn / Mã QR), sửa, kích hoạt / tạm dừng / tiếp tục / lưu trữ / khôi phục, lịch sử hoạt động. Thêm bé bằng wizard toàn màn hình 4 bước (Bé → Học tập → An toàn → Xong), lỗi giữa chừng bấm lại không tạo trùng. Còn thiếu: chọn ảnh đại diện (đang dùng ảnh mặc định vì chưa có cách đổi `avatarId` ra ảnh).
+- [x] Learning Profile: mức đọc, chế độ đọc, mục tiêu, chủ đề yêu thích / cần chú ý.
+- [x] Safety Policy: các mục ảnh hưởng tới lúc bé đọc (cổng phụ huynh, điều ước, tương tác khi nghe, trả lời bằng giọng nói, chủ đề Cho phép / Chặn); đồng ý điều khoản. Tự lưu như web, luôn gửi đủ các trường (Backend ghi đè và không nhận null). Các mục chỉ dùng khi tạo truyện (chế độ duyệt, độ dài truyện, ngưỡng tự duyệt) để trên web.
+- [x] Mã QR EasyLogin: tạo, tạo lại, thu hồi (`qr_flutter`, link `?kid=` giống web, nền trắng cả khi giao diện tối).
+- [x] Tài khoản (phương án A): thẻ hồ sơ + sửa họ tên, Bảo mật (đổi mật khẩu, đổi email có mã OTP, phiên đăng nhập, lịch sử hoạt động), Xoá tài khoản mở trang web, đăng xuất.
 
 ## Giai đoạn 4: Phụ huynh, thống kê học tập (F-08)
 
