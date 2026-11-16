@@ -16,6 +16,7 @@ import 'package:ai_storytelling_mobile/features/account/presentation/account_nam
 import 'package:ai_storytelling_mobile/features/account/presentation/account_password_dialog.dart';
 import 'package:ai_storytelling_mobile/features/auth/application/auth_controller.dart';
 import 'package:ai_storytelling_mobile/features/auth/data/auth_models.dart';
+import 'package:ai_storytelling_mobile/features/notifications/presentation/notification_bell.dart';
 
 const _deleteAccountUrl = 'https://www.taletale.site';
 
@@ -27,6 +28,7 @@ class AccountScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authControllerProvider);
     final user = authState is AuthSignedIn ? authState.user : null;
+    final unread = watchUnreadCount(ref);
 
     final sections = <Widget>[
       if (user != null) _ProfileCard(user: user),
@@ -59,6 +61,12 @@ class AccountScreen extends ConsumerWidget {
       _Group(
         title: 'Khác',
         items: [
+          _Item(
+            icon: Icons.notifications_rounded,
+            label: 'Thông báo',
+            badge: unread,
+            onTap: () => openNotifications(context, ref),
+          ),
           _Item(
             icon: Icons.person_remove_rounded,
             label: 'Xoá tài khoản',
@@ -198,12 +206,16 @@ class _Item {
     required this.label,
     required this.onTap,
     this.trailing = Icons.chevron_right_rounded,
+    this.badge = 0,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final IconData trailing;
+
+  /// Số chưa đọc hiện trong viên vàng trước mũi tên (0 = ẩn).
+  final int badge;
 }
 
 /// Một nhóm chức năng: nhãn nhóm + TtCard chứa các dòng ngăn cách bằng Divider.
@@ -257,7 +269,16 @@ class _Group extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  trailing: Icon(items[i].trailing, color: tt.muted),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (items[i].badge > 0) ...[
+                        UnreadBadge(count: items[i].badge),
+                        const SizedBox(width: 8),
+                      ],
+                      Icon(items[i].trailing, color: tt.muted),
+                    ],
+                  ),
                   onTap: items[i].onTap,
                 ),
               ],

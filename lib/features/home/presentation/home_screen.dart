@@ -15,6 +15,8 @@ import '../../../models/child_profile_dto.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../children/presentation/children_providers.dart';
 import '../../kid/data/handover_action.dart';
+import '../../notifications/data/notification_repository.dart';
+import '../../notifications/presentation/notification_bell.dart';
 import 'home_providers.dart';
 
 String _errorText(Object error) => error is ApiException
@@ -34,6 +36,7 @@ class HomeScreen extends ConsumerWidget {
   Future<void> _refresh(WidgetRef ref) async {
     ref.invalidate(childrenListProvider);
     ref.invalidate(childHomeSummaryProvider);
+    ref.invalidate(unreadNotificationCountProvider);
     try {
       await ref.read(childrenListProvider.future);
     } catch (_) {}
@@ -62,7 +65,9 @@ class HomeScreen extends ConsumerWidget {
             style: textTheme.headlineMedium,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
+        const NotificationBellButton(),
+        const SizedBox(width: 8),
         const TtFrog(mood: TtFrogMood.happy, size: 56)
             .animate()
             .scale(

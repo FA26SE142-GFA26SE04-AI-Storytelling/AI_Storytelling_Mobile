@@ -6,6 +6,7 @@ import 'package:ai_storytelling_mobile/core/theme/app_theme.dart';
 import 'package:ai_storytelling_mobile/features/account/account_screen.dart';
 import 'package:ai_storytelling_mobile/features/auth/application/auth_controller.dart';
 import 'package:ai_storytelling_mobile/features/auth/data/auth_models.dart';
+import 'package:ai_storytelling_mobile/features/notifications/data/notification_repository.dart';
 
 class _FakeAuthController extends AuthController {
   @override
@@ -21,7 +22,7 @@ class _FakeAuthController extends AuthController {
       );
 }
 
-Future<void> _pump(WidgetTester tester, Size size) async {
+Future<void> _pump(WidgetTester tester, Size size, {int unread = 0}) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -30,6 +31,7 @@ Future<void> _pump(WidgetTester tester, Size size) async {
     ProviderScope(
       overrides: [
         authControllerProvider.overrideWith(_FakeAuthController.new),
+        unreadNotificationCountProvider.overrideWith((_) async => unread),
       ],
       child: MaterialApp(theme: AppTheme.light(), home: const AccountScreen()),
     ),
@@ -54,6 +56,7 @@ void main() {
         'Phiên đăng nhập',
         'Lịch sử hoạt động',
         'Khác',
+        'Thông báo',
         'Xoá tài khoản',
       ]) {
         expect(find.text(label), findsOneWidget, reason: label);
@@ -64,6 +67,21 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets('Dòng Thông báo hiện số chưa đọc', (tester) async {
+    await _pump(tester, const Size(390, 844), unread: 5);
+    expect(find.text('5'), findsOneWidget);
+  });
+
+  testWidgets('Dòng Thông báo: nhiều hơn 99 hiện 99+', (tester) async {
+    await _pump(tester, const Size(390, 844), unread: 120);
+    expect(find.text('99+'), findsOneWidget);
+  });
+
+  testWidgets('Dòng Thông báo: 0 chưa đọc thì không có số', (tester) async {
+    await _pump(tester, const Size(390, 844));
+    expect(find.text('0'), findsNothing);
+  });
 
   testWidgets('Bấm Đăng xuất hiện popup xác nhận', (tester) async {
     await _pump(tester, const Size(390, 844));

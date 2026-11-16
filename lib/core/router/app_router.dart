@@ -31,6 +31,7 @@ import 'package:ai_storytelling_mobile/features/children/presentation/child_lear
 import 'package:ai_storytelling_mobile/features/children/presentation/create_child_wizard_screen.dart';
 import 'package:ai_storytelling_mobile/features/safety/presentation/child_safety_screen.dart';
 import 'package:ai_storytelling_mobile/features/access/presentation/child_access_screen.dart';
+import 'package:ai_storytelling_mobile/features/notifications/presentation/notifications_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Hằng số đường dẫn tập trung — dùng chung toàn app
@@ -48,6 +49,7 @@ abstract final class AppRoutes {
   static const String kidsNew = '/kids/new';
   static const String learning = '/learning';
   static const String account = '/account';
+  static const String notifications = '/notifications';
   static const String kidMode = '/kid';
   static const String kidEntry = '/kid-entry';
   static const String kidRead = '/kid/read/:storyId';
@@ -183,6 +185,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.kidEntry,
         builder: (context, state) => const KidQrScreen(),
+      ),
+      // Thông báo phụ huynh: toàn màn hình, mở từ Trang chủ hoặc Tài khoản.
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
       ),
 
       // --- Chế độ bé (toàn màn hình, không thuộc bottom nav) ---
