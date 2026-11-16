@@ -5,7 +5,7 @@ import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_card.dart';
-import '../../../core/widgets/tt_network_image.dart';
+import '../../../core/widgets/tt_child_avatar.dart';
 import '../../../core/widgets/tt_state_views.dart';
 import '../../../models/child_profile_dto.dart';
 import '../data/archived_children_store.dart';
@@ -75,7 +75,7 @@ class ChildPickerStrip extends StatelessWidget {
           // Bé chính
           ...children.map((c) => _ChildAvatar(
                 key: ValueKey('child-${c.id}'),
-                avatarUrl: null, // avatarId dạng String, chưa có URL resolver
+                avatarId: c.avatarId,
                 nickname: c.nickname,
                 isSelected: c.id == selectedId,
                 opacity: 1.0,
@@ -87,7 +87,7 @@ class ChildPickerStrip extends StatelessWidget {
           // Hồ sơ lưu trữ
           ...archived.map((a) => _ChildAvatar(
                 key: ValueKey('archived-${a.id}'),
-                avatarUrl: null,
+                avatarId: a.avatarId,
                 nickname: a.nickname,
                 isSelected: false,
                 opacity: 0.5,
@@ -110,7 +110,7 @@ class ChildPickerStrip extends StatelessWidget {
 class _ChildAvatar extends StatelessWidget {
   const _ChildAvatar({
     super.key,
-    required this.avatarUrl,
+    required this.avatarId,
     required this.nickname,
     required this.isSelected,
     required this.opacity,
@@ -119,7 +119,7 @@ class _ChildAvatar extends StatelessWidget {
     required this.textTheme,
   });
 
-  final String? avatarUrl;
+  final String? avatarId;
   final String nickname;
   final bool isSelected;
   final double opacity;
@@ -129,11 +129,6 @@ class _ChildAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = isSelected
-        ? tt.gold
-        : tt.line2.withValues(alpha: 0.5);
-    final borderWidth = isSelected ? 3.0 : 1.5;
-
     return Opacity(
       opacity: opacity,
       child: GestureDetector(
@@ -144,19 +139,10 @@ class _ChildAvatar extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: borderColor, width: borderWidth),
-                ),
-                child: ClipOval(
-                  child: TtNetworkImage(
-                    url: avatarUrl,
-                    width: 56,
-                    height: 56,
-                    radius: BorderRadius.circular(28),
-                  ),
-                ),
+              TtChildAvatar(
+                avatarId: avatarId,
+                size: 56,
+                selected: isSelected,
               ),
               const SizedBox(height: 4),
               Text(
@@ -271,21 +257,7 @@ class PrimaryChildCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Avatar 64dp
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: tt.line2, width: 1.5),
-                ),
-                child: ClipOval(
-                  child: TtNetworkImage(
-                    url: null,
-                    width: 64,
-                    height: 64,
-                    radius: BorderRadius.circular(32),
-                  ),
-                ),
-              ),
+              TtChildAvatar(avatarId: child.avatarId, size: 64),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(

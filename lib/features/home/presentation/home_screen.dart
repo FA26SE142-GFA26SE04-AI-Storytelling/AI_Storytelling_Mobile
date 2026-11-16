@@ -9,7 +9,7 @@ import '../../../core/theme/tt_radius.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_card.dart';
 import '../../../core/widgets/tt_frog.dart';
-import '../../../core/widgets/tt_network_image.dart';
+import '../../../core/widgets/tt_child_avatar.dart';
 import '../../../core/widgets/tt_state_views.dart';
 import '../../../models/child_profile_dto.dart';
 import '../../auth/application/auth_controller.dart';
@@ -292,21 +292,7 @@ class _ChildHomeCardState extends ConsumerState<_ChildHomeCard> {
         children: [
           Row(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: tt.line2, width: 1.5),
-                ),
-                child: ClipOval(
-                  // avatarId chưa có URL resolver nên dùng ảnh mặc định như tab Bé.
-                  child: TtNetworkImage(
-                    url: null,
-                    width: 48,
-                    height: 48,
-                    radius: BorderRadius.circular(24),
-                  ),
-                ),
-              ),
+              TtChildAvatar(avatarId: child.avatarId, size: 48),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(

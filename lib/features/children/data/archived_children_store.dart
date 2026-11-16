@@ -9,7 +9,8 @@ import '../../auth/application/auth_controller.dart';
 class ArchivedChild {
   final int id;
   final String nickname;
-  final int? avatarId;
+  /// Mã ảnh đại diện dạng chuỗi như Backend (vd `avatar-frog`).
+  final String? avatarId;
 
   const ArchivedChild({
     required this.id,
@@ -22,9 +23,8 @@ class ArchivedChild {
     return ArchivedChild(
       id: (json['id'] as num?)?.toInt() ?? int.tryParse(json['id']?.toString() ?? '0') ?? 0,
       nickname: (json['nickname'] as String?) ?? '',
-      avatarId: rawAvatarId is num
-          ? rawAvatarId.toInt()
-          : (rawAvatarId != null ? int.tryParse(rawAvatarId.toString()) : null),
+      // Bản lưu cũ ghi số (luôn null do parse sai) thì bỏ qua.
+      avatarId: rawAvatarId is String ? rawAvatarId : null,
     );
   }
 
