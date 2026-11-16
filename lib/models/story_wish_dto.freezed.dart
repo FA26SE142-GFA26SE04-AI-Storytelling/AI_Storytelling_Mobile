@@ -1458,4 +1458,320 @@ as bool,
 
 }
 
+
+/// @nodoc
+mixin _$ParentWish {
+
+ int get wishId; int get childProfileId; String get kind;/// Pending, Accepted, Fulfilled, Declined, Expired, Cancelled.
+ String get status; List<ChildWishCard> get cards; bool get lessonLeftToParent; DateTime? get submittedAt;/// Hạn xử lý, chỉ có khi đang Pending.
+ DateTime? get expiresAt; String? get declineReason; int? get generatedStoryId; int? get fulfilledStoryId; bool get fulfilledWithExistingStory; DateTime? get resolvedAt;
+/// Create a copy of ParentWish
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ParentWishCopyWith<ParentWish> get copyWith => _$ParentWishCopyWithImpl<ParentWish>(this as ParentWish, _$identity);
+
+  /// Serializes this ParentWish to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ParentWish;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ParentWish&&(identical(other.wishId, _this.wishId) || other.wishId == _this.wishId)&&(identical(other.childProfileId, _this.childProfileId) || other.childProfileId == _this.childProfileId)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.status, _this.status) || other.status == _this.status)&&const DeepCollectionEquality().equals(other.cards, _this.cards)&&(identical(other.lessonLeftToParent, _this.lessonLeftToParent) || other.lessonLeftToParent == _this.lessonLeftToParent)&&(identical(other.submittedAt, _this.submittedAt) || other.submittedAt == _this.submittedAt)&&(identical(other.expiresAt, _this.expiresAt) || other.expiresAt == _this.expiresAt)&&(identical(other.declineReason, _this.declineReason) || other.declineReason == _this.declineReason)&&(identical(other.generatedStoryId, _this.generatedStoryId) || other.generatedStoryId == _this.generatedStoryId)&&(identical(other.fulfilledStoryId, _this.fulfilledStoryId) || other.fulfilledStoryId == _this.fulfilledStoryId)&&(identical(other.fulfilledWithExistingStory, _this.fulfilledWithExistingStory) || other.fulfilledWithExistingStory == _this.fulfilledWithExistingStory)&&(identical(other.resolvedAt, _this.resolvedAt) || other.resolvedAt == _this.resolvedAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ParentWish;
+  return Object.hash(runtimeType,_this.wishId,_this.childProfileId,_this.kind,_this.status,const DeepCollectionEquality().hash(_this.cards),_this.lessonLeftToParent,_this.submittedAt,_this.expiresAt,_this.declineReason,_this.generatedStoryId,_this.fulfilledStoryId,_this.fulfilledWithExistingStory,_this.resolvedAt);
+}
+
+@override
+String toString() {
+  final _this = this as ParentWish;
+  return 'ParentWish(wishId: ${_this.wishId}, childProfileId: ${_this.childProfileId}, kind: ${_this.kind}, status: ${_this.status}, cards: ${_this.cards}, lessonLeftToParent: ${_this.lessonLeftToParent}, submittedAt: ${_this.submittedAt}, expiresAt: ${_this.expiresAt}, declineReason: ${_this.declineReason}, generatedStoryId: ${_this.generatedStoryId}, fulfilledStoryId: ${_this.fulfilledStoryId}, fulfilledWithExistingStory: ${_this.fulfilledWithExistingStory}, resolvedAt: ${_this.resolvedAt})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ParentWishCopyWith<$Res>  {
+  factory $ParentWishCopyWith(ParentWish value, $Res Function(ParentWish) _then) = _$ParentWishCopyWithImpl;
+@useResult
+$Res call({
+ int wishId, int childProfileId, String kind, String status, List<ChildWishCard> cards, bool lessonLeftToParent, DateTime? submittedAt, DateTime? expiresAt, String? declineReason, int? generatedStoryId, int? fulfilledStoryId, bool fulfilledWithExistingStory, DateTime? resolvedAt
+});
+
+
+
+
+}
+/// @nodoc
+class _$ParentWishCopyWithImpl<$Res>
+    implements $ParentWishCopyWith<$Res> {
+  _$ParentWishCopyWithImpl(this._self, this._then);
+
+  final ParentWish _self;
+  final $Res Function(ParentWish) _then;
+
+/// Create a copy of ParentWish
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? wishId = null,Object? childProfileId = null,Object? kind = null,Object? status = null,Object? cards = null,Object? lessonLeftToParent = null,Object? submittedAt = freezed,Object? expiresAt = freezed,Object? declineReason = freezed,Object? generatedStoryId = freezed,Object? fulfilledStoryId = freezed,Object? fulfilledWithExistingStory = null,Object? resolvedAt = freezed,}) {
+  return _then(ParentWish(
+wishId: null == wishId ? _self.wishId : wishId // ignore: cast_nullable_to_non_nullable
+as int,childProfileId: null == childProfileId ? _self.childProfileId : childProfileId // ignore: cast_nullable_to_non_nullable
+as int,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,cards: null == cards ? _self.cards : cards // ignore: cast_nullable_to_non_nullable
+as List<ChildWishCard>,lessonLeftToParent: null == lessonLeftToParent ? _self.lessonLeftToParent : lessonLeftToParent // ignore: cast_nullable_to_non_nullable
+as bool,submittedAt: freezed == submittedAt ? _self.submittedAt : submittedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,declineReason: freezed == declineReason ? _self.declineReason : declineReason // ignore: cast_nullable_to_non_nullable
+as String?,generatedStoryId: freezed == generatedStoryId ? _self.generatedStoryId : generatedStoryId // ignore: cast_nullable_to_non_nullable
+as int?,fulfilledStoryId: freezed == fulfilledStoryId ? _self.fulfilledStoryId : fulfilledStoryId // ignore: cast_nullable_to_non_nullable
+as int?,fulfilledWithExistingStory: null == fulfilledWithExistingStory ? _self.fulfilledWithExistingStory : fulfilledWithExistingStory // ignore: cast_nullable_to_non_nullable
+as bool,resolvedAt: freezed == resolvedAt ? _self.resolvedAt : resolvedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ParentWish].
+extension ParentWishPatterns on ParentWish {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ParentWish value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ParentWish() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ParentWish value)  $default,){
+final _that = this;
+switch (_that) {
+case _ParentWish():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ParentWish value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ParentWish() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int wishId,  int childProfileId,  String kind,  String status,  List<ChildWishCard> cards,  bool lessonLeftToParent,  DateTime? submittedAt,  DateTime? expiresAt,  String? declineReason,  int? generatedStoryId,  int? fulfilledStoryId,  bool fulfilledWithExistingStory,  DateTime? resolvedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ParentWish() when $default != null:
+return $default(_that.wishId,_that.childProfileId,_that.kind,_that.status,_that.cards,_that.lessonLeftToParent,_that.submittedAt,_that.expiresAt,_that.declineReason,_that.generatedStoryId,_that.fulfilledStoryId,_that.fulfilledWithExistingStory,_that.resolvedAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int wishId,  int childProfileId,  String kind,  String status,  List<ChildWishCard> cards,  bool lessonLeftToParent,  DateTime? submittedAt,  DateTime? expiresAt,  String? declineReason,  int? generatedStoryId,  int? fulfilledStoryId,  bool fulfilledWithExistingStory,  DateTime? resolvedAt)  $default,) {final _that = this;
+switch (_that) {
+case _ParentWish():
+return $default(_that.wishId,_that.childProfileId,_that.kind,_that.status,_that.cards,_that.lessonLeftToParent,_that.submittedAt,_that.expiresAt,_that.declineReason,_that.generatedStoryId,_that.fulfilledStoryId,_that.fulfilledWithExistingStory,_that.resolvedAt);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int wishId,  int childProfileId,  String kind,  String status,  List<ChildWishCard> cards,  bool lessonLeftToParent,  DateTime? submittedAt,  DateTime? expiresAt,  String? declineReason,  int? generatedStoryId,  int? fulfilledStoryId,  bool fulfilledWithExistingStory,  DateTime? resolvedAt)?  $default,) {final _that = this;
+switch (_that) {
+case _ParentWish() when $default != null:
+return $default(_that.wishId,_that.childProfileId,_that.kind,_that.status,_that.cards,_that.lessonLeftToParent,_that.submittedAt,_that.expiresAt,_that.declineReason,_that.generatedStoryId,_that.fulfilledStoryId,_that.fulfilledWithExistingStory,_that.resolvedAt);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ParentWish implements ParentWish {
+  const _ParentWish({required this.wishId, this.childProfileId = 0, this.kind = '', this.status = '',  List<ChildWishCard> cards = const <ChildWishCard>[], this.lessonLeftToParent = false, this.submittedAt, this.expiresAt, this.declineReason, this.generatedStoryId, this.fulfilledStoryId, this.fulfilledWithExistingStory = false, this.resolvedAt}): _cards = cards;
+  factory _ParentWish.fromJson(Map<String, dynamic> json) => _$ParentWishFromJson(json);
+
+@override final  int wishId;
+@override@JsonKey() final  int childProfileId;
+@override@JsonKey() final  String kind;
+/// Pending, Accepted, Fulfilled, Declined, Expired, Cancelled.
+@override@JsonKey() final  String status;
+ final  List<ChildWishCard> _cards;
+@override@JsonKey() List<ChildWishCard> get cards {
+  if (_cards is EqualUnmodifiableListView) return _cards;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_cards);
+}
+
+@override@JsonKey() final  bool lessonLeftToParent;
+@override final  DateTime? submittedAt;
+/// Hạn xử lý, chỉ có khi đang Pending.
+@override final  DateTime? expiresAt;
+@override final  String? declineReason;
+@override final  int? generatedStoryId;
+@override final  int? fulfilledStoryId;
+@override@JsonKey() final  bool fulfilledWithExistingStory;
+@override final  DateTime? resolvedAt;
+
+/// Create a copy of ParentWish
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ParentWishCopyWith<_ParentWish> get copyWith => __$ParentWishCopyWithImpl<_ParentWish>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ParentWishToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ParentWish&&(identical(other.wishId, wishId) || other.wishId == wishId)&&(identical(other.childProfileId, childProfileId) || other.childProfileId == childProfileId)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.cards, _cards)&&(identical(other.lessonLeftToParent, lessonLeftToParent) || other.lessonLeftToParent == lessonLeftToParent)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.declineReason, declineReason) || other.declineReason == declineReason)&&(identical(other.generatedStoryId, generatedStoryId) || other.generatedStoryId == generatedStoryId)&&(identical(other.fulfilledStoryId, fulfilledStoryId) || other.fulfilledStoryId == fulfilledStoryId)&&(identical(other.fulfilledWithExistingStory, fulfilledWithExistingStory) || other.fulfilledWithExistingStory == fulfilledWithExistingStory)&&(identical(other.resolvedAt, resolvedAt) || other.resolvedAt == resolvedAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,wishId,childProfileId,kind,status,const DeepCollectionEquality().hash(_cards),lessonLeftToParent,submittedAt,expiresAt,declineReason,generatedStoryId,fulfilledStoryId,fulfilledWithExistingStory,resolvedAt);
+}
+
+@override
+String toString() {
+    return 'ParentWish(wishId: $wishId, childProfileId: $childProfileId, kind: $kind, status: $status, cards: $cards, lessonLeftToParent: $lessonLeftToParent, submittedAt: $submittedAt, expiresAt: $expiresAt, declineReason: $declineReason, generatedStoryId: $generatedStoryId, fulfilledStoryId: $fulfilledStoryId, fulfilledWithExistingStory: $fulfilledWithExistingStory, resolvedAt: $resolvedAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ParentWishCopyWith<$Res> implements $ParentWishCopyWith<$Res> {
+  factory _$ParentWishCopyWith(_ParentWish value, $Res Function(_ParentWish) _then) = __$ParentWishCopyWithImpl;
+@override @useResult
+$Res call({
+ int wishId, int childProfileId, String kind, String status, List<ChildWishCard> cards, bool lessonLeftToParent, DateTime? submittedAt, DateTime? expiresAt, String? declineReason, int? generatedStoryId, int? fulfilledStoryId, bool fulfilledWithExistingStory, DateTime? resolvedAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$ParentWishCopyWithImpl<$Res>
+    implements _$ParentWishCopyWith<$Res> {
+  __$ParentWishCopyWithImpl(this._self, this._then);
+
+  final _ParentWish _self;
+  final $Res Function(_ParentWish) _then;
+
+/// Create a copy of ParentWish
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? wishId = null,Object? childProfileId = null,Object? kind = null,Object? status = null,Object? cards = null,Object? lessonLeftToParent = null,Object? submittedAt = freezed,Object? expiresAt = freezed,Object? declineReason = freezed,Object? generatedStoryId = freezed,Object? fulfilledStoryId = freezed,Object? fulfilledWithExistingStory = null,Object? resolvedAt = freezed,}) {
+  return _then(_ParentWish(
+wishId: null == wishId ? _self.wishId : wishId // ignore: cast_nullable_to_non_nullable
+as int,childProfileId: null == childProfileId ? _self.childProfileId : childProfileId // ignore: cast_nullable_to_non_nullable
+as int,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,cards: null == cards ? _self._cards : cards // ignore: cast_nullable_to_non_nullable
+as List<ChildWishCard>,lessonLeftToParent: null == lessonLeftToParent ? _self.lessonLeftToParent : lessonLeftToParent // ignore: cast_nullable_to_non_nullable
+as bool,submittedAt: freezed == submittedAt ? _self.submittedAt : submittedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,declineReason: freezed == declineReason ? _self.declineReason : declineReason // ignore: cast_nullable_to_non_nullable
+as String?,generatedStoryId: freezed == generatedStoryId ? _self.generatedStoryId : generatedStoryId // ignore: cast_nullable_to_non_nullable
+as int?,fulfilledStoryId: freezed == fulfilledStoryId ? _self.fulfilledStoryId : fulfilledStoryId // ignore: cast_nullable_to_non_nullable
+as int?,fulfilledWithExistingStory: null == fulfilledWithExistingStory ? _self.fulfilledWithExistingStory : fulfilledWithExistingStory // ignore: cast_nullable_to_non_nullable
+as bool,resolvedAt: freezed == resolvedAt ? _self.resolvedAt : resolvedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+
+}
+
 // dart format on

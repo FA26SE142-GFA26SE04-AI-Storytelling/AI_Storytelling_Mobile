@@ -19,6 +19,13 @@ _ParentReadingFeedbackItemDto _$ParentReadingFeedbackItemDtoFromJson(
   feelingLabel: json['feelingLabel'] as String?,
   quizTotalQuestions: (json['quizTotalQuestions'] as num?)?.toInt() ?? 0,
   quizBestPercent: (json['quizBestPercent'] as num?)?.toDouble(),
+  conversationAnswers:
+      (json['conversationAnswers'] as List<dynamic>?)
+          ?.map(
+            (e) => ConversationAnswerDto.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const <ConversationAnswerDto>[],
 );
 
 Map<String, dynamic> _$ParentReadingFeedbackItemDtoToJson(
@@ -32,6 +39,29 @@ Map<String, dynamic> _$ParentReadingFeedbackItemDtoToJson(
   'feelingLabel': instance.feelingLabel,
   'quizTotalQuestions': instance.quizTotalQuestions,
   'quizBestPercent': instance.quizBestPercent,
+  'conversationAnswers': instance.conversationAnswers,
+};
+
+_ConversationAnswerDto _$ConversationAnswerDtoFromJson(
+  Map<String, dynamic> json,
+) => _ConversationAnswerDto(
+  question: json['question'] as String? ?? '',
+  kind: json['kind'] as String? ?? '',
+  answerText: json['answerText'] as String? ?? '',
+  sceneIndex: (json['sceneIndex'] as num?)?.toInt(),
+  answeredAt: json['answeredAt'] == null
+      ? null
+      : DateTime.parse(json['answeredAt'] as String),
+);
+
+Map<String, dynamic> _$ConversationAnswerDtoToJson(
+  _ConversationAnswerDto instance,
+) => <String, dynamic>{
+  'question': instance.question,
+  'kind': instance.kind,
+  'answerText': instance.answerText,
+  'sceneIndex': instance.sceneIndex,
+  'answeredAt': instance.answeredAt?.toIso8601String(),
 };
 
 _ParentReadingFeedbackPageDto _$ParentReadingFeedbackPageDtoFromJson(

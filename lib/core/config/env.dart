@@ -35,4 +35,7 @@ class Env {
   }
 
   static final String apiBaseUrl = normalizeApiBaseUrl(_rawApiUrl);
+
+  /// Trang web cho các việc chỉ làm trên web (xử lý điều ước, sửa lộ trình...).
+  static const String webUrl = 'https://www.taletale.site';
 }

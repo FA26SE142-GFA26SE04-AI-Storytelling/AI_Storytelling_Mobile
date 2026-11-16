@@ -14,10 +14,29 @@ abstract class ParentReadingFeedbackItemDto with _$ParentReadingFeedbackItemDto 
     String? feelingLabel,
     @Default(0) int quizTotalQuestions,
     double? quizBestPercent,
+    /// Câu bé trả lời ở các điểm dừng cảm xúc/cảm nhận trong lần đọc này.
+    @Default(<ConversationAnswerDto>[])
+    List<ConversationAnswerDto> conversationAnswers,
   }) = _ParentReadingFeedbackItemDto;
 
   factory ParentReadingFeedbackItemDto.fromJson(Map<String, dynamic> json) =>
       _$ParentReadingFeedbackItemDtoFromJson(json);
+}
+
+@freezed
+abstract class ConversationAnswerDto with _$ConversationAnswerDto {
+  const factory ConversationAnswerDto({
+    @Default('') String question,
+    /// "Emotion" hoặc "Opinion".
+    @Default('') String kind,
+    @Default('') String answerText,
+    /// Cảnh có câu hỏi (đếm từ 0); null nếu không còn tìm thấy.
+    int? sceneIndex,
+    DateTime? answeredAt,
+  }) = _ConversationAnswerDto;
+
+  factory ConversationAnswerDto.fromJson(Map<String, dynamic> json) =>
+      _$ConversationAnswerDtoFromJson(json);
 }
 
 @freezed

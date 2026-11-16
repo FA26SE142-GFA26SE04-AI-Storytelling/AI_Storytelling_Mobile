@@ -89,7 +89,7 @@ Tham khảo web: `features/kid/*`, `childAccessService.ts`, `childReadingService
 - [x] Hoàn thành truyện (phương án A, từng bước toàn màn hình, có Bỏ qua): cảm xúc (kèm +EXP, huy hiệu mới, bước lộ trình) → quiz (đáp án xáo trộn, trả lời ngắn, kết quả, làm lại) → ghi âm kể lại (`record`, WAV 16 kHz, tự dừng ở 3 MB) → đánh dấu tối đa 5 cảnh còn thắc mắc. Giọng đọc đang phát cũng tính là bé đang hoạt động. Chưa thử ghi âm trên máy thật; trên web không ghi âm được (báo bằng toast). Huy hiệu mới hiện tên (tra từ phần thưởng như web).
 - [x] Phần thưởng (phương án A: cây trên, huy hiệu dưới): EXP, chuỗi ngày đọc, cây tri thức 5 giai đoạn (`TtKnowledgeTree` chuyển từ web) và tưới cây, 7 huy hiệu lưới 2 cột. Sổ tay từ vựng: danh sách, xoá có xác nhận. Đọc xong mở bước lộ trình tiếp theo do Backend xử lý, mobile báo ở bước Cảm xúc.
 - [x] Gửi điều ước bằng thẻ (phương án A: lưới thẻ + thanh đáy): Nhân vật → Nơi chốn → Thử thách → Bài học (hoặc "Để bố mẹ chọn"), phát âm thanh thẻ, danh sách điều ước đã gửi kèm nút đọc truyện. Gợi ý chỉ có truyện cộng đồng tạm ẩn (xem mục đọc truyện cộng đồng).
-- [ ] Đọc truyện cộng đồng đã duyệt. Lưu ý: Backend `StartReadingRequestDto` chưa có `communitySubmissionId` (web và mobile đều gửi trường này) — cần hỏi Backend (kiểm tra lại 16/11: vẫn chưa có, mobile chưa làm được).
+- [ ] Đọc truyện cộng đồng đã duyệt qua `communitySubmissionId` — **không làm**: Backend đã gỡ `CommunitySubmission` (11/11, xem `AI_Storytelling_Frontend/TASKS.md` mục Cộng đồng), `StartReadingRequestDto` chỉ còn `StoryId`. Gợi ý điều ước dạng truyện cộng đồng vẫn tạm ẩn.
 - [x] Nút tối thiểu 64dp, chữ nội dung 22sp trên các màn của bé (`kKidMinTap`). Màn đọc bật chế độ toàn màn hình (ẩn thanh trạng thái và thông báo), thoát thì trả lại. Thông báo đẩy của app (giai đoạn 4) phải không hiện khi bé đang ở Chế độ của bé. Chưa thử trên máy thật.
 - [x] Luyện đọc to: chạm chữ cần đọc lại thì hiện gợi ý theo `hint` như web (sai dấu / chưa nghe rõ / đọc thành chữ khác / quên đọc).
 
@@ -114,11 +114,13 @@ Tham khảo web: `features/children`, `features/safety`, `childProfileService.ts
 
 Tham khảo web: `features/learning`, `roadmapService.ts`, `storyWishService.ts`.
 
-- [ ] Tổng quan học tập của từng bé: EXP, chuỗi ngày đọc, số truyện đã đọc, huy hiệu, cây tri thức (số liệu lấy hoàn toàn từ API, không tự tính).
-- [ ] Kết quả đọc từng truyện: câu trả lời quiz, cảm xúc, nghe bản kể lại, chỗ còn thắc mắc, xoá bản kể lại (có popup xác nhận).
-- [ ] Tiến độ lộ trình của bé (chỉ xem; sửa lộ trình trên web).
-- [ ] Điều ước bé đã gửi (chỉ xem; dùng truyện có sẵn / tạo truyện / từ chối làm trên web).
-- [ ] Thông báo: danh sách, đánh dấu đã đọc, xoá; thông báo đẩy khi bé gửi điều ước, bé đọc xong truyện.
+- [x] Tab Học tập (`lib/features/learning`): dải chọn bé (chỉ bé Active, dùng chung `selectedChildIdProvider` với tab Bé), 4 tab Tổng quan · Lộ trình · Kết quả đọc · Điều ước; mỗi tab có đang tải / rỗng / lỗi + thử lại, kéo xuống để tải lại.
+- [x] Tổng quan của từng bé như web: 4 ô số liệu bấm được (Lộ trình `đã đọc/tổng`, Đã đọc xong, Bé kể lại, Điều ước chờ), thẻ Đang đọc (bìa, hạn, tiến độ, 3 truyện kế tiếp), thẻ Mới đọc xong (3 truyện). Phụ huynh không có API EXP / chuỗi ngày / huy hiệu / cây tri thức (chỉ phiên của bé có) nên không hiện các số này.
+- [x] Kết quả đọc từng truyện: cảm xúc, % câu đố tốt nhất, ngày, câu bé trả lời ở điểm dừng; phần bé kể lại: nghe bản ghi âm ngay trong dòng (một bản một lúc, dừng khi rời tab/màn), cảnh bé còn thắc mắc, xoá bản kể lại (có popup xác nhận). Tải thêm khi cuộn (20/trang).
+- [x] Tiến độ lộ trình của bé (chỉ xem; sửa lộ trình trên web): Đang đọc / Tiếp theo / Đã đọc / Đã gỡ hoặc bỏ qua.
+- [x] Điều ước bé đã gửi (chỉ xem; dùng truyện có sẵn / tạo truyện / từ chối làm trên web — điều ước đang chờ có nút mở web).
+- [x] Thông báo trong app (`lib/features/notifications`, `/Notification`): danh sách (câu chữ theo loại thông báo như web, không hiện JSON), chưa đọc nổi bật, chạm để đánh dấu đã đọc và mở đúng màn (điều ước / lộ trình / kể lại → tab Học tập đúng bé; giám sát → tab Bé; bảo mật → Tài khoản), đánh dấu tất cả đã đọc, xoá có popup. Lối vào: chuông có số chưa đọc ở Trang chủ, dòng "Thông báo" trong Tài khoản; số chưa đọc làm mới khi mở / kéo tải lại / quay lại / app trở lại foreground.
+- [ ] Thông báo đẩy khi bé gửi điều ước, bé đọc xong truyện — **chờ Backend** (chưa có API đăng ký thiết bị nhận thông báo đẩy). Khi làm: không hiện khi máy đang ở Chế độ của bé.
 
 ---
 

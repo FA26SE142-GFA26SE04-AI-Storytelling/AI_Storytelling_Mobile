@@ -47,19 +47,21 @@ class ChildPickerStrip extends StatelessWidget {
   const ChildPickerStrip({
     super.key,
     required this.children,
-    required this.archived,
+    this.archived = const [],
     required this.selectedId,
     required this.onSelect,
-    required this.onOpenArchived,
-    required this.onAdd,
+    this.onOpenArchived,
+    this.onAdd,
   });
 
   final List<ChildProfileDto> children;
   final List<ArchivedChild> archived;
   final int? selectedId;
   final ValueChanged<int> onSelect;
-  final ValueChanged<int> onOpenArchived;
-  final VoidCallback onAdd;
+  final ValueChanged<int>? onOpenArchived;
+
+  /// null thì ẩn nút "Thêm bé" (tab Học tập chỉ chọn bé).
+  final VoidCallback? onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -91,13 +93,14 @@ class ChildPickerStrip extends StatelessWidget {
                 nickname: a.nickname,
                 isSelected: false,
                 opacity: 0.5,
-                onTap: () => onOpenArchived(a.id),
+                onTap: () => onOpenArchived?.call(a.id),
                 tt: tt,
                 textTheme: textTheme,
               )),
 
           // Nút thêm bé
-          _AddChildButton(onAdd: onAdd, tt: tt, textTheme: textTheme),
+          if (onAdd != null)
+            _AddChildButton(onAdd: onAdd!, tt: tt, textTheme: textTheme),
         ],
       ),
     )

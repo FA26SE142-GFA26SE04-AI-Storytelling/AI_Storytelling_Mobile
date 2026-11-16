@@ -10,7 +10,7 @@ import 'package:ai_storytelling_mobile/features/auth/presentation/verify_email_s
 import 'package:ai_storytelling_mobile/features/auth/presentation/forgot_password_screen.dart';
 import 'package:ai_storytelling_mobile/features/auth/presentation/reset_password_screen.dart';
 import 'package:ai_storytelling_mobile/features/auth/presentation/blocked_screen.dart';
-import 'package:ai_storytelling_mobile/features/shell/empty_tab_screen.dart';
+import 'package:ai_storytelling_mobile/features/learning/presentation/learning_screen.dart';
 import 'package:ai_storytelling_mobile/features/account/account_screen.dart';
 import 'package:ai_storytelling_mobile/features/home/presentation/home_screen.dart';
 import 'package:ai_storytelling_mobile/features/account/presentation/account_sessions_screen.dart';
@@ -289,11 +289,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.learning,
-                builder: (context, state) => EmptyTabScreen(
-                  title: 'Học tập',
-                  icon: Icons.insights_rounded,
-                  message: 'Thống kê học tập của bé sẽ có ở giai đoạn 4.',
-                ),
+                builder: (context, state) => const LearningScreen(),
               ),
             ],
           ),
