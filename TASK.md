@@ -91,6 +91,13 @@ Tham khảo web: `features/kid/*`, `childAccessService.ts`, `childReadingService
 - [x] Gửi điều ước bằng thẻ (phương án A: lưới thẻ + thanh đáy): Nhân vật → Nơi chốn → Thử thách → Bài học (hoặc "Để bố mẹ chọn"), phát âm thanh thẻ, danh sách điều ước đã gửi kèm nút đọc truyện. Gợi ý chỉ có truyện cộng đồng tạm ẩn (xem mục đọc truyện cộng đồng).
 - [ ] Đọc truyện cộng đồng đã duyệt. Lưu ý: Backend `StartReadingRequestDto` chưa có `communitySubmissionId` (web và mobile đều gửi trường này) — cần hỏi Backend.
 - [ ] **Một phần** — Nút tối thiểu 64dp, chữ nội dung 22sp trên các màn của bé (xong, `kKidMinTap`). Còn thiếu: tắt thông báo của app khi bé đang đọc.
+- [ ] Luyện đọc to: chạm chữ cần đọc lại thì hiện gợi ý theo `hint` như web (sai dấu / chưa nghe rõ / đọc thành chữ khác).
+
+### Lỗi giao diện phát hiện khi chụp màn hình (16/11)
+
+- [ ] Màn đọc ở khổ rộng (800): tranh bị căn giữa theo chiều dọc so với cột chữ dài nên lệch xuống dưới, góc trên bên trái trống nhiều (`kid_reader_page.dart`, Row đang `crossAxisAlignment.center`).
+- [ ] Màn tương tác "Đoán tranh": đáp án không có ảnh hiện ô trắng trống, chưa dùng ảnh mặc định.
+- [ ] Khổ 360: toast hiện đè lên thanh đáy ◀ 🔊 🎤 ▶ của màn đọc.
 
 ## Giai đoạn 3: Phụ huynh, thông tin của bé (F-01, F-02, F-12)
 
