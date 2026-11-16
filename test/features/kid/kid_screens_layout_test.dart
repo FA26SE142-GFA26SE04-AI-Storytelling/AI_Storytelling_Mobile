@@ -10,6 +10,8 @@ import 'package:ai_storytelling_mobile/features/kid/quiz/kid_after_reading_scree
 import 'package:ai_storytelling_mobile/features/kid/rewards/kid_notebook_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/rewards/kid_rewards_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/wish/kid_wish_screen.dart';
+import 'package:ai_storytelling_mobile/models/child_interaction_dto.dart';
+import 'package:ai_storytelling_mobile/models/child_read_aloud_dto.dart';
 import 'package:ai_storytelling_mobile/models/child_reading_dto.dart';
 import 'package:ai_storytelling_mobile/models/child_rewards_dto.dart';
 import 'package:ai_storytelling_mobile/models/story_wish_dto.dart';
@@ -98,6 +100,22 @@ class _Reading implements KidReadingRepository {
   );
 
   @override
+  Future<ListeningAttemptResult> attemptInteraction(
+    String sessionId,
+    int interactionId, {
+    int? optionId,
+    String? answer,
+    List<int>? orderedOptionIds,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<ReadAloudResult> readAloud(
+    String sessionId,
+    int segmentId, {
+    required String filePath,
+  }) => throw UnimplementedError();
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -124,6 +142,7 @@ Future<void> _pump(WidgetTester tester, Size size, Widget screen) async {
 void main() {
   const sizes = {
     'điện thoại nhỏ': Size(360, 640),
+    'điện thoại rất nhỏ': Size(320, 640),
     'tablet ngang': Size(1024, 768),
   };
   final screens = <String, Widget Function()>{

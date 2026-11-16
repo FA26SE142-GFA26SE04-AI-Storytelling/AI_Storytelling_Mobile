@@ -11,6 +11,8 @@ void showTtToast(
   BuildContext context,
   String message, {
   TtToastType type = TtToastType.info,
+  /// Khoảng cách từ đáy màn hình, dùng để toast nằm trên thanh đáy.
+  double bottomOffset = 16,
 }) {
   final tt = context.tt;
 
@@ -41,7 +43,7 @@ void showTtToast(
       backgroundColor: Colors.transparent,
       padding: EdgeInsets.zero,
       duration: Duration(seconds: type == TtToastType.error ? 4 : 3),
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      margin: EdgeInsets.fromLTRB(16, 0, 16, bottomOffset),
       content: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(

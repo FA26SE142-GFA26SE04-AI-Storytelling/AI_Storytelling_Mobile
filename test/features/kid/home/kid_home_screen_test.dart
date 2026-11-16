@@ -173,5 +173,39 @@ void main() {
       expect(find.text('Hôm nay em muốn đọc truyện gì?'), findsOneWidget);
       expect(find.text('Chọn truyện'), findsOneWidget);
     });
+
+    testWidgets('KidHomeScreen không tràn ở 320×640', (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      final roadmap = MyRoadmapDto(
+        open: const MyRoadmapOpenStoryDto(
+          storyId: 10,
+          title: 'Chú ếch và hoa sen',
+          note: 'Đọc cho ngoan nhé',
+          isLocked: false,
+        ),
+        done: const [
+          MyRoadmapDoneDto(storyId: 9, title: 'Truyện đã xong'),
+        ],
+        upcoming: const [
+          MyRoadmapUpcomingDto(
+            order: 2,
+            storyId: 11,
+            title: 'Truyện sắp đọc',
+            isLocked: false,
+          ),
+        ],
+        completedCount: 1,
+        totalCount: 3,
+      );
+
+      await pumpHome(tester, roadmap);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(tester.takeException(), isNull);
+    });
   });
 }

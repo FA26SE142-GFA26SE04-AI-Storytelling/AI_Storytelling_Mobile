@@ -100,7 +100,7 @@ class KidTodayCard extends StatelessWidget {
               '💌 ${open.note!.trim()}',
               style: TextStyle(
                 fontFamily: 'Nunito',
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.w600,
                 color: tt.text,
               ),
@@ -113,7 +113,7 @@ class KidTodayCard extends StatelessWidget {
             'Truyện này chưa mở, em chờ bố mẹ nhé.',
             style: TextStyle(
               fontFamily: 'Nunito',
-              fontSize: 20,
+              fontSize: 22,
               fontWeight: FontWeight.w600,
               color: tt.muted,
             ),

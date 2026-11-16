@@ -132,7 +132,7 @@ Future<bool> runChildLifecycleAction({
               ArchivedChild(
                 id: child.id,
                 nickname: child.nickname,
-                avatarId: int.tryParse(child.avatarId),
+                avatarId: child.avatarId,
               ),
             );
         ref.invalidate(archivedChildrenProvider);

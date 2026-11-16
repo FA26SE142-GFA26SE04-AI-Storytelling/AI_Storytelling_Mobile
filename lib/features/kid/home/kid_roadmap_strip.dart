@@ -288,7 +288,7 @@ class _RoadmapStepItem extends StatelessWidget {
                   item.title ?? '',
                   style: TextStyle(
                     fontFamily: 'Baloo2',
-                    fontSize: 18,
+                    fontSize: 22,
                     fontWeight: FontWeight.w600,
                     color: tt.text,
                     height: 1.2,

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_card.dart';
+import '../../../core/widgets/tt_child_avatar.dart';
 import '../../../core/widgets/tt_state_views.dart';
 import '../../../core/widgets/tt_text_field.dart';
 import '../../../core/widgets/tt_toast.dart';
@@ -91,6 +92,8 @@ class _EditChildDialogState extends ConsumerState<_EditChildDialog> {
   late String _ageBand;
   late String _initialNickname;
   late String _initialAgeBand;
+  late String _initialAvatar;
+  late String _avatar;
   bool _isSaving = false;
 
   @override
@@ -100,6 +103,9 @@ class _EditChildDialogState extends ConsumerState<_EditChildDialog> {
         ref.read(childDetailProvider(widget.childId)).value;
     _initialNickname = child?.nickname ?? '';
     _initialAgeBand = child?.ageBand ?? 'Age_6_8';
+    // Như web: mã lạ (vd `avatar-default`) coi là ếch.
+    _initialAvatar = childAvatarOf(child?.avatarId).id;
+    _avatar = _initialAvatar;
     _nicknameCtrl = TextEditingController(text: _initialNickname);
     _ageBand = _initialAgeBand;
     _nicknameCtrl.addListener(_onChanged);
@@ -109,7 +115,8 @@ class _EditChildDialogState extends ConsumerState<_EditChildDialog> {
 
   bool get _hasChanges =>
       _nicknameCtrl.text.trim() != _initialNickname ||
-      _ageBand != _initialAgeBand;
+      _ageBand != _initialAgeBand ||
+      _avatar != _initialAvatar;
 
   bool get _isValid =>
       _nicknameCtrl.text.trim().isNotEmpty &&
@@ -135,14 +142,11 @@ class _EditChildDialogState extends ConsumerState<_EditChildDialog> {
 
     final repo = ref.read(childProfileRepositoryProvider);
     try {
-      final avatarIdRaw = child.avatarId;
-      final avatarId = int.tryParse(avatarIdRaw);
-
       final response = await repo.update(
         child.id,
         nickname: _nicknameCtrl.text.trim(),
         ageBand: _ageBand,
-        avatarId: avatarId,
+        avatarId: _avatar,
       );
 
       ref.invalidate(childDetailProvider(child.id));
@@ -213,7 +217,7 @@ class _EditChildDialogState extends ConsumerState<_EditChildDialog> {
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
       backgroundColor: tt.panel,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -271,6 +275,41 @@ class _EditChildDialogState extends ConsumerState<_EditChildDialog> {
                   const TextStyle(fontFamily: 'Nunito', fontWeight: FontWeight.w600),
                 ),
               ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Ảnh đại diện',
+              style: textTheme.titleSmall?.copyWith(
+                fontFamily: 'Nunito',
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: tt.text,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                for (final a in kChildAvatars)
+                  Tooltip(
+                    message: a.label,
+                    child: InkWell(
+                      key: ValueKey(a.id),
+                      customBorder: const CircleBorder(),
+                      onTap: () => setState(() => _avatar = a.id),
+                      child: AnimatedScale(
+                        scale: _avatar == a.id ? 1.08 : 1.0,
+                        duration: const Duration(milliseconds: 150),
+                        child: TtChildAvatar(
+                          avatarId: a.id,
+                          size: 48,
+                          selected: _avatar == a.id,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 24),
             Row(
@@ -464,10 +503,17 @@ class _ChildProfileBodyState extends ConsumerState<_ChildProfileBody> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _SectionHeader(
-                icon: Icons.person_rounded,
-                label: 'Thông tin hồ sơ',
-                tt: tt,
+              Row(
+                children: [
+                  Expanded(
+                    child: _SectionHeader(
+                      icon: Icons.person_rounded,
+                      label: 'Thông tin hồ sơ',
+                      tt: tt,
+                    ),
+                  ),
+                  TtChildAvatar(avatarId: child.avatarId as String?, size: 44),
+                ],
               ),
               const SizedBox(height: 14),
               _InfoRow(
@@ -478,16 +524,19 @@ class _ChildProfileBodyState extends ConsumerState<_ChildProfileBody> {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  Text(
-                    'Trạng thái',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: tt.muted,
+                  Expanded(
+                    child: Text(
+                      'Trạng thái',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: tt.muted,
+                      ),
                     ),
                   ),
-                  const Spacer(),
                   _StatusChip(status: child.status as String, tt: tt),
                 ],
               ),
@@ -630,13 +679,17 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Icon(icon, size: 18, color: tt.goldDeep),
         const SizedBox(width: 8),
-        Text(
-          label,
-          style: TextStyle(
-            fontFamily: 'Baloo2',
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: tt.text,
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: 'Baloo2',
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: tt.text,
+            ),
           ),
         ),
       ],

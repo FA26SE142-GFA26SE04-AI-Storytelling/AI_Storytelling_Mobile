@@ -11,6 +11,7 @@ import 'package:ai_storytelling_mobile/features/children/data/child_profile_repo
 import 'package:ai_storytelling_mobile/features/children/presentation/children_providers.dart';
 import 'package:ai_storytelling_mobile/features/home/data/home_repository.dart';
 import 'package:ai_storytelling_mobile/features/home/presentation/home_screen.dart';
+import 'package:ai_storytelling_mobile/features/notifications/data/notification_repository.dart';
 import 'package:ai_storytelling_mobile/models/child_profile_dto.dart';
 import 'package:ai_storytelling_mobile/models/child_roadmap_dto.dart';
 import 'package:ai_storytelling_mobile/models/parent_reading_feedback_dto.dart';
@@ -112,6 +113,7 @@ Future<(ProviderContainer, _FakeHome)> _pump(
   WidgetTester tester, {
   List<ChildProfileDto> children = const [_an, _binh, _draft],
   Size? size,
+  int unread = 0,
 }) async {
   if (size != null) {
     tester.view.physicalSize = size;
@@ -126,6 +128,7 @@ Future<(ProviderContainer, _FakeHome)> _pump(
       childProfileRepositoryProvider.overrideWithValue(_FakeChildren(children)),
       homeRepositoryProvider.overrideWithValue(home),
       authControllerProvider.overrideWith(_SignedIn.new),
+      unreadNotificationCountProvider.overrideWith((_) async => unread),
     ],
   );
   addTearDown(container.dispose);
@@ -208,6 +211,20 @@ void main() {
     await tester.tap(find.text('Mở tab Bé'));
     await tester.pumpAndSettle();
     expect(find.text('KIDS_TAB'), findsOneWidget);
+  });
+
+  testWidgets('chuông thông báo hiện số chưa đọc; 0 thì không có số',
+      (tester) async {
+    await _pump(tester, unread: 3);
+    expect(find.byTooltip('Thông báo, 3 chưa đọc'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
+  });
+
+  testWidgets('không có thông báo chưa đọc thì chuông không có số',
+      (tester) async {
+    await _pump(tester);
+    expect(find.byTooltip('Thông báo'), findsOneWidget);
+    expect(find.text('0'), findsNothing);
   });
 
   test('greeting theo giờ', () {

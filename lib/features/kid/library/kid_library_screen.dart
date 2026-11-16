@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:ai_storytelling_mobile/core/theme/kid_metrics.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
@@ -287,6 +288,7 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
       child: Row(
         children: [
           TtIconButton(
+            size: kKidMinTap,
             icon: Icons.arrow_back_rounded,
             tooltip: 'Quay lại',
             onPressed: () {
@@ -340,6 +342,7 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
                 : Padding(
                     padding: const EdgeInsets.only(left: 8, bottom: 2),
                     child: TtIconButton(
+                      size: kKidMinTap,
                       icon: Icons.close_rounded,
                       tooltip: 'Xoá tìm kiếm',
                       onPressed: _searchController.clear,
@@ -350,6 +353,7 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
           Padding(
             padding: const EdgeInsets.only(bottom: 2),
             child: TtIconButton(
+              size: kKidMinTap,
               icon: Icons.search_rounded,
               tooltip: 'Tìm kiếm',
               onPressed: () => _triggerSearch(_searchController.text),
@@ -509,7 +513,7 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontFamily: 'Nunito',
-              fontSize: 15,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: tt.text,
             ),
@@ -550,7 +554,7 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
                   'Thư viện đang tạm khoá',
                   style: TextStyle(
                     fontFamily: 'Baloo2',
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: tt.text,
                   ),
@@ -563,7 +567,7 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
             message,
             style: TextStyle(
               fontFamily: 'Nunito',
-              fontSize: 15,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
               color: tt.text,
             ),

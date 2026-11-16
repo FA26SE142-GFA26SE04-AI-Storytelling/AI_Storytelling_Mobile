@@ -2005,7 +2005,7 @@ as String,
 /// @nodoc
 mixin _$ReadingScene {
 
- int get sceneId; int get sceneIndex; String get text; String? get illustrationUrl; List<SceneIllustration>? get illustrations; List<ReadingSegment> get segments; Map<String, dynamic>? get interaction; bool get attemptedInSession;
+ int get sceneId; int get sceneIndex; String get text; String? get illustrationUrl; List<SceneIllustration>? get illustrations; List<ReadingSegment> get segments; ReadingInteraction? get interaction; bool get attemptedInSession;
 /// Create a copy of ReadingScene
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2019,14 +2019,14 @@ $ReadingSceneCopyWith<ReadingScene> get copyWith => _$ReadingSceneCopyWithImpl<R
 @override
 bool operator ==(Object other) {
   final _this = this as ReadingScene;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadingScene&&(identical(other.sceneId, _this.sceneId) || other.sceneId == _this.sceneId)&&(identical(other.sceneIndex, _this.sceneIndex) || other.sceneIndex == _this.sceneIndex)&&(identical(other.text, _this.text) || other.text == _this.text)&&(identical(other.illustrationUrl, _this.illustrationUrl) || other.illustrationUrl == _this.illustrationUrl)&&const DeepCollectionEquality().equals(other.illustrations, _this.illustrations)&&const DeepCollectionEquality().equals(other.segments, _this.segments)&&const DeepCollectionEquality().equals(other.interaction, _this.interaction)&&(identical(other.attemptedInSession, _this.attemptedInSession) || other.attemptedInSession == _this.attemptedInSession));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadingScene&&(identical(other.sceneId, _this.sceneId) || other.sceneId == _this.sceneId)&&(identical(other.sceneIndex, _this.sceneIndex) || other.sceneIndex == _this.sceneIndex)&&(identical(other.text, _this.text) || other.text == _this.text)&&(identical(other.illustrationUrl, _this.illustrationUrl) || other.illustrationUrl == _this.illustrationUrl)&&const DeepCollectionEquality().equals(other.illustrations, _this.illustrations)&&const DeepCollectionEquality().equals(other.segments, _this.segments)&&(identical(other.interaction, _this.interaction) || other.interaction == _this.interaction)&&(identical(other.attemptedInSession, _this.attemptedInSession) || other.attemptedInSession == _this.attemptedInSession));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ReadingScene;
-  return Object.hash(runtimeType,_this.sceneId,_this.sceneIndex,_this.text,_this.illustrationUrl,const DeepCollectionEquality().hash(_this.illustrations),const DeepCollectionEquality().hash(_this.segments),const DeepCollectionEquality().hash(_this.interaction),_this.attemptedInSession);
+  return Object.hash(runtimeType,_this.sceneId,_this.sceneIndex,_this.text,_this.illustrationUrl,const DeepCollectionEquality().hash(_this.illustrations),const DeepCollectionEquality().hash(_this.segments),_this.interaction,_this.attemptedInSession);
 }
 
 @override
@@ -2043,11 +2043,11 @@ abstract mixin class $ReadingSceneCopyWith<$Res>  {
   factory $ReadingSceneCopyWith(ReadingScene value, $Res Function(ReadingScene) _then) = _$ReadingSceneCopyWithImpl;
 @useResult
 $Res call({
- int sceneId, int sceneIndex, String text, String? illustrationUrl, List<SceneIllustration>? illustrations, List<ReadingSegment> segments, Map<String, dynamic>? interaction, bool attemptedInSession
+ int sceneId, int sceneIndex, String text, String? illustrationUrl, List<SceneIllustration>? illustrations, List<ReadingSegment> segments, ReadingInteraction? interaction, bool attemptedInSession
 });
 
 
-
+$ReadingInteractionCopyWith<$Res>? get interaction;
 
 }
 /// @nodoc
@@ -2069,11 +2069,23 @@ as String,illustrationUrl: freezed == illustrationUrl ? _self.illustrationUrl : 
 as String?,illustrations: freezed == illustrations ? _self.illustrations : illustrations // ignore: cast_nullable_to_non_nullable
 as List<SceneIllustration>?,segments: null == segments ? _self.segments : segments // ignore: cast_nullable_to_non_nullable
 as List<ReadingSegment>,interaction: freezed == interaction ? _self.interaction : interaction // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,attemptedInSession: null == attemptedInSession ? _self.attemptedInSession : attemptedInSession // ignore: cast_nullable_to_non_nullable
+as ReadingInteraction?,attemptedInSession: null == attemptedInSession ? _self.attemptedInSession : attemptedInSession // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
+/// Create a copy of ReadingScene
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ReadingInteractionCopyWith<$Res>? get interaction {
+    if (_self.interaction == null) {
+    return null;
+  }
 
+  return $ReadingInteractionCopyWith<$Res>(_self.interaction!, (value) {
+    return _then(_self.copyWith(interaction: value));
+  });
+}
 }
 
 
@@ -2155,7 +2167,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int sceneId,  int sceneIndex,  String text,  String? illustrationUrl,  List<SceneIllustration>? illustrations,  List<ReadingSegment> segments,  Map<String, dynamic>? interaction,  bool attemptedInSession)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int sceneId,  int sceneIndex,  String text,  String? illustrationUrl,  List<SceneIllustration>? illustrations,  List<ReadingSegment> segments,  ReadingInteraction? interaction,  bool attemptedInSession)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ReadingScene() when $default != null:
 return $default(_that.sceneId,_that.sceneIndex,_that.text,_that.illustrationUrl,_that.illustrations,_that.segments,_that.interaction,_that.attemptedInSession);case _:
@@ -2176,7 +2188,7 @@ return $default(_that.sceneId,_that.sceneIndex,_that.text,_that.illustrationUrl,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int sceneId,  int sceneIndex,  String text,  String? illustrationUrl,  List<SceneIllustration>? illustrations,  List<ReadingSegment> segments,  Map<String, dynamic>? interaction,  bool attemptedInSession)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int sceneId,  int sceneIndex,  String text,  String? illustrationUrl,  List<SceneIllustration>? illustrations,  List<ReadingSegment> segments,  ReadingInteraction? interaction,  bool attemptedInSession)  $default,) {final _that = this;
 switch (_that) {
 case _ReadingScene():
 return $default(_that.sceneId,_that.sceneIndex,_that.text,_that.illustrationUrl,_that.illustrations,_that.segments,_that.interaction,_that.attemptedInSession);case _:
@@ -2196,7 +2208,7 @@ return $default(_that.sceneId,_that.sceneIndex,_that.text,_that.illustrationUrl,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int sceneId,  int sceneIndex,  String text,  String? illustrationUrl,  List<SceneIllustration>? illustrations,  List<ReadingSegment> segments,  Map<String, dynamic>? interaction,  bool attemptedInSession)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int sceneId,  int sceneIndex,  String text,  String? illustrationUrl,  List<SceneIllustration>? illustrations,  List<ReadingSegment> segments,  ReadingInteraction? interaction,  bool attemptedInSession)?  $default,) {final _that = this;
 switch (_that) {
 case _ReadingScene() when $default != null:
 return $default(_that.sceneId,_that.sceneIndex,_that.text,_that.illustrationUrl,_that.illustrations,_that.segments,_that.interaction,_that.attemptedInSession);case _:
@@ -2211,7 +2223,7 @@ return $default(_that.sceneId,_that.sceneIndex,_that.text,_that.illustrationUrl,
 @JsonSerializable()
 
 class _ReadingScene implements ReadingScene {
-  const _ReadingScene({required this.sceneId, required this.sceneIndex, required this.text, this.illustrationUrl,  List<SceneIllustration>? illustrations,  List<ReadingSegment> segments = const <ReadingSegment>[],  Map<String, dynamic>? interaction, this.attemptedInSession = false}): _illustrations = illustrations,_segments = segments,_interaction = interaction;
+  const _ReadingScene({required this.sceneId, required this.sceneIndex, required this.text, this.illustrationUrl,  List<SceneIllustration>? illustrations,  List<ReadingSegment> segments = const <ReadingSegment>[], this.interaction, this.attemptedInSession = false}): _illustrations = illustrations,_segments = segments;
   factory _ReadingScene.fromJson(Map<String, dynamic> json) => _$ReadingSceneFromJson(json);
 
 @override final  int sceneId;
@@ -2234,15 +2246,7 @@ class _ReadingScene implements ReadingScene {
   return EqualUnmodifiableListView(_segments);
 }
 
- final  Map<String, dynamic>? _interaction;
-@override Map<String, dynamic>? get interaction {
-  final value = _interaction;
-  if (value == null) return null;
-  if (_interaction is EqualUnmodifiableMapView) return _interaction;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(value);
-}
-
+@override final  ReadingInteraction? interaction;
 @override@JsonKey() final  bool attemptedInSession;
 
 /// Create a copy of ReadingScene
@@ -2258,13 +2262,13 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadingScene&&(identical(other.sceneId, sceneId) || other.sceneId == sceneId)&&(identical(other.sceneIndex, sceneIndex) || other.sceneIndex == sceneIndex)&&(identical(other.text, text) || other.text == text)&&(identical(other.illustrationUrl, illustrationUrl) || other.illustrationUrl == illustrationUrl)&&const DeepCollectionEquality().equals(other.illustrations, _illustrations)&&const DeepCollectionEquality().equals(other.segments, _segments)&&const DeepCollectionEquality().equals(other.interaction, _interaction)&&(identical(other.attemptedInSession, attemptedInSession) || other.attemptedInSession == attemptedInSession));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadingScene&&(identical(other.sceneId, sceneId) || other.sceneId == sceneId)&&(identical(other.sceneIndex, sceneIndex) || other.sceneIndex == sceneIndex)&&(identical(other.text, text) || other.text == text)&&(identical(other.illustrationUrl, illustrationUrl) || other.illustrationUrl == illustrationUrl)&&const DeepCollectionEquality().equals(other.illustrations, _illustrations)&&const DeepCollectionEquality().equals(other.segments, _segments)&&(identical(other.interaction, interaction) || other.interaction == interaction)&&(identical(other.attemptedInSession, attemptedInSession) || other.attemptedInSession == attemptedInSession));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,sceneId,sceneIndex,text,illustrationUrl,const DeepCollectionEquality().hash(_illustrations),const DeepCollectionEquality().hash(_segments),const DeepCollectionEquality().hash(_interaction),attemptedInSession);
+    return Object.hash(runtimeType,sceneId,sceneIndex,text,illustrationUrl,const DeepCollectionEquality().hash(_illustrations),const DeepCollectionEquality().hash(_segments),interaction,attemptedInSession);
 }
 
 @override
@@ -2280,11 +2284,11 @@ abstract mixin class _$ReadingSceneCopyWith<$Res> implements $ReadingSceneCopyWi
   factory _$ReadingSceneCopyWith(_ReadingScene value, $Res Function(_ReadingScene) _then) = __$ReadingSceneCopyWithImpl;
 @override @useResult
 $Res call({
- int sceneId, int sceneIndex, String text, String? illustrationUrl, List<SceneIllustration>? illustrations, List<ReadingSegment> segments, Map<String, dynamic>? interaction, bool attemptedInSession
+ int sceneId, int sceneIndex, String text, String? illustrationUrl, List<SceneIllustration>? illustrations, List<ReadingSegment> segments, ReadingInteraction? interaction, bool attemptedInSession
 });
 
 
-
+@override $ReadingInteractionCopyWith<$Res>? get interaction;
 
 }
 /// @nodoc
@@ -2305,13 +2309,25 @@ as int,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nu
 as String,illustrationUrl: freezed == illustrationUrl ? _self.illustrationUrl : illustrationUrl // ignore: cast_nullable_to_non_nullable
 as String?,illustrations: freezed == illustrations ? _self._illustrations : illustrations // ignore: cast_nullable_to_non_nullable
 as List<SceneIllustration>?,segments: null == segments ? _self._segments : segments // ignore: cast_nullable_to_non_nullable
-as List<ReadingSegment>,interaction: freezed == interaction ? _self._interaction : interaction // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,attemptedInSession: null == attemptedInSession ? _self.attemptedInSession : attemptedInSession // ignore: cast_nullable_to_non_nullable
+as List<ReadingSegment>,interaction: freezed == interaction ? _self.interaction : interaction // ignore: cast_nullable_to_non_nullable
+as ReadingInteraction?,attemptedInSession: null == attemptedInSession ? _self.attemptedInSession : attemptedInSession // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
 
+/// Create a copy of ReadingScene
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ReadingInteractionCopyWith<$Res>? get interaction {
+    if (_self.interaction == null) {
+    return null;
+  }
 
+  return $ReadingInteractionCopyWith<$Res>(_self.interaction!, (value) {
+    return _then(_self.copyWith(interaction: value));
+  });
+}
 }
 
 

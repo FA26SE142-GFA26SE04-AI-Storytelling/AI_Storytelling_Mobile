@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ai_storytelling_mobile/core/network/api_exception.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/kid_reading_repository.dart';
 import 'package:ai_storytelling_mobile/features/kid/library/kid_library_screen.dart';
+import 'package:ai_storytelling_mobile/models/child_interaction_dto.dart';
+import 'package:ai_storytelling_mobile/models/child_read_aloud_dto.dart';
 import 'package:ai_storytelling_mobile/models/child_reading_dto.dart';
 
 class StoryPageCall {
@@ -142,6 +144,22 @@ class FakeKidReadingRepository implements KidReadingRepository {
   }) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<ListeningAttemptResult> attemptInteraction(
+    String sessionId,
+    int interactionId, {
+    int? optionId,
+    String? answer,
+    List<int>? orderedOptionIds,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<ReadAloudResult> readAloud(
+    String sessionId,
+    int segmentId, {
+    required String filePath,
+  }) => throw UnimplementedError();
 }
 
 List<ChildStory> makeStories(int count, {int startId = 1}) {

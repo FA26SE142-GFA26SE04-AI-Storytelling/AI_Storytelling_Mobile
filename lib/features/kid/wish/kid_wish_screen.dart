@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai_storytelling_mobile/core/theme/kid_metrics.dart';
 
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
@@ -124,6 +125,7 @@ class _KidWishScreenState extends ConsumerState<KidWishScreen> {
               child: Row(
                 children: [
                   TtIconButton(
+                    size: kKidMinTap,
                     icon: Icons.arrow_back_rounded,
                     tooltip: 'Quay lại',
                     onPressed: () {
@@ -171,7 +173,7 @@ class _KidWishScreenState extends ConsumerState<KidWishScreen> {
                       'Điều ước đã gửi',
                       style: TextStyle(
                         fontFamily: 'Nunito',
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.w800,
                         color: tt.text,
                       ),
@@ -321,7 +323,7 @@ class _KidWishScreenState extends ConsumerState<KidWishScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Nunito',
-                  fontSize: 20,
+                  fontSize: 22,
                   fontWeight: FontWeight.w700,
                   color: tt.muted,
                 ),

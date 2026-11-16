@@ -201,7 +201,7 @@ class _KidFlagsStepState extends ConsumerState<KidFlagsStep> {
                   'Chọn tối đa $kSummaryMaxFlags cảnh để bố mẹ cùng xem nhé',
                   style: TextStyle(
                     fontFamily: 'Nunito',
-                    fontSize: 18,
+                    fontSize: 22,
                     fontWeight: FontWeight.w600,
                     color: tt.muted,
                   ),
@@ -281,7 +281,7 @@ class _KidFlagsStepState extends ConsumerState<KidFlagsStep> {
                       'Truyện này chưa có cảnh để chọn.',
                       style: TextStyle(
                         fontFamily: 'Nunito',
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.w600,
                         color: tt.muted,
                       ),

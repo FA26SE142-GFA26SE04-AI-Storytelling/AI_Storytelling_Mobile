@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import 'package:ai_storytelling_mobile/core/theme/kid_metrics.dart';
+
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
@@ -119,7 +121,12 @@ class _KidQrScreenState extends ConsumerState<KidQrScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        toolbarHeight: kKidMinTap,
         leading: IconButton(
+          constraints: const BoxConstraints.tightFor(
+            width: kKidMinTap,
+            height: kKidMinTap,
+          ),
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () {
             if (context.canPop()) {

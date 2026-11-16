@@ -119,3 +119,47 @@ Map<String, dynamic> _$SelectWishCardRequestToJson(
   'cardId': instance.cardId,
   'leaveToParent': instance.leaveToParent,
 };
+
+_ParentWish _$ParentWishFromJson(Map<String, dynamic> json) => _ParentWish(
+  wishId: (json['wishId'] as num).toInt(),
+  childProfileId: (json['childProfileId'] as num?)?.toInt() ?? 0,
+  kind: json['kind'] as String? ?? '',
+  status: json['status'] as String? ?? '',
+  cards:
+      (json['cards'] as List<dynamic>?)
+          ?.map((e) => ChildWishCard.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const <ChildWishCard>[],
+  lessonLeftToParent: json['lessonLeftToParent'] as bool? ?? false,
+  submittedAt: json['submittedAt'] == null
+      ? null
+      : DateTime.parse(json['submittedAt'] as String),
+  expiresAt: json['expiresAt'] == null
+      ? null
+      : DateTime.parse(json['expiresAt'] as String),
+  declineReason: json['declineReason'] as String?,
+  generatedStoryId: (json['generatedStoryId'] as num?)?.toInt(),
+  fulfilledStoryId: (json['fulfilledStoryId'] as num?)?.toInt(),
+  fulfilledWithExistingStory:
+      json['fulfilledWithExistingStory'] as bool? ?? false,
+  resolvedAt: json['resolvedAt'] == null
+      ? null
+      : DateTime.parse(json['resolvedAt'] as String),
+);
+
+Map<String, dynamic> _$ParentWishToJson(_ParentWish instance) =>
+    <String, dynamic>{
+      'wishId': instance.wishId,
+      'childProfileId': instance.childProfileId,
+      'kind': instance.kind,
+      'status': instance.status,
+      'cards': instance.cards,
+      'lessonLeftToParent': instance.lessonLeftToParent,
+      'submittedAt': instance.submittedAt?.toIso8601String(),
+      'expiresAt': instance.expiresAt?.toIso8601String(),
+      'declineReason': instance.declineReason,
+      'generatedStoryId': instance.generatedStoryId,
+      'fulfilledStoryId': instance.fulfilledStoryId,
+      'fulfilledWithExistingStory': instance.fulfilledWithExistingStory,
+      'resolvedAt': instance.resolvedAt?.toIso8601String(),
+    };

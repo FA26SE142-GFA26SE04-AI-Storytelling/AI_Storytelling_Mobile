@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/kid_metrics.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
 import '../../../core/widgets/tt_button.dart';
@@ -383,7 +384,7 @@ class _KidWishWizardState extends ConsumerState<KidWishWizard> {
                           child: Text(
                             step.label,
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 16,
                               fontWeight: isSelected
                                   ? FontWeight.w800
                                   : FontWeight.w600,
@@ -528,7 +529,7 @@ class _KidWishWizardState extends ConsumerState<KidWishWizard> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
                     color: isSelected ? tt.primaryStrong : tt.text,
                     fontFamily: 'Nunito',
@@ -574,6 +575,8 @@ class _KidWishWizardState extends ConsumerState<KidWishWizard> {
                   : () => _goToStep(_currentStepIndex - 1),
               icon: const Icon(Icons.arrow_back_rounded, size: 30),
               style: IconButton.styleFrom(
+                minimumSize: const Size(kKidMinTap, kKidMinTap),
+                fixedSize: const Size(kKidMinTap, kKidMinTap),
                 backgroundColor: tt.panel,
                 foregroundColor: tt.text,
                 disabledBackgroundColor: tt.panel.withValues(alpha: 0.5),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai_storytelling_mobile/core/theme/kid_metrics.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
@@ -129,30 +130,33 @@ class _KidNotebookScreenState extends ConsumerState<KidNotebookScreen> {
           Material(
             color: tt.panel,
             shape: const CircleBorder(),
-            child: InkWell(
-              onTap: () {
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.go('/kid');
-                }
-              },
-              customBorder: const CircleBorder(),
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: tt.line2, width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: tt.shadow.withValues(alpha: 0.06),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: kKidMinTap),
+              child: InkWell(
+                onTap: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/kid');
+                  }
+                },
+                customBorder: const CircleBorder(),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: tt.line2, width: 1.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: tt.shadow.withValues(alpha: 0.06),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(Icons.arrow_back_rounded, color: tt.text, size: 24),
                 ),
-                child: Icon(Icons.arrow_back_rounded, color: tt.text, size: 24),
               ),
             ),
           ),
@@ -281,9 +285,9 @@ class _KidNotebookScreenState extends ConsumerState<KidNotebookScreen> {
                         ),
                         tooltip: 'Xoá từ vựng',
                         padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 36,
-                          minHeight: 36,
+                        constraints: const BoxConstraints.tightFor(
+                          width: kKidMinTap,
+                          height: kKidMinTap,
                         ),
                         onPressed: () => _onDeleteEntry(entry),
                       ),

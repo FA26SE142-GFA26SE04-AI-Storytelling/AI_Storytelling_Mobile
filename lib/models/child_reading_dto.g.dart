@@ -154,7 +154,11 @@ _ReadingScene _$ReadingSceneFromJson(Map<String, dynamic> json) =>
               ?.map((e) => ReadingSegment.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const <ReadingSegment>[],
-      interaction: json['interaction'] as Map<String, dynamic>?,
+      interaction: json['interaction'] == null
+          ? null
+          : ReadingInteraction.fromJson(
+              json['interaction'] as Map<String, dynamic>,
+            ),
       attemptedInSession: json['attemptedInSession'] as bool? ?? false,
     );
 

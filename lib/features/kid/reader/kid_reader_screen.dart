@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,7 +13,9 @@ import '../../../core/widgets/tt_toast.dart';
 import '../../../models/child_reading_dto.dart';
 import '../data/kid_reading_repository.dart';
 import '../data/kid_session_controller.dart';
+import '../interaction/kid_interaction_screen.dart';
 import '../quiz/kid_after_reading_screen.dart';
+import 'kid_read_aloud_controller.dart';
 import 'kid_reader_audio.dart';
 import 'kid_reader_bottom_bar.dart';
 import 'kid_reader_controller.dart';
@@ -41,11 +44,16 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   /// Cờ để chỉ tự động phát lần đầu khi chuyển sang ready một lần duy nhất.
   bool _didAutoPlay = false;
 
+  /// Cờ chống mở chồng hộp thoại tương tác.
+  bool _askingInteraction = false;
+
   late final KidSessionController _kidSession;
 
   @override
   void initState() {
     super.initState();
+    // Tắt thông báo khi bé đang đọc.
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _audio = KidReaderAudio();
     _kidSession = ref.read(kidSessionProvider.notifier);
     _playingSub = _audio.playingStream.listen((playing) {
@@ -68,6 +76,11 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     _kidSession.narrating = false;
     _audio.dispose();
     _pageController?.dispose();
+    // Trả về mặc định của app (hiện cả hai thanh), app chưa đặt edgeToEdge ở đâu.
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
     super.dispose();
   }
 
@@ -76,20 +89,77 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.hidden) {
+      _cancelAloud();
       _audio.stop();
     }
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
+  void _toast(String message, {TtToastType type = TtToastType.info}) {
+    showTtToast(
+      context,
+      message,
+      type: type,
+      bottomOffset: _kToastBottomOffset,
+    );
+  }
+
   KidReaderController get _notifier =>
       ref.read(kidReaderControllerProvider(widget.storyId).notifier);
 
-  void _goTo(int i) {
+  /// Huỷ bản ghi đọc to dở dang (không gửi chấm) và bỏ kết quả đang tô.
+  void _cancelAloud() => unawaited(
+    ref.read(kidReadAloudControllerProvider(widget.storyId).notifier).cancel(),
+  );
+
+  ReadingSegment? _aloudTarget(ReadingScene scene) {
+    final segs = [...scene.segments]
+      ..sort((a, b) => a.segmentOrder.compareTo(b.segmentOrder));
+    if (segs.isEmpty) return null;
+
+    final state = ref.read(kidReadAloudControllerProvider(widget.storyId));
+    final res = state.result;
+    if (res != null) {
+      final idx = segs.indexWhere((s) => s.segmentId == res.segmentId);
+      if (idx != -1) {
+        return segs[(idx + 1) % segs.length];
+      }
+    }
+
+    if (_activeSegmentId != null) {
+      final idx = segs.indexWhere((s) => s.segmentId == _activeSegmentId);
+      if (idx != -1) return segs[idx];
+    }
+
+    return segs.first;
+  }
+
+  /// [skipGuard]: bé vừa chọn "Đọc tiếp"/"Để sau" ở màn tương tác thì cho lật
+  /// luôn, không hỏi lại (như `guarded → then` của web).
+  void _goTo(int i, {bool skipGuard = false}) {
     final state = ref.read(kidReaderControllerProvider(widget.storyId));
     final totalPages = state.totalPages;
     if (i < 0 || i >= totalPages) return;
 
+    final cur = state.currentPage;
+    if (!skipGuard &&
+        i > cur &&
+        state.content != null &&
+        cur >= 0 &&
+        cur < state.content!.scenes.length) {
+      final curScene = state.content!.scenes[cur];
+      if (_notifier.isInteractionPending(curScene)) {
+        final pc = _pageController;
+        if (pc != null && pc.hasClients && pc.page?.round() != cur) {
+          pc.jumpToPage(cur);
+        }
+        _askInteraction(cur, nextPage: i);
+        return;
+      }
+    }
+
+    _cancelAloud();
     _audio.stop();
     setState(() => _activeSegmentId = null);
 
@@ -106,6 +176,103 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
 
     if (state.readingMode == KidReadingMode.listenFirst) {
       _playPage(i);
+    }
+  }
+
+  void _replayScene(int idx) {
+    final state = ref.read(kidReaderControllerProvider(widget.storyId));
+    if (idx < 0 || idx >= state.totalPages) return;
+
+    _cancelAloud();
+    _audio.stop();
+    if (mounted) {
+      setState(() => _activeSegmentId = null);
+    }
+
+    _notifier.goToPage(idx);
+
+    final pc = _pageController;
+    if (pc != null && pc.hasClients && pc.page?.round() != idx) {
+      pc.animateToPage(
+        idx,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+
+    _playPage(idx);
+  }
+
+  Future<void> _askInteraction(int sceneIndex, {int? nextPage}) async {
+    if (_askingInteraction) return;
+    _askingInteraction = true;
+    try {
+      final state = ref.read(kidReaderControllerProvider(widget.storyId));
+      final content = state.content;
+      if (content == null ||
+          sceneIndex < 0 ||
+          sceneIndex >= content.scenes.length) {
+        return;
+      }
+
+      final scene = content.scenes[sceneIndex];
+      if (!_notifier.isInteractionPending(scene) || scene.interaction == null) {
+        return;
+      }
+
+      _audio.stop();
+      if (mounted) {
+        setState(() => _activeSegmentId = null);
+      }
+
+      final it = scene.interaction!;
+      _cancelAloud();
+      final r = await Navigator.of(context).push<KidInteractionResult>(
+        PageRouteBuilder<KidInteractionResult>(
+          opaque: true,
+          transitionDuration: const Duration(milliseconds: 300),
+          pageBuilder: (_, _, _) => KidInteractionScreen(
+            interaction: it,
+            onAttempt: ({optionId, answer, orderedOptionIds}) =>
+                _notifier.attemptInteraction(
+                  interactionId: it.id,
+                  optionId: optionId,
+                  answer: answer,
+                  orderedOptionIds: orderedOptionIds,
+                ),
+            onPlayAudio: (url) => unawaited(_audio.playUrls([url])),
+          ),
+          transitionsBuilder: (_, anim, _, child) => SlideTransition(
+            position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+                .animate(
+                  CurvedAnimation(parent: anim, curve: Curves.easeOutCubic),
+                ),
+            child: child,
+          ),
+        ),
+      );
+
+      _askingInteraction = false;
+      if (!mounted) return;
+      if (r == null) return;
+
+      if (r.replaySceneIndex != null) {
+        _replayScene(r.replaySceneIndex!);
+      } else if (r.resume) {
+        if (nextPage != null) {
+          _goTo(nextPage, skipGuard: true);
+        } else {
+          final curState = ref.read(
+            kidReaderControllerProvider(widget.storyId),
+          );
+          if (curState.readingMode == KidReadingMode.listenFirst &&
+              sceneIndex < curState.totalPages - 1) {
+            _goTo(sceneIndex + 1, skipGuard: true);
+          }
+        }
+      }
+    } finally {
+      _askingInteraction = false;
     }
   }
 
@@ -127,6 +294,11 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     _notifier.markTtsStarted();
 
     if (!hasAudio) {
+      if (_notifier.isInteractionPending(scene)) {
+        _askInteraction(pageIndex);
+        return;
+      }
+
       // Không có audio: vẫn auto-lật trong listenFirst
       Future.delayed(const Duration(milliseconds: 600), () {
         if (!mounted) return;
@@ -158,6 +330,15 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
         setState(() => _activeSegmentId = null);
 
         final curState = ref.read(kidReaderControllerProvider(widget.storyId));
+        final scenes = curState.content?.scenes;
+        if (scenes != null && pageIndex >= 0 && pageIndex < scenes.length) {
+          final sceneNow = scenes[pageIndex];
+          if (_notifier.isInteractionPending(sceneNow)) {
+            _askInteraction(pageIndex);
+            return;
+          }
+        }
+
         if (curState.readingMode == KidReadingMode.listenFirst &&
             curState.currentPage == pageIndex &&
             pageIndex < curState.totalPages - 1) {
@@ -182,6 +363,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   }
 
   void _onToggleAudio(int currentPage, ReadingContent content) {
+    _cancelAloud();
     if (_isAudioPlaying) {
       _audio.stop();
       setState(() => _activeSegmentId = null);
@@ -193,6 +375,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   Future<void> _confirmExit() async {
     final state = ref.read(kidReaderControllerProvider(widget.storyId));
     if (state.isFinished) {
+      _cancelAloud();
       _audio.stop();
       if (mounted) context.go('/kid');
       return;
@@ -208,6 +391,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     if (!confirmed) return;
 
     await _notifier.saveProgressNow();
+    _cancelAloud();
     _audio.stop();
     if (mounted) context.go('/kid');
   }
@@ -221,6 +405,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
       cancelLabel: 'Chưa',
     );
     if (!confirmed) return;
+    _cancelAloud();
     _audio.stop();
     await _notifier.complete();
   }
@@ -277,7 +462,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
           .select((s) => s.lastErrorMessage),
       (prev, next) {
         if (next != null && next.isNotEmpty && mounted) {
-          showTtToast(context, next, type: TtToastType.error);
+          _toast(next, type: TtToastType.error);
         }
       },
     );
@@ -288,13 +473,37 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
       (prev, next) {
         if (next != null && next.isNotEmpty && mounted) {
           _audio.stop();
-          showTtToast(context, next, type: TtToastType.info);
+          _toast(next, type: TtToastType.info);
           context.go('/kid');
         }
       },
     );
 
+    // Lắng nghe lỗi đọc to → toast + clearError
+    ref.listen(kidReadAloudControllerProvider(widget.storyId), (prev, next) {
+      if (next.errorMessage != null &&
+          next.errorMessage!.isNotEmpty &&
+          mounted) {
+        _toast(next.errorMessage!, type: TtToastType.error);
+        ref
+            .read(kidReadAloudControllerProvider(widget.storyId).notifier)
+            .clearError();
+      }
+    });
+
+    // Lắng nghe kết quả đọc to → toast chúc mừng
+    ref.listen(kidReadAloudControllerProvider(widget.storyId), (prev, next) {
+      if (next.result != null && prev?.result != next.result && mounted) {
+        final msg = next.result!.message.trim();
+        _toast(
+          msg.isNotEmpty ? msg : 'Em đọc hay quá!',
+          type: TtToastType.success,
+        );
+      }
+    });
+
     final state = ref.watch(kidReaderControllerProvider(widget.storyId));
+    final aloud = ref.watch(kidReadAloudControllerProvider(widget.storyId));
     final tt = context.tt;
 
     return Scaffold(
@@ -311,7 +520,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                 : 'Em thử lại nhé',
             onRetry: _notifier.load,
           ),
-          KidReaderStatus.ready => _buildReadyBody(context, state, tt),
+          KidReaderStatus.ready => _buildReadyBody(context, state, tt, aloud),
         },
       ),
     );
@@ -321,6 +530,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     BuildContext context,
     KidReaderState state,
     TtColors tt,
+    KidReadAloudState aloud,
   ) {
     final content = state.content;
     if (content == null) {
@@ -334,9 +544,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     // Khởi tạo PageController lazy (chỉ một lần khi ready)
     _pageController ??= PageController(initialPage: state.currentPage);
 
-    final orientation = MediaQuery.orientationOf(context);
-    final width = MediaQuery.sizeOf(context).width;
-    final isWide = orientation == Orientation.landscape || width >= 700;
+    final layout = kidReaderLayoutFor(MediaQuery.sizeOf(context));
 
     final currentPage = state.currentPage;
     final totalPages = state.totalPages;
@@ -497,8 +705,23 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                 scene: scenes[i],
                 vocabulary: content.vocabulary,
                 activeSegmentId: i == currentPage ? _activeSegmentId : null,
-                isWide: isWide,
+                aloudSegmentId: i == currentPage && aloud.recording
+                    ? aloud.segmentId
+                    : null,
+                aloudResult:
+                    i == currentPage &&
+                        aloud.result != null &&
+                        content.scenes[i].segments.any(
+                          (s) => s.segmentId == aloud.result!.segmentId,
+                        )
+                    ? aloud.result
+                    : null,
+                layout: layout,
+                isNarrating: i == currentPage && _isAudioPlaying,
+                isAloudBusy: i == currentPage && (aloud.recording || aloud.sending),
                 onVocabTap: _openVocab,
+                onAloudHintTap: (message) =>
+                    _toast(message, type: TtToastType.info),
               );
             },
           ),
@@ -527,17 +750,36 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
             canGoNext: currentPage < totalPages - 1,
             isAudioPlaying: _isAudioPlaying,
             isAudioAvailable: audioAvailable,
+            isRecording: aloud.recording,
+            isSending: aloud.sending,
             onPrev: () => _goTo(currentPage - 1),
             onNext: () => _goTo(currentPage + 1),
             onToggleAudio: () => _onToggleAudio(currentPage, content),
-            onMicTap: () => showTtToast(
-              context,
-              'Tính năng này sắp có',
-              type: TtToastType.info,
-            ),
+            onMicTap: () {
+              final scene = (currentPage >= 0 && currentPage < scenes.length)
+                  ? scenes[currentPage]
+                  : null;
+              final target = scene == null ? null : _aloudTarget(scene);
+              if (target == null) {
+                _toast('Trang này chưa có chữ để đọc', type: TtToastType.info);
+                return;
+              }
+              ref
+                  .read(kidReadAloudControllerProvider(widget.storyId).notifier)
+                  .toggle(
+                    target.segmentId,
+                    onStart: () {
+                      _audio.stop();
+                      setState(() => _activeSegmentId = null);
+                    },
+                  );
+            },
           ),
         ],
       ],
     );
   }
 }
+
+// Khoảng cao thanh đáy màn đọc, để toast không đè lên.
+const double _kToastBottomOffset = 96;

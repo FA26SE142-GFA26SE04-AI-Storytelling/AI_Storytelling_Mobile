@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/theme/kid_metrics.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
 import '../../../core/widgets/tt_button.dart';
@@ -189,7 +190,7 @@ class _KidRewardsScreenState extends ConsumerState<KidRewardsScreen> {
                     badge.description,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 16,
                       color: tt.muted,
                       height: 1.4,
                     ),
@@ -210,7 +211,7 @@ class _KidRewardsScreenState extends ConsumerState<KidRewardsScreen> {
                   child: Text(
                     earnedAtText,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: badge.earned ? tt.goldDeep : tt.muted,
                     ),
@@ -234,7 +235,12 @@ class _KidRewardsScreenState extends ConsumerState<KidRewardsScreen> {
         backgroundColor: tt.bg,
         elevation: 0,
         scrolledUnderElevation: 0,
+        toolbarHeight: kKidMinTap,
         leading: IconButton(
+          constraints: const BoxConstraints.tightFor(
+            width: kKidMinTap,
+            height: kKidMinTap,
+          ),
           icon: const Icon(Icons.arrow_back),
           tooltip: 'Quay lại',
           onPressed: () => Navigator.maybePop(context),
@@ -556,7 +562,7 @@ class _KidRewardsScreenState extends ConsumerState<KidRewardsScreen> {
                 child: Center(
                   child: Text(
                     'Chưa có thông tin huy hiệu',
-                    style: TextStyle(color: tt.muted, fontSize: 14),
+                    style: TextStyle(color: tt.muted, fontSize: 16),
                   ),
                 ),
               )
@@ -567,7 +573,7 @@ class _KidRewardsScreenState extends ConsumerState<KidRewardsScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 1.15,
+                childAspectRatio: 1.0,
                 children: badges.map((badge) {
                   final Widget cardChild = Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -584,7 +590,7 @@ class _KidRewardsScreenState extends ConsumerState<KidRewardsScreen> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: tt.text,
                         ),

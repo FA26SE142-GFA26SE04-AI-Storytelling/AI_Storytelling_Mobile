@@ -10,6 +10,7 @@ import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_toast.dart';
 import '../../../models/child_reading_dto.dart';
 import '../data/kid_reading_repository.dart';
+import '../data/kid_rewards_repository.dart';
 
 /// Bước câu đố sau khi đọc truyện dành cho bé.
 class KidQuizStep extends ConsumerStatefulWidget {
@@ -48,6 +49,9 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
   String _pickedAnswer = '';
   QuizAnswerResult? _currentAnswerResult;
   ChildQuizResult? _quizSummaryResult;
+
+  /// Lấy tên từ bảng phần thưởng như web.
+  Map<String, String> _badgeNames = const {};
 
   @override
   void initState() {
@@ -144,6 +148,16 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
         _currentAnswerResult = result;
         _sending = false;
       });
+
+      if (result.newBadges.isNotEmpty && _badgeNames.isEmpty) {
+        ref.read(kidRewardsRepositoryProvider).rewards().then((r) {
+          if (mounted) {
+            setState(
+              () => _badgeNames = {for (final b in r.badges) b.code: b.name},
+            );
+          }
+        }, onError: (_) {});
+      }
       // Cuộn xuống để bé thấy lời khen / gợi ý của ếch ngay dưới các đáp án.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!_questionScroll.hasClients) return;
@@ -551,7 +565,7 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
                       hintText: 'Nhập câu trả lời của em...',
                       hintStyle: TextStyle(
                         fontFamily: 'Nunito',
-                        fontSize: 20,
+                        fontSize: 22,
                         color: tt.faint,
                       ),
                       filled: true,
@@ -623,7 +637,7 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
                                     : 'Mình thử nghĩ lại nhé.'),
                           style: TextStyle(
                             fontFamily: 'Nunito',
-                            fontSize: 18,
+                            fontSize: 22,
                             fontWeight: FontWeight.w700,
                             color: tt.text,
                           ),
@@ -677,7 +691,9 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Em mở được ${_currentAnswerResult!.newBadges.length} huy hiệu mới',
+                                _badgeNames.isEmpty
+                                    ? 'Em mở được ${_currentAnswerResult!.newBadges.length} huy hiệu mới'
+                                    : 'Huy hiệu mới: ${_currentAnswerResult!.newBadges.map((c) => _badgeNames[c] ?? c).join(', ')}!',
                                 style: TextStyle(
                                   fontFamily: 'Nunito',
                                   fontSize: 16,

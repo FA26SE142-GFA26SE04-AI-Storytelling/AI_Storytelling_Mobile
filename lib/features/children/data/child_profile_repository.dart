@@ -23,7 +23,7 @@ abstract class ChildProfileRepository {
     int id, {
     required String nickname,
     required String ageBand,
-    int? avatarId,
+    String? avatarId,
   });
   Future<void> activate(int id);
   Future<void> suspend(int id);
@@ -114,7 +114,7 @@ class ApiChildProfileRepository implements ChildProfileRepository {
     int id, {
     required String nickname,
     required String ageBand,
-    int? avatarId,
+    String? avatarId,
   }) =>
       runApi(() async {
         final response = await dio.put<dynamic>(
