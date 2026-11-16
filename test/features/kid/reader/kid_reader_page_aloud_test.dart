@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -47,6 +48,7 @@ void main() {
     required ReadingScene scene,
     int? aloudSegmentId,
     ReadAloudResult? aloudResult,
+    void Function(String)? onHintTap,
   }) {
     return ProviderScope(
       child: MaterialApp(
@@ -58,6 +60,7 @@ void main() {
             isWide: false,
             aloudSegmentId: aloudSegmentId,
             aloudResult: aloudResult,
+            onAloudHintTap: onHintTap,
             onVocabTap: (_) {},
           ),
         ),
@@ -219,6 +222,59 @@ void main() {
           );
           expect(span.style?.backgroundColor, isNull);
         }
+      },
+    );
+
+    testWidgets(
+      'Test 4: chạm chữ retry có hint gọi onAloudHintTap đúng thông điệp và chữ skipped không hint báo quên',
+      (tester) async {
+        const aloudResult = ReadAloudResult(
+          sessionId: 100,
+          segmentId: 1,
+          words: [
+            ReadAloudWord(index: 0, text: 'Bé', status: 'good'),
+            ReadAloudWord(index: 1, text: 'Na', status: 'retry', hint: 'tone'),
+            ReadAloudWord(index: 2, text: 'đi', status: 'good'),
+            ReadAloudWord(index: 3, text: 'học', status: 'skipped', hint: null),
+          ],
+        );
+
+        final messages = <String>[];
+
+        await tester.pumpWidget(
+          buildTestWidget(
+            scene: testScene,
+            aloudResult: aloudResult,
+            onHintTap: messages.add,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final richTextFinder = find.descendant(
+          of: find.byType(KidReaderPage),
+          matching: find.byType(RichText),
+        );
+        final richText = tester.widget<RichText>(richTextFinder.first);
+        final spans = collectTextSpans(richText.text);
+
+        final beSpan = spans.firstWhere((s) => s.text!.contains('Bé'));
+        final naSpan = spans.firstWhere((s) => s.text!.contains('Na'));
+        final hocSpan = spans.firstWhere((s) => s.text!.contains('học'));
+
+        // Với span chứa 'Bé' (good) -> recognizer là null (kỳ vọng isNull)
+        expect(beSpan.recognizer, isNull);
+
+        // Chạm chữ 'Na' -> kỳ vọng messages chứa 'Sai dấu, em thử lại nhé'
+        final naRecognizer = naSpan.recognizer as TapGestureRecognizer?;
+        expect(naRecognizer, isNotNull);
+        naRecognizer!.onTap!();
+        expect(messages, contains('Sai dấu, em thử lại nhé'));
+
+        // Tương tự với span chứa 'học' -> 'Em quên đọc chữ này'
+        final hocRecognizer = hocSpan.recognizer as TapGestureRecognizer?;
+        expect(hocRecognizer, isNotNull);
+        hocRecognizer!.onTap!();
+        expect(messages, contains('Em quên đọc chữ này'));
       },
     );
   });

@@ -85,19 +85,19 @@ Tham khảo web: `features/kid/*`, `childAccessService.ts`, `childReadingService
 - [x] Ảnh bìa có đuôi `#crop=x,y,w,h`: `TtNetworkImage` tự cắt đúng vùng như web.
 - [ ] **Một phần** — Màn đọc (bố cục A: tranh trên, chữ dưới, thanh ◀ 🔊 🎤 ▶ ở đáy): xong vuốt lật trang, ListenFirst / ReadFirst, phát giọng đọc có sẵn (`just_audio`, tô sáng đoạn đang đọc), từ vựng (xem nghĩa, cất vào sổ tay), lưu tiến độ (1-based, tối đa 600 giây/lần), dấu trang, yêu thích, theo dõi tín hiệu dừng đọc (`/signal` mỗi 8 giây), sự kiện `PageCompleted` / `TtsStarted` / `TtsCompleted`, nút "Em đọc xong rồi" → màn +EXP. Màn rộng hiện tranh và chữ cạnh nhau. Còn thiếu: hai trang cho máy tính bảng.
 - [x] 5 loại tương tác khi nghe (kiểu Quizlet, toàn màn hình): Checkpoint, Đoán tranh, Nhập vai, Điền chữ, Xếp thứ tự. Hỏi khi nghe hết cảnh, chặn lật trang khi chưa trả lời; "Để sau" thì đọc tiếp; truyện chỉ nghe không hỏi.
-- [x] Luyện đọc to bằng micro (giống web): bấm 🎤 dừng giọng kể và ghi âm đoạn đang đọc (WAV 16 kHz, tự dừng ở 3 MB, khoảng 98 giây, như web), đoạn đang ghi tô nền vàng; kết quả tô từng chữ (đúng: màu chính in đậm, cần đọc lại: nền vàng, bỏ qua: chữ mờ), lời khen / lỗi hiện bằng toast; bấm lần sau sang đoạn kế. Lật trang, thoát, mở tương tác, bật giọng kể hoặc ẩn app thì huỷ bản ghi, không gửi. Chưa thử ghi âm trên máy thật (web không ghi âm được); chưa hiện gợi ý `hint` (sai dấu / chưa rõ) khi chạm chữ.
-- [x] Hoàn thành truyện (phương án A, từng bước toàn màn hình, có Bỏ qua): cảm xúc (kèm +EXP, huy hiệu mới, bước lộ trình) → quiz (đáp án xáo trộn, trả lời ngắn, kết quả, làm lại) → ghi âm kể lại (`record`, WAV 16 kHz, tự dừng ở 3 MB) → đánh dấu tối đa 5 cảnh còn thắc mắc. Giọng đọc đang phát cũng tính là bé đang hoạt động. Chưa thử ghi âm trên máy thật; trên web không ghi âm được (báo bằng toast). Huy hiệu mới chỉ hiện số lượng, chưa hiện tên.
+- [x] Luyện đọc to bằng micro (giống web): bấm 🎤 dừng giọng kể và ghi âm đoạn đang đọc (WAV 16 kHz, tự dừng ở 3 MB, khoảng 98 giây, như web), đoạn đang ghi tô nền vàng; kết quả tô từng chữ (đúng: màu chính in đậm, cần đọc lại: nền vàng, bỏ qua: chữ mờ), lời khen / lỗi hiện bằng toast; bấm lần sau sang đoạn kế. Lật trang, thoát, mở tương tác, bật giọng kể hoặc ẩn app thì huỷ bản ghi, không gửi. Chưa thử ghi âm trên máy thật (web không ghi âm được).
+- [x] Hoàn thành truyện (phương án A, từng bước toàn màn hình, có Bỏ qua): cảm xúc (kèm +EXP, huy hiệu mới, bước lộ trình) → quiz (đáp án xáo trộn, trả lời ngắn, kết quả, làm lại) → ghi âm kể lại (`record`, WAV 16 kHz, tự dừng ở 3 MB) → đánh dấu tối đa 5 cảnh còn thắc mắc. Giọng đọc đang phát cũng tính là bé đang hoạt động. Chưa thử ghi âm trên máy thật; trên web không ghi âm được (báo bằng toast). Huy hiệu mới hiện tên (tra từ phần thưởng như web).
 - [x] Phần thưởng (phương án A: cây trên, huy hiệu dưới): EXP, chuỗi ngày đọc, cây tri thức 5 giai đoạn (`TtKnowledgeTree` chuyển từ web) và tưới cây, 7 huy hiệu lưới 2 cột. Sổ tay từ vựng: danh sách, xoá có xác nhận. Đọc xong mở bước lộ trình tiếp theo do Backend xử lý, mobile báo ở bước Cảm xúc.
 - [x] Gửi điều ước bằng thẻ (phương án A: lưới thẻ + thanh đáy): Nhân vật → Nơi chốn → Thử thách → Bài học (hoặc "Để bố mẹ chọn"), phát âm thanh thẻ, danh sách điều ước đã gửi kèm nút đọc truyện. Gợi ý chỉ có truyện cộng đồng tạm ẩn (xem mục đọc truyện cộng đồng).
-- [ ] Đọc truyện cộng đồng đã duyệt. Lưu ý: Backend `StartReadingRequestDto` chưa có `communitySubmissionId` (web và mobile đều gửi trường này) — cần hỏi Backend.
-- [ ] **Một phần** — Nút tối thiểu 64dp, chữ nội dung 22sp trên các màn của bé (xong, `kKidMinTap`). Còn thiếu: tắt thông báo của app khi bé đang đọc.
-- [ ] Luyện đọc to: chạm chữ cần đọc lại thì hiện gợi ý theo `hint` như web (sai dấu / chưa nghe rõ / đọc thành chữ khác).
+- [ ] Đọc truyện cộng đồng đã duyệt. Lưu ý: Backend `StartReadingRequestDto` chưa có `communitySubmissionId` (web và mobile đều gửi trường này) — cần hỏi Backend (kiểm tra lại 16/11: vẫn chưa có, mobile chưa làm được).
+- [x] Nút tối thiểu 64dp, chữ nội dung 22sp trên các màn của bé (`kKidMinTap`). Màn đọc bật chế độ toàn màn hình (ẩn thanh trạng thái và thông báo), thoát thì trả lại. Thông báo đẩy của app (giai đoạn 4) phải không hiện khi bé đang ở Chế độ của bé. Chưa thử trên máy thật.
+- [x] Luyện đọc to: chạm chữ cần đọc lại thì hiện gợi ý theo `hint` như web (sai dấu / chưa nghe rõ / đọc thành chữ khác / quên đọc).
 
 ### Lỗi giao diện phát hiện khi chụp màn hình (16/11)
 
-- [ ] Màn đọc ở khổ rộng (800): tranh bị căn giữa theo chiều dọc so với cột chữ dài nên lệch xuống dưới, góc trên bên trái trống nhiều (`kid_reader_page.dart`, Row đang `crossAxisAlignment.center`).
-- [ ] Màn tương tác "Đoán tranh": đáp án không có ảnh hiện ô trắng trống, chưa dùng ảnh mặc định.
-- [ ] Khổ 360: toast hiện đè lên thanh đáy ◀ 🔊 🎤 ▶ của màn đọc.
+- [ ] Màn đọc ở khổ rộng (800): tranh bị căn giữa theo chiều dọc so với cột chữ dài nên lệch xuống dưới, góc trên bên trái trống nhiều (`kid_reader_page.dart`, Row đang `crossAxisAlignment.center`). Sẽ làm cùng bố cục sách mở (đã chốt phương án A).
+- [ ] Màn tương tác "Đoán tranh": một đáp án hiện ô trắng. Đọc code thấy đã dùng `TtNetworkImage` có ảnh mặc định; cần chụp lại để biết là ảnh thật màu trắng hay lỗi tải.
+- [x] Khổ 360: toast hiện đè lên thanh đáy ◀ 🔊 🎤 ▶ của màn đọc (toast ở màn đọc nâng lên 96dp, `showTtToast(bottomOffset:)`).
 
 ## Giai đoạn 3: Phụ huynh, thông tin của bé (F-01, F-02, F-12)
 

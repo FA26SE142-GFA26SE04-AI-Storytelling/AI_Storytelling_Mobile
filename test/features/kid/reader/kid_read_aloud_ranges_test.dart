@@ -132,5 +132,18 @@ void main() {
         expect(ranges[2].status, 'skipped');
       },
     );
+
+    test('mang hint của từng word vào range', () {
+      const segmentText = 'Bé Na';
+      const words = [
+        ReadAloudWord(index: 0, text: 'Bé', status: 'good', hint: null),
+        ReadAloudWord(index: 1, text: 'Na', status: 'retry', hint: 'tone'),
+      ];
+
+      final ranges = readAloudWordRanges(segmentText, words);
+
+      expect(ranges[1].hint, 'tone');
+      expect(ranges[0].hint, isNull);
+    });
   });
 }

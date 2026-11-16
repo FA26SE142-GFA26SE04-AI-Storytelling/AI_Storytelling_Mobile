@@ -9,11 +9,15 @@ class ReadAloudWordRange {
     required this.start,
     required this.end,
     required this.status,
+    this.hint,
   });
 
   final int start;
   final int end;
   final String status;
+
+  /// Gợi ý khi chữ đọc chưa đúng (tone/unclear/different), null nếu không có
+  final String? hint;
 }
 
 /// Ghép token chữ trong [segmentText] với danh sách [words] theo thứ tự.
@@ -47,6 +51,7 @@ List<ReadAloudWordRange> readAloudWordRanges(
       start: token.start,
       end: token.end,
       status: sortedWords[i].status,
+      hint: sortedWords[i].hint,
     );
   });
 }

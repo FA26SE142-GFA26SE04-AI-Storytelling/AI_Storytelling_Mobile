@@ -32,6 +32,7 @@ class KidReaderPage extends StatefulWidget {
     this.activeSegmentId,
     this.aloudSegmentId,
     this.aloudResult,
+    this.onAloudHintTap,
     required this.isWide,
     required this.onVocabTap,
   });
@@ -50,6 +51,9 @@ class KidReaderPage extends StatefulWidget {
 
   /// Kết quả đọc to của đoạn văn (tô màu theo trạng thái từng từ)
   final ReadAloudResult? aloudResult;
+
+  /// Callback khi bé chạm vào chữ cần đọc lại để xem gợi ý
+  final void Function(String message)? onAloudHintTap;
 
   /// Có đang hiển thị trên màn hình rộng (tablet/desktop) hay không
   final bool isWide;
@@ -179,6 +183,23 @@ class _KidReaderPageState extends State<KidReaderPage> {
     return true;
   }
 
+  /// Chuyển đổi trạng thái và gợi ý đọc to thành thông điệp cho bé
+  String? _resolveAloudHintMessage(String status, String? hint) {
+    switch (hint) {
+      case 'tone':
+        return 'Sai dấu, em thử lại nhé';
+      case 'unclear':
+        return 'Chưa nghe rõ';
+      case 'different':
+        return 'Em đọc thành chữ khác';
+      default:
+        if (status == 'skipped') {
+          return 'Em quên đọc chữ này';
+        }
+        return null;
+    }
+  }
+
   /// Xây dựng các TextSpan phân chia theo đoạn active và từ vựng
   List<InlineSpan> _buildTextSpans(BuildContext context, String text) {
     _clearRecognizers();
@@ -265,6 +286,7 @@ class _KidReaderPageState extends State<KidReaderPage> {
 
     // Bản đồ gán trạng thái đọc to cho từng ký tự
     final charStatus = List<String?>.filled(text.length, null);
+    final charHint = List<String?>.filled(text.length, null);
     if (widget.aloudResult != null) {
       final aloudResult = widget.aloudResult!;
       final r = _segmentRange(text, aloudResult.segmentId);
@@ -274,8 +296,14 @@ class _KidReaderPageState extends State<KidReaderPage> {
         for (final wr in wordRanges) {
           final wordStart = (r.start + wr.start).clamp(0, text.length);
           final wordEnd = (r.start + wr.end).clamp(0, text.length);
+          final message = (wr.status == 'retry' || wr.status == 'skipped')
+              ? _resolveAloudHintMessage(wr.status, wr.hint)
+              : null;
           for (int i = wordStart; i < wordEnd; i++) {
             charStatus[i] = wr.status;
+            if (message != null) {
+              charHint[i] = message;
+            }
           }
         }
       }
@@ -299,12 +327,14 @@ class _KidReaderPageState extends State<KidReaderPage> {
       final currentActive = isCharActive(start);
       final currentVocab = charVocab[start];
       final currentStatus = charStatus[start];
+      final currentHint = charHint[start];
 
       int end = start + 1;
       while (end < text.length &&
           isCharActive(end) == currentActive &&
           charVocab[end] == currentVocab &&
-          charStatus[end] == currentStatus) {
+          charStatus[end] == currentStatus &&
+          charHint[end] == currentHint) {
         end++;
       }
 
@@ -314,6 +344,11 @@ class _KidReaderPageState extends State<KidReaderPage> {
         final item = currentVocab;
         recognizer = TapGestureRecognizer()
           ..onTap = () => widget.onVocabTap(item);
+        _recognizers.add(recognizer);
+      } else if (currentHint != null && widget.onAloudHintTap != null) {
+        final message = currentHint;
+        recognizer = TapGestureRecognizer()
+          ..onTap = () => widget.onAloudHintTap!(message);
         _recognizers.add(recognizer);
       }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -51,6 +52,8 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   @override
   void initState() {
     super.initState();
+    // Tắt thông báo khi bé đang đọc.
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _audio = KidReaderAudio();
     _kidSession = ref.read(kidSessionProvider.notifier);
     _playingSub = _audio.playingStream.listen((playing) {
@@ -73,6 +76,11 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     _kidSession.narrating = false;
     _audio.dispose();
     _pageController?.dispose();
+    // Trả về mặc định của app (hiện cả hai thanh), app chưa đặt edgeToEdge ở đâu.
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
     super.dispose();
   }
 
@@ -87,6 +95,15 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  void _toast(String message, {TtToastType type = TtToastType.info}) {
+    showTtToast(
+      context,
+      message,
+      type: type,
+      bottomOffset: _kToastBottomOffset,
+    );
+  }
 
   KidReaderController get _notifier =>
       ref.read(kidReaderControllerProvider(widget.storyId).notifier);
@@ -445,7 +462,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
           .select((s) => s.lastErrorMessage),
       (prev, next) {
         if (next != null && next.isNotEmpty && mounted) {
-          showTtToast(context, next, type: TtToastType.error);
+          _toast(next, type: TtToastType.error);
         }
       },
     );
@@ -456,7 +473,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
       (prev, next) {
         if (next != null && next.isNotEmpty && mounted) {
           _audio.stop();
-          showTtToast(context, next, type: TtToastType.info);
+          _toast(next, type: TtToastType.info);
           context.go('/kid');
         }
       },
@@ -467,7 +484,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
       if (next.errorMessage != null &&
           next.errorMessage!.isNotEmpty &&
           mounted) {
-        showTtToast(context, next.errorMessage!, type: TtToastType.error);
+        _toast(next.errorMessage!, type: TtToastType.error);
         ref
             .read(kidReadAloudControllerProvider(widget.storyId).notifier)
             .clearError();
@@ -478,8 +495,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     ref.listen(kidReadAloudControllerProvider(widget.storyId), (prev, next) {
       if (next.result != null && prev?.result != next.result && mounted) {
         final msg = next.result!.message.trim();
-        showTtToast(
-          context,
+        _toast(
           msg.isNotEmpty ? msg : 'Em đọc hay quá!',
           type: TtToastType.success,
         );
@@ -704,6 +720,8 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                     : null,
                 isWide: isWide,
                 onVocabTap: _openVocab,
+                onAloudHintTap: (message) =>
+                    _toast(message, type: TtToastType.info),
               );
             },
           ),
@@ -743,11 +761,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                   : null;
               final target = scene == null ? null : _aloudTarget(scene);
               if (target == null) {
-                showTtToast(
-                  context,
-                  'Trang này chưa có chữ để đọc',
-                  type: TtToastType.info,
-                );
+                _toast('Trang này chưa có chữ để đọc', type: TtToastType.info);
                 return;
               }
               ref
@@ -766,3 +780,6 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     );
   }
 }
+
+// Khoảng cao thanh đáy màn đọc, để toast không đè lên.
+const double _kToastBottomOffset = 96;
