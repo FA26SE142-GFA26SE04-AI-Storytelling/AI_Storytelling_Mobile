@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_network_image.dart';
 import '../../../models/child_read_aloud_dto.dart';
 import '../../../models/child_reading_dto.dart';
@@ -23,6 +24,15 @@ class _VocabCandidate {
   final bool isWholeWord;
 }
 
+/// Bố cục màn đọc: dọc, ngang điện thoại (tranh trái chữ phải), sách mở (máy tính bảng ngang).
+enum KidReaderLayout { stacked, sideBySide, book }
+
+KidReaderLayout kidReaderLayoutFor(Size size) {
+  final landscape = size.width > size.height;
+  if (!landscape) return KidReaderLayout.stacked;
+  return size.shortestSide >= 600 ? KidReaderLayout.book : KidReaderLayout.sideBySide;
+}
+
 /// Widget hiển thị MỘT trang (= một cảnh/scene) của truyện dành cho chế độ đọc của bé.
 class KidReaderPage extends StatefulWidget {
   const KidReaderPage({
@@ -33,7 +43,9 @@ class KidReaderPage extends StatefulWidget {
     this.aloudSegmentId,
     this.aloudResult,
     this.onAloudHintTap,
-    required this.isWide,
+    required this.layout,
+    this.isNarrating = false,
+    this.isAloudBusy = false,
     required this.onVocabTap,
   });
 
@@ -55,8 +67,14 @@ class KidReaderPage extends StatefulWidget {
   /// Callback khi bé chạm vào chữ cần đọc lại để xem gợi ý
   final void Function(String message)? onAloudHintTap;
 
-  /// Có đang hiển thị trên màn hình rộng (tablet/desktop) hay không
-  final bool isWide;
+  /// Bố cục đang dùng
+  final KidReaderLayout layout;
+
+  /// Giọng kể đang phát
+  final bool isNarrating;
+
+  /// Đang ghi âm hoặc chấm đọc to
+  final bool isAloudBusy;
 
   /// Callback khi bé chạm vào một từ vựng
   final void Function(ReadingVocabulary item) onVocabTap;
@@ -428,8 +446,32 @@ class _KidReaderPageState extends State<KidReaderPage> {
     );
   }
 
-  Widget _buildTextCard(BuildContext context, List<InlineSpan> spans) {
+  Widget _buildTextCard(
+    BuildContext context,
+    List<InlineSpan> spans, {
+    bool bare = false,
+  }) {
     final tt = context.tt;
+
+    final content = spans.isEmpty
+        ? const SizedBox.shrink()
+        : Text.rich(
+            TextSpan(
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 24,
+                height: 1.6,
+                color: tt.text,
+                fontWeight: FontWeight.w400,
+              ),
+              children: spans,
+            ),
+            textAlign: TextAlign.start,
+          );
+
+    if (bare) {
+      return content;
+    }
 
     return Container(
       width: double.infinity,
@@ -449,21 +491,213 @@ class _KidReaderPageState extends State<KidReaderPage> {
           ),
         ],
       ),
-      child: spans.isEmpty
-          ? const SizedBox.shrink()
-          : Text.rich(
-              TextSpan(
-                style: TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 24,
-                  height: 1.6,
-                  color: tt.text,
-                  fontWeight: FontWeight.w400,
-                ),
-                children: spans,
-              ),
-              textAlign: TextAlign.start,
+      child: content,
+    );
+  }
+
+  TtFrogMood _frogMood() {
+    if (widget.isAloudBusy) return TtFrogMood.think;
+    if (widget.aloudResult != null || widget.isNarrating) {
+      return TtFrogMood.happy;
+    }
+    return TtFrogMood.idle;
+  }
+
+  Widget _buildStacked(
+    BuildContext context,
+    String? imageUrl,
+    List<InlineSpan> spans,
+  ) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildImage(context, imageUrl),
+              const SizedBox(height: 16),
+              _buildTextCard(context, spans),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSideBySide(
+    BuildContext context,
+    String? imageUrl,
+    List<InlineSpan> spans,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 5,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: _buildImage(context, imageUrl),
             ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            flex: 6,
+            child: SingleChildScrollView(
+              child: _buildTextCard(context, spans),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBook(
+    BuildContext context,
+    String? imageUrl,
+    List<InlineSpan> spans,
+  ) {
+    final tt = context.tt;
+    final mood = _frogMood();
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SizedBox(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        color: tt.paper,
+                        borderRadius: BorderRadius.circular(TtRadius.xl),
+                        border: Border.all(
+                          color: tt.line,
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: tt.shadow.withValues(alpha: 0.08),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(TtRadius.xl - 2),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: TtNetworkImage(
+                                key: ValueKey(imageUrl ?? ''),
+                                url: imageUrl,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                                radius: BorderRadius.zero,
+                              ),
+                            ),
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Container(
+                                  width: 2,
+                                  color: tt.line,
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  bottom: 0,
+                                  right: 2,
+                                  width: 16,
+                                  child: IgnorePointer(
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.centerRight,
+                                          end: Alignment.centerLeft,
+                                          colors: [
+                                            tt.shadow.withValues(alpha: 0.12),
+                                            Colors.transparent,
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  bottom: 0,
+                                  left: 2,
+                                  width: 16,
+                                  child: IgnorePointer(
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                          colors: [
+                                            tt.shadow.withValues(alpha: 0.12),
+                                            Colors.transparent,
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: SingleChildScrollView(
+                                padding: const EdgeInsets.all(20),
+                                child: _buildTextCard(
+                                  context,
+                                  spans,
+                                  bare: true,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      // Đứng trong góc sách: đặt ra ngoài mép thì bị PageView cắt mất thân.
+                      left: 12,
+                      bottom: 12,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        transitionBuilder: (child, anim) => FadeTransition(
+                          opacity: anim,
+                          child: ScaleTransition(scale: anim, child: child),
+                        ),
+                        child: TtFrog(
+                          key: ValueKey(mood),
+                          mood: mood,
+                          size: 80,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 
@@ -472,41 +706,13 @@ class _KidReaderPageState extends State<KidReaderPage> {
     final imageUrl = _resolveImageUrl();
     final spans = _buildTextSpans(context, widget.scene.text);
 
-    if (widget.isWide) {
-      return SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  flex: 5,
-                  child: _buildImage(context, imageUrl),
-                ),
-                const SizedBox(width: 24),
-                Expanded(
-                  flex: 6,
-                  child: _buildTextCard(context, spans),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
+    switch (widget.layout) {
+      case KidReaderLayout.stacked:
+        return _buildStacked(context, imageUrl, spans);
+      case KidReaderLayout.sideBySide:
+        return _buildSideBySide(context, imageUrl, spans);
+      case KidReaderLayout.book:
+        return _buildBook(context, imageUrl, spans);
     }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildImage(context, imageUrl),
-          const SizedBox(height: 16),
-          _buildTextCard(context, spans),
-        ],
-      ),
-    );
   }
 }

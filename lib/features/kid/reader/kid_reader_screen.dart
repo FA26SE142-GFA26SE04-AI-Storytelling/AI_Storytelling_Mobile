@@ -544,9 +544,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     // Khởi tạo PageController lazy (chỉ một lần khi ready)
     _pageController ??= PageController(initialPage: state.currentPage);
 
-    final orientation = MediaQuery.orientationOf(context);
-    final width = MediaQuery.sizeOf(context).width;
-    final isWide = orientation == Orientation.landscape || width >= 700;
+    final layout = kidReaderLayoutFor(MediaQuery.sizeOf(context));
 
     final currentPage = state.currentPage;
     final totalPages = state.totalPages;
@@ -718,7 +716,9 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                         )
                     ? aloud.result
                     : null,
-                isWide: isWide,
+                layout: layout,
+                isNarrating: i == currentPage && _isAudioPlaying,
+                isAloudBusy: i == currentPage && (aloud.recording || aloud.sending),
                 onVocabTap: _openVocab,
                 onAloudHintTap: (message) =>
                     _toast(message, type: TtToastType.info),

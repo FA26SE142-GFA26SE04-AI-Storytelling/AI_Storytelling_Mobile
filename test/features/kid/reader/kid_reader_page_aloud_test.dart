@@ -57,7 +57,7 @@ void main() {
           body: KidReaderPage(
             scene: scene,
             vocabulary: const <ReadingVocabulary>[],
-            isWide: false,
+            layout: KidReaderLayout.stacked,
             aloudSegmentId: aloudSegmentId,
             aloudResult: aloudResult,
             onAloudHintTap: onHintTap,
