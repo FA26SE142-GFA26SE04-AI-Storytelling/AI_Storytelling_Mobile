@@ -134,7 +134,8 @@ class KidReadAloudController extends Notifier<KidReadAloudState> {
         final next = state.elapsedSeconds + 1;
         _safeSetState(state.copyWith(elapsedSeconds: next));
 
-        bool limit = next >= 60;
+        // Giống web (useRecorder): tối đa 120 giây, thường chạm giới hạn 3 MB (~98 giây WAV 16 kHz) trước.
+        bool limit = next >= 120;
         if (!limit && _recordedPath != null) {
           try {
             final f = File(_recordedPath!);
