@@ -1,6 +1,6 @@
 # Mobile (Flutter): chức năng theo vai trò
 
-Cập nhật: 15/11/2026.
+Cập nhật: 16/11/2026.
 
 Căn cứ:
 
@@ -83,14 +83,14 @@ Tham khảo web: `features/kid/*`, `childAccessService.ts`, `childReadingService
 - [x] Thư viện của bé (`GET /child/reading/stories`, trang đánh số từ 1 như Backend): lưới bìa, tìm kiếm, tải thêm khi cuộn, nút xoá nhanh ô tìm kiếm.
 - [x] Hỏi lại phiên bé định kỳ như web: kiểm tra mỗi 15 giây, chỉ gọi `GET /ChildAccessCredential/me` (tối đa 1 lần/phút) khi bé vừa chạm màn hình; 20 phút không hoạt động → "Phiên đọc đã kết thúc". Mất mạng thì giữ phiên.
 - [x] Ảnh bìa có đuôi `#crop=x,y,w,h`: `TtNetworkImage` tự cắt đúng vùng như web.
-- [ ] **Một phần** — Màn đọc (bố cục A: tranh trên, chữ dưới, thanh ◀ 🔊 🎤 ▶ ở đáy): xong vuốt lật trang, ListenFirst / ReadFirst, phát giọng đọc có sẵn (`just_audio`, tô sáng đoạn đang đọc), từ vựng (xem nghĩa, cất vào sổ tay), lưu tiến độ (1-based, tối đa 600 giây/lần), dấu trang, yêu thích, theo dõi tín hiệu dừng đọc (`/signal` mỗi 8 giây), sự kiện `PageCompleted` / `TtsStarted` / `TtsCompleted`, nút "Em đọc xong rồi" → màn +EXP. Màn rộng hiện tranh và chữ cạnh nhau. Còn thiếu: hai trang cho máy tính bảng, nút 🎤 (luyện đọc to) đang báo "sắp có", cảnh có `interaction` chưa hiển thị (DTO còn để Map).
-- [ ] 5 loại tương tác khi nghe: Checkpoint, RolePlay, FillBlank, EventOrdering, PicturePrediction.
-- [ ] Luyện đọc to bằng micro (ghi WAV, chấm từng chữ xanh / vàng / xám).
+- [ ] **Một phần** — Màn đọc (bố cục A: tranh trên, chữ dưới, thanh ◀ 🔊 🎤 ▶ ở đáy): xong vuốt lật trang, ListenFirst / ReadFirst, phát giọng đọc có sẵn (`just_audio`, tô sáng đoạn đang đọc), từ vựng (xem nghĩa, cất vào sổ tay), lưu tiến độ (1-based, tối đa 600 giây/lần), dấu trang, yêu thích, theo dõi tín hiệu dừng đọc (`/signal` mỗi 8 giây), sự kiện `PageCompleted` / `TtsStarted` / `TtsCompleted`, nút "Em đọc xong rồi" → màn +EXP. Màn rộng hiện tranh và chữ cạnh nhau. Còn thiếu: hai trang cho máy tính bảng.
+- [x] 5 loại tương tác khi nghe (kiểu Quizlet, toàn màn hình): Checkpoint, Đoán tranh, Nhập vai, Điền chữ, Xếp thứ tự. Hỏi khi nghe hết cảnh, chặn lật trang khi chưa trả lời; "Để sau" thì đọc tiếp; truyện chỉ nghe không hỏi.
+- [x] Luyện đọc to bằng micro (giống web): bấm 🎤 dừng giọng kể và ghi âm đoạn đang đọc (WAV 16 kHz, tự dừng ở 60 giây / 3 MB), đoạn đang ghi tô nền vàng; kết quả tô từng chữ (đúng: màu chính in đậm, cần đọc lại: nền vàng, bỏ qua: chữ mờ), lời khen / lỗi hiện bằng toast; bấm lần sau sang đoạn kế. Lật trang, thoát, mở tương tác, bật giọng kể hoặc ẩn app thì huỷ bản ghi, không gửi. Chưa thử ghi âm trên máy thật (web không ghi âm được); chưa hiện gợi ý `hint` (sai dấu / chưa rõ) khi chạm chữ.
 - [x] Hoàn thành truyện (phương án A, từng bước toàn màn hình, có Bỏ qua): cảm xúc (kèm +EXP, huy hiệu mới, bước lộ trình) → quiz (đáp án xáo trộn, trả lời ngắn, kết quả, làm lại) → ghi âm kể lại (`record`, WAV 16 kHz, tự dừng ở 3 MB) → đánh dấu tối đa 5 cảnh còn thắc mắc. Giọng đọc đang phát cũng tính là bé đang hoạt động. Chưa thử ghi âm trên máy thật; trên web không ghi âm được (báo bằng toast). Huy hiệu mới chỉ hiện số lượng, chưa hiện tên.
 - [x] Phần thưởng (phương án A: cây trên, huy hiệu dưới): EXP, chuỗi ngày đọc, cây tri thức 5 giai đoạn (`TtKnowledgeTree` chuyển từ web) và tưới cây, 7 huy hiệu lưới 2 cột. Sổ tay từ vựng: danh sách, xoá có xác nhận. Đọc xong mở bước lộ trình tiếp theo do Backend xử lý, mobile báo ở bước Cảm xúc.
 - [x] Gửi điều ước bằng thẻ (phương án A: lưới thẻ + thanh đáy): Nhân vật → Nơi chốn → Thử thách → Bài học (hoặc "Để bố mẹ chọn"), phát âm thanh thẻ, danh sách điều ước đã gửi kèm nút đọc truyện. Gợi ý chỉ có truyện cộng đồng tạm ẩn (xem mục đọc truyện cộng đồng).
 - [ ] Đọc truyện cộng đồng đã duyệt. Lưu ý: Backend `StartReadingRequestDto` chưa có `communitySubmissionId` (web và mobile đều gửi trường này) — cần hỏi Backend.
-- [ ] Tắt thông báo của app khi bé đang đọc; nút tối thiểu 64dp, chữ 22–28sp.
+- [ ] **Một phần** — Nút tối thiểu 64dp, chữ nội dung 22sp trên các màn của bé (xong, `kKidMinTap`). Còn thiếu: tắt thông báo của app khi bé đang đọc.
 
 ## Giai đoạn 3: Phụ huynh, thông tin của bé (F-01, F-02, F-12)
 

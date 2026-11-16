@@ -15,6 +15,8 @@ class KidReaderBottomBar extends StatelessWidget {
     required this.onNext,
     required this.onToggleAudio,
     required this.onMicTap,
+    this.isRecording = false,
+    this.isSending = false,
   });
 
   /// Cho phép lùi về trang trước (false thì nút mờ và không bấm).
@@ -38,8 +40,14 @@ class KidReaderBottomBar extends StatelessWidget {
   /// Callback bật / tạm dừng phát âm thanh.
   final VoidCallback onToggleAudio;
 
-  /// Callback khi chạm mic (màn hình cha hiển thị thông báo "Sắp có").
+  /// Chạm để bắt đầu/dừng đọc to đoạn đang hiện.
   final VoidCallback onMicTap;
+
+  /// Trạng thái đang ghi âm đọc to.
+  final bool isRecording;
+
+  /// Trạng thái đang gửi giọng đọc để chấm điểm.
+  final bool isSending;
 
   @override
   Widget build(BuildContext context) {
@@ -101,16 +109,63 @@ class KidReaderBottomBar extends StatelessWidget {
                   ),
                 ),
               ),
-              // 3. Nút micro (luôn hiện mờ, vẫn bấm được)
+              // 3. Nút micro
               Expanded(
                 child: Center(
-                  child: _ReaderCircleButton(
-                    icon: Icons.mic_rounded,
-                    tooltip: 'Nói chuyện với truyện',
-                    isEnabled: true,
-                    onTap: onMicTap,
-                    opacity: 0.45,
-                  ),
+                  child: isSending
+                      ? _ReaderCircleButton(
+                          tooltip: 'Đang chấm...',
+                          isEnabled: false,
+                          onTap: null,
+                          opacity: 1.0,
+                          child: SizedBox(
+                            width: 26,
+                            height: 26,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                              color: tt.goldDeep,
+                            ),
+                          ),
+                        )
+                      : isRecording
+                          ? Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                _ReaderCircleButton(
+                                  icon: Icons.stop_rounded,
+                                  tooltip: 'Dừng đọc',
+                                  isEnabled: true,
+                                  onTap: onMicTap,
+                                  opacity: 1.0,
+                                  backgroundColor: tt.danger,
+                                  borderColor: tt.danger,
+                                  iconColor: Colors.white,
+                                ),
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: BoxDecoration(
+                                      color: tt.danger,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : _ReaderCircleButton(
+                              icon: Icons.mic_rounded,
+                              tooltip: 'Đọc to cho truyện nghe',
+                              isEnabled: true,
+                              onTap: onMicTap,
+                              opacity: 1.0,
+                            ),
                 ),
               ),
               // 4. Nút sang trang sau
@@ -135,7 +190,7 @@ class KidReaderBottomBar extends StatelessWidget {
 
 class _ReaderCircleButton extends StatelessWidget {
   const _ReaderCircleButton({
-    required this.icon,
+    this.icon = Icons.circle,
     required this.tooltip,
     required this.isEnabled,
     required this.onTap,
@@ -143,6 +198,7 @@ class _ReaderCircleButton extends StatelessWidget {
     this.backgroundColor,
     this.borderColor,
     this.iconColor,
+    this.child,
   });
 
   final IconData icon;
@@ -153,6 +209,7 @@ class _ReaderCircleButton extends StatelessWidget {
   final Color? backgroundColor;
   final Color? borderColor;
   final Color? iconColor;
+  final Widget? child;
 
   static const double _buttonSize = 64.0;
 
@@ -193,11 +250,12 @@ class _ReaderCircleButton extends StatelessWidget {
                   border: Border.all(color: effectiveBorder, width: 1.5),
                 ),
                 alignment: Alignment.center,
-                child: Icon(
-                  icon,
-                  size: 28,
-                  color: effectiveIconColor,
-                ),
+                child: child ??
+                    Icon(
+                      icon,
+                      size: 28,
+                      color: effectiveIconColor,
+                    ),
               ),
             ),
           ),

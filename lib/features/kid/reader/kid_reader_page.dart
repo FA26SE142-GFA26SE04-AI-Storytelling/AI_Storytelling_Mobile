@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
 import '../../../core/widgets/tt_network_image.dart';
+import '../../../models/child_read_aloud_dto.dart';
 import '../../../models/child_reading_dto.dart';
+import 'kid_read_aloud_ranges.dart';
 
 /// Candidate match của một từ vựng trong văn bản
 class _VocabCandidate {
@@ -28,6 +30,8 @@ class KidReaderPage extends StatefulWidget {
     required this.scene,
     required this.vocabulary,
     this.activeSegmentId,
+    this.aloudSegmentId,
+    this.aloudResult,
     required this.isWide,
     required this.onVocabTap,
   });
@@ -40,6 +44,12 @@ class KidReaderPage extends StatefulWidget {
 
   /// Id đoạn đang đọc (được highlight màu vàng nhạt)
   final int? activeSegmentId;
+
+  /// Id đoạn đang ghi âm (tô nền vàng như đoạn active)
+  final int? aloudSegmentId;
+
+  /// Kết quả đọc to của đoạn văn (tô màu theo trạng thái từng từ)
+  final ReadAloudResult? aloudResult;
 
   /// Có đang hiển thị trên màn hình rộng (tablet/desktop) hay không
   final bool isWide;
@@ -94,13 +104,13 @@ class _KidReaderPageState extends State<KidReaderPage> {
     return widget.scene.illustrationUrl;
   }
 
-  /// Tìm khoảng offset [start, end) của đoạn đang đọc trong scene.text
-  ({int start, int end})? _getActiveRange(String text) {
-    if (widget.activeSegmentId == null || text.isEmpty) return null;
+  /// Tìm khoảng offset [start, end) của một đoạn [segmentId] trong [text]
+  ({int start, int end})? _segmentRange(String text, int? segmentId) {
+    if (segmentId == null || text.isEmpty) return null;
 
     final segments = widget.scene.segments;
     final seg = segments
-        .where((s) => s.segmentId == widget.activeSegmentId)
+        .where((s) => s.segmentId == segmentId)
         .firstOrNull;
     if (seg == null) return null;
 
@@ -128,7 +138,7 @@ class _KidReaderPageState extends State<KidReaderPage> {
       final actualStart = idx != -1 ? idx : text.indexOf(sText);
       if (actualStart != -1) {
         final actualEnd = (actualStart + sText.length).clamp(0, text.length);
-        if (s.segmentId == widget.activeSegmentId) {
+        if (s.segmentId == segmentId) {
           return (start: actualStart, end: actualEnd);
         }
         searchFrom = actualEnd;
@@ -144,6 +154,11 @@ class _KidReaderPageState extends State<KidReaderPage> {
     }
 
     return null;
+  }
+
+  /// Tìm khoảng offset [start, end) của đoạn đang đọc trong scene.text
+  ({int start, int end})? _getActiveRange(String text) {
+    return _segmentRange(text, widget.activeSegmentId);
   }
 
   /// Kiểm tra ký tự có phải là chữ cái hoặc số (hỗ trợ Unicode tiếng Việt)
@@ -248,25 +263,48 @@ class _KidReaderPageState extends State<KidReaderPage> {
       }
     }
 
+    // Bản đồ gán trạng thái đọc to cho từng ký tự
+    final charStatus = List<String?>.filled(text.length, null);
+    if (widget.aloudResult != null) {
+      final aloudResult = widget.aloudResult!;
+      final r = _segmentRange(text, aloudResult.segmentId);
+      if (r != null) {
+        final segText = text.substring(r.start, r.end);
+        final wordRanges = readAloudWordRanges(segText, aloudResult.words);
+        for (final wr in wordRanges) {
+          final wordStart = (r.start + wr.start).clamp(0, text.length);
+          final wordEnd = (r.start + wr.end).clamp(0, text.length);
+          for (int i = wordStart; i < wordEnd; i++) {
+            charStatus[i] = wr.status;
+          }
+        }
+      }
+    }
+
     // Xác định đoạn active
-    final activeRange = _getActiveRange(text);
+    final aloudRange = widget.aloudSegmentId != null
+        ? _segmentRange(text, widget.aloudSegmentId)
+        : null;
+    final activeRange = aloudRange ?? _getActiveRange(text);
     bool isCharActive(int i) {
       if (activeRange == null) return false;
       return i >= activeRange.start && i < activeRange.end;
     }
 
-    // Ghép các ký tự liên tiếp có cùng trạng thái (active, vocab) thành từng TextSpan
+    // Ghép các ký tự liên tiếp có cùng trạng thái (active, vocab, status đọc to) thành từng TextSpan
     final spans = <InlineSpan>[];
     int start = 0;
 
     while (start < text.length) {
       final currentActive = isCharActive(start);
       final currentVocab = charVocab[start];
+      final currentStatus = charStatus[start];
 
       int end = start + 1;
       while (end < text.length &&
           isCharActive(end) == currentActive &&
-          charVocab[end] == currentVocab) {
+          charVocab[end] == currentVocab &&
+          charStatus[end] == currentStatus) {
         end++;
       }
 
@@ -279,15 +317,27 @@ class _KidReaderPageState extends State<KidReaderPage> {
         _recognizers.add(recognizer);
       }
 
-      final style = TextStyle(
-        backgroundColor: currentActive
-            ? tt.gold.withValues(alpha: 0.25)
-            : null,
-        decoration: currentVocab != null ? TextDecoration.underline : null,
-        decorationColor: currentVocab != null ? tt.gold : null,
-        decorationThickness: currentVocab != null ? 2 : null,
-        fontWeight: currentVocab != null ? FontWeight.w700 : FontWeight.w400,
-      );
+      TextStyle style;
+      if (currentStatus != null) {
+        final statusStyle = readAloudStyle(currentStatus, tt);
+        style = currentVocab != null
+            ? statusStyle.copyWith(
+                decoration: TextDecoration.underline,
+                decorationColor: tt.gold,
+                decorationThickness: 2,
+              )
+            : statusStyle;
+      } else {
+        style = TextStyle(
+          backgroundColor: currentActive
+              ? tt.gold.withValues(alpha: 0.25)
+              : null,
+          decoration: currentVocab != null ? TextDecoration.underline : null,
+          decorationColor: currentVocab != null ? tt.gold : null,
+          decorationThickness: currentVocab != null ? 2 : null,
+          fontWeight: currentVocab != null ? FontWeight.w700 : FontWeight.w400,
+        );
+      }
 
       spans.add(TextSpan(
         text: slice,

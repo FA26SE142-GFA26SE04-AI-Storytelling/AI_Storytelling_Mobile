@@ -14,6 +14,7 @@ import '../data/kid_reading_repository.dart';
 import '../data/kid_session_controller.dart';
 import '../interaction/kid_interaction_screen.dart';
 import '../quiz/kid_after_reading_screen.dart';
+import 'kid_read_aloud_controller.dart';
 import 'kid_reader_audio.dart';
 import 'kid_reader_bottom_bar.dart';
 import 'kid_reader_controller.dart';
@@ -80,6 +81,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.hidden) {
+      _cancelAloud();
       _audio.stop();
     }
   }
@@ -88,6 +90,33 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
 
   KidReaderController get _notifier =>
       ref.read(kidReaderControllerProvider(widget.storyId).notifier);
+
+  /// Huỷ bản ghi đọc to dở dang (không gửi chấm) và bỏ kết quả đang tô.
+  void _cancelAloud() => unawaited(
+    ref.read(kidReadAloudControllerProvider(widget.storyId).notifier).cancel(),
+  );
+
+  ReadingSegment? _aloudTarget(ReadingScene scene) {
+    final segs = [...scene.segments]
+      ..sort((a, b) => a.segmentOrder.compareTo(b.segmentOrder));
+    if (segs.isEmpty) return null;
+
+    final state = ref.read(kidReadAloudControllerProvider(widget.storyId));
+    final res = state.result;
+    if (res != null) {
+      final idx = segs.indexWhere((s) => s.segmentId == res.segmentId);
+      if (idx != -1) {
+        return segs[(idx + 1) % segs.length];
+      }
+    }
+
+    if (_activeSegmentId != null) {
+      final idx = segs.indexWhere((s) => s.segmentId == _activeSegmentId);
+      if (idx != -1) return segs[idx];
+    }
+
+    return segs.first;
+  }
 
   /// [skipGuard]: bé vừa chọn "Đọc tiếp"/"Để sau" ở màn tương tác thì cho lật
   /// luôn, không hỏi lại (như `guarded → then` của web).
@@ -113,6 +142,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
       }
     }
 
+    _cancelAloud();
     _audio.stop();
     setState(() => _activeSegmentId = null);
 
@@ -136,6 +166,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     final state = ref.read(kidReaderControllerProvider(widget.storyId));
     if (idx < 0 || idx >= state.totalPages) return;
 
+    _cancelAloud();
     _audio.stop();
     if (mounted) {
       setState(() => _activeSegmentId = null);
@@ -178,6 +209,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
       }
 
       final it = scene.interaction!;
+      _cancelAloud();
       final r = await Navigator.of(context).push<KidInteractionResult>(
         PageRouteBuilder<KidInteractionResult>(
           opaque: true,
@@ -186,23 +218,18 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
             interaction: it,
             onAttempt: ({optionId, answer, orderedOptionIds}) =>
                 _notifier.attemptInteraction(
-              interactionId: it.id,
-              optionId: optionId,
-              answer: answer,
-              orderedOptionIds: orderedOptionIds,
-            ),
+                  interactionId: it.id,
+                  optionId: optionId,
+                  answer: answer,
+                  orderedOptionIds: orderedOptionIds,
+                ),
             onPlayAudio: (url) => unawaited(_audio.playUrls([url])),
           ),
           transitionsBuilder: (_, anim, _, child) => SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 1),
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(
-                parent: anim,
-                curve: Curves.easeOutCubic,
-              ),
-            ),
+            position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+                .animate(
+                  CurvedAnimation(parent: anim, curve: Curves.easeOutCubic),
+                ),
             child: child,
           ),
         ),
@@ -218,8 +245,9 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
         if (nextPage != null) {
           _goTo(nextPage, skipGuard: true);
         } else {
-          final curState =
-              ref.read(kidReaderControllerProvider(widget.storyId));
+          final curState = ref.read(
+            kidReaderControllerProvider(widget.storyId),
+          );
           if (curState.readingMode == KidReadingMode.listenFirst &&
               sceneIndex < curState.totalPages - 1) {
             _goTo(sceneIndex + 1, skipGuard: true);
@@ -318,6 +346,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   }
 
   void _onToggleAudio(int currentPage, ReadingContent content) {
+    _cancelAloud();
     if (_isAudioPlaying) {
       _audio.stop();
       setState(() => _activeSegmentId = null);
@@ -329,6 +358,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   Future<void> _confirmExit() async {
     final state = ref.read(kidReaderControllerProvider(widget.storyId));
     if (state.isFinished) {
+      _cancelAloud();
       _audio.stop();
       if (mounted) context.go('/kid');
       return;
@@ -344,6 +374,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     if (!confirmed) return;
 
     await _notifier.saveProgressNow();
+    _cancelAloud();
     _audio.stop();
     if (mounted) context.go('/kid');
   }
@@ -357,6 +388,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
       cancelLabel: 'Chưa',
     );
     if (!confirmed) return;
+    _cancelAloud();
     _audio.stop();
     await _notifier.complete();
   }
@@ -430,7 +462,32 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
       },
     );
 
+    // Lắng nghe lỗi đọc to → toast + clearError
+    ref.listen(kidReadAloudControllerProvider(widget.storyId), (prev, next) {
+      if (next.errorMessage != null &&
+          next.errorMessage!.isNotEmpty &&
+          mounted) {
+        showTtToast(context, next.errorMessage!, type: TtToastType.error);
+        ref
+            .read(kidReadAloudControllerProvider(widget.storyId).notifier)
+            .clearError();
+      }
+    });
+
+    // Lắng nghe kết quả đọc to → toast chúc mừng
+    ref.listen(kidReadAloudControllerProvider(widget.storyId), (prev, next) {
+      if (next.result != null && prev?.result != next.result && mounted) {
+        final msg = next.result!.message.trim();
+        showTtToast(
+          context,
+          msg.isNotEmpty ? msg : 'Em đọc hay quá!',
+          type: TtToastType.success,
+        );
+      }
+    });
+
     final state = ref.watch(kidReaderControllerProvider(widget.storyId));
+    final aloud = ref.watch(kidReadAloudControllerProvider(widget.storyId));
     final tt = context.tt;
 
     return Scaffold(
@@ -447,7 +504,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                 : 'Em thử lại nhé',
             onRetry: _notifier.load,
           ),
-          KidReaderStatus.ready => _buildReadyBody(context, state, tt),
+          KidReaderStatus.ready => _buildReadyBody(context, state, tt, aloud),
         },
       ),
     );
@@ -457,6 +514,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     BuildContext context,
     KidReaderState state,
     TtColors tt,
+    KidReadAloudState aloud,
   ) {
     final content = state.content;
     if (content == null) {
@@ -633,6 +691,17 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                 scene: scenes[i],
                 vocabulary: content.vocabulary,
                 activeSegmentId: i == currentPage ? _activeSegmentId : null,
+                aloudSegmentId: i == currentPage && aloud.recording
+                    ? aloud.segmentId
+                    : null,
+                aloudResult:
+                    i == currentPage &&
+                        aloud.result != null &&
+                        content.scenes[i].segments.any(
+                          (s) => s.segmentId == aloud.result!.segmentId,
+                        )
+                    ? aloud.result
+                    : null,
                 isWide: isWide,
                 onVocabTap: _openVocab,
               );
@@ -663,14 +732,34 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
             canGoNext: currentPage < totalPages - 1,
             isAudioPlaying: _isAudioPlaying,
             isAudioAvailable: audioAvailable,
+            isRecording: aloud.recording,
+            isSending: aloud.sending,
             onPrev: () => _goTo(currentPage - 1),
             onNext: () => _goTo(currentPage + 1),
             onToggleAudio: () => _onToggleAudio(currentPage, content),
-            onMicTap: () => showTtToast(
-              context,
-              'Tính năng này sắp có',
-              type: TtToastType.info,
-            ),
+            onMicTap: () {
+              final scene = (currentPage >= 0 && currentPage < scenes.length)
+                  ? scenes[currentPage]
+                  : null;
+              final target = scene == null ? null : _aloudTarget(scene);
+              if (target == null) {
+                showTtToast(
+                  context,
+                  'Trang này chưa có chữ để đọc',
+                  type: TtToastType.info,
+                );
+                return;
+              }
+              ref
+                  .read(kidReadAloudControllerProvider(widget.storyId).notifier)
+                  .toggle(
+                    target.segmentId,
+                    onStart: () {
+                      _audio.stop();
+                      setState(() => _activeSegmentId = null);
+                    },
+                  );
+            },
           ),
         ],
       ],
