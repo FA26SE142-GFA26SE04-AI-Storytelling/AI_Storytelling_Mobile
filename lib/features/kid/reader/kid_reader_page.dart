@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_network_image.dart';
 import '../../../models/child_read_aloud_dto.dart';
@@ -473,25 +474,13 @@ class _KidReaderPageState extends State<KidReaderPage> {
       return content;
     }
 
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: BoxDecoration(
-        color: tt.surface.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(TtRadius.xl),
-        border: Border.all(
-          color: tt.line,
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: tt.shadow.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+      child: KidPanel(
+        borderColor: tt.gold,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        child: content,
       ),
-      child: content,
     );
   }
 

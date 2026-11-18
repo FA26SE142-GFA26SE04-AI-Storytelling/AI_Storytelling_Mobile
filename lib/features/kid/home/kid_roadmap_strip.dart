@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_network_image.dart';
 import '../../../core/widgets/tt_toast.dart';
@@ -29,7 +30,7 @@ class _RoadmapItemData {
   final bool isLocked;
 }
 
-/// Dải hiển thị lộ trình học / đọc truyện "Hành trình của em" dạng các lá sen cuộn ngang.
+/// Dải hiển thị lộ trình học / đọc truyện "Hành trình của em" dạng đường nối các chặng cuộn ngang.
 class KidRoadmapStrip extends StatelessWidget {
   const KidRoadmapStrip({
     super.key,
@@ -94,55 +95,72 @@ class KidRoadmapStrip extends StatelessWidget {
         ),
     ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Text(
-                'Hành trình của em',
-                style: TextStyle(
-                  fontFamily: 'Baloo2',
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: tt.text,
-                ),
+    final isFinished = roadmap.isFinished && roadmap.totalCount > 0;
+
+    return KidPanel(
+      borderColor: tt.primary,
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          KidPanelHeader(
+            title: 'Hành trình của em',
+            color: tt.primary,
+            icon: Icons.route_rounded,
+            textColor: Colors.white,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: SizedBox(
+              height: 156,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                // items + connectors between them + end marker
+                itemCount: items.length * 2 + 1,
+                itemBuilder: (context, index) {
+                  // Even indices: connectors/end; odd indices: step items
+                  // Pattern: [connector, item, connector, item, ..., connector, end]
+                  if (index == items.length * 2) {
+                    // End marker (lotus-style)
+                    return _JourneyEndMarker(isFinished: isFinished);
+                  }
+                  if (index.isEven) {
+                    // Connector before item at items[index ~/ 2]
+                    final itemIndex = index ~/ 2;
+                    final walked = itemIndex > 0 &&
+                        items[itemIndex - 1].type == _RoadmapItemType.done;
+                    return _JourneyConnector(walked: walked);
+                  }
+                  // Step item
+                  final item = items[index ~/ 2];
+                  return _RoadmapStepItem(
+                    item: item,
+                    index: index ~/ 2,
+                    onTap: () => _handleTap(context, item),
+                  );
+                },
               ),
-              const Spacer(),
-              Text(
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 16, bottom: 10),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Text(
                 '${roadmap.completedCount}/${roadmap.totalCount}',
-                style: TextStyle(
-                  fontFamily: 'Baloo2',
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: tt.muted,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontFamily: 'Baloo2',
+                      fontWeight: FontWeight.w600,
+                      color: tt.muted,
+                    ),
               ),
-            ],
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 156,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            clipBehavior: Clip.none,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: items.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return _RoadmapStepItem(
-                item: item,
-                onTap: () => _handleTap(context, item),
-              );
-            },
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -150,10 +168,12 @@ class KidRoadmapStrip extends StatelessWidget {
 class _RoadmapStepItem extends StatelessWidget {
   const _RoadmapStepItem({
     required this.item,
+    required this.index,
     required this.onTap,
   });
 
   final _RoadmapItemData item;
+  final int index;
   final VoidCallback onTap;
 
   @override
@@ -169,7 +189,7 @@ class _RoadmapStepItem extends StatelessWidget {
         borderWidth = 2.5;
       case _RoadmapItemType.current:
         borderColor = tt.gold;
-        borderWidth = 3.0;
+        borderWidth = 3.5;
       case _RoadmapItemType.upcoming:
         borderColor = tt.line;
         borderWidth = 1.5;
@@ -184,6 +204,9 @@ class _RoadmapStepItem extends StatelessWidget {
           color: borderColor,
           width: borderWidth,
         ),
+        color: item.type == _RoadmapItemType.current
+            ? tt.gold.withValues(alpha: 0.08)
+            : null,
       ),
       child: ClipOval(
         child: TtNetworkImage(
@@ -286,13 +309,14 @@ class _RoadmapStepItem extends StatelessWidget {
                 width: 110,
                 child: Text(
                   item.title ?? '',
-                  style: TextStyle(
-                    fontFamily: 'Baloo2',
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    color: tt.text,
-                    height: 1.2,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontFamily: 'Baloo2',
+                        fontWeight: FontWeight.w600,
+                        color: item.type == _RoadmapItemType.current
+                            ? tt.goldDeep
+                            : tt.text,
+                        height: 1.2,
+                      ),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -300,6 +324,73 @@ class _RoadmapStepItem extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Đường nối ngang giữa các chặng; [walked] = true khi chặng trước đó đã xong.
+class _JourneyConnector extends StatelessWidget {
+  const _JourneyConnector({required this.walked});
+
+  final bool walked;
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = context.tt;
+    return SizedBox(
+      width: 24,
+      height: 156,
+      child: Center(
+        child: Container(
+          height: 4,
+          decoration: BoxDecoration(
+            color: walked ? tt.primary : tt.line,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Điểm đích cuối hành trình (hoa / ngôi sao).
+class _JourneyEndMarker extends StatelessWidget {
+  const _JourneyEndMarker({required this.isFinished});
+
+  final bool isFinished;
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = context.tt;
+    return SizedBox(
+      width: 64,
+      height: 156,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: isFinished ? 56 : 44,
+              height: isFinished ? 56 : 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isFinished
+                    ? tt.gold.withValues(alpha: 0.18)
+                    : tt.surface,
+                border: Border.all(
+                  color: isFinished ? tt.gold : tt.line,
+                  width: isFinished ? 3 : 2,
+                ),
+              ),
+              child: Icon(
+                isFinished ? Icons.auto_awesome_rounded : Icons.flag_rounded,
+                size: isFinished ? 28 : 22,
+                color: isFinished ? tt.gold : tt.muted,
+              ),
+            ),
+          ],
         ),
       ),
     );

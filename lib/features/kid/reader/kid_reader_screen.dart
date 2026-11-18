@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tt_colors.dart';
-import '../../../core/widgets/tt_button.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_confirm_dialog.dart';
 import '../../../core/widgets/tt_state_views.dart';
 import '../../../core/widgets/tt_toast.dart';
@@ -510,8 +510,22 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
       backgroundColor: tt.bg,
       body: SafeArea(
         child: switch (state.status) {
-          KidReaderStatus.loading => const Center(
-            child: CircularProgressIndicator(),
+          KidReaderStatus.loading => Padding(
+            padding: const EdgeInsets.all(24),
+            child: KidPanel(
+              borderColor: tt.primary,
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TtSkeleton(height: 200),
+                  SizedBox(height: 16),
+                  TtSkeleton(height: 20),
+                  SizedBox(height: 12),
+                  TtSkeleton(height: 20),
+                ],
+              ),
+            ),
           ),
           KidReaderStatus.error => TtErrorState(
             title: 'Chưa mở được truyện',
@@ -733,11 +747,11 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
           if (currentPage == totalPages - 1) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: TtButton(
+              child: KidBtn3D(
                 label: 'Em đọc xong rồi',
                 icon: Icons.check_circle_rounded,
-                expanded: true,
-                isLoading: state.isCompleting,
+                color: tt.primary,
+                expand: true,
                 onPressed: state.isCompleting ? null : _confirmComplete,
               ),
             ),

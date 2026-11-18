@@ -9,6 +9,7 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
 import '../../../core/widgets/tt_button.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_card.dart';
 import '../../../core/widgets/tt_network_image.dart';
 import '../../../core/widgets/tt_state_views.dart';
@@ -370,17 +371,37 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
     if (state.isLoadingInitial) {
       return Padding(
         padding: const EdgeInsets.all(16),
-        child: GridView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: 6,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.72,
+        child: KidPanel(
+          padding: EdgeInsets.zero,
+          borderColor: tt.gold,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              KidPanelHeader(
+                title: 'Thư viện truyện',
+                color: tt.gold,
+                icon: Icons.menu_book_rounded,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: 6,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.72,
+                    ),
+                    itemBuilder: (context, index) =>
+                        TtSkeleton(radius: BorderRadius.circular(TtRadius.lg)),
+                  ),
+                ),
+              ),
+            ],
           ),
-          itemBuilder: (context, index) =>
-              TtSkeleton(radius: BorderRadius.circular(TtRadius.lg)),
         ),
       );
     }
@@ -438,52 +459,71 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref
-            .read(kidLibraryControllerProvider.notifier)
-            .loadInitial(search: _searchController.text);
-      },
-      child: CustomScrollView(
-        controller: _scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          if (state.isLocked)
-            SliverToBoxAdapter(child: _buildLockedCard(context, state)),
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.72,
-              ),
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final story = state.stories[index];
-                return _buildStoryCard(context, story);
-              }, childCount: state.stories.length),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: KidPanel(
+        padding: EdgeInsets.zero,
+        borderColor: tt.gold,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            KidPanelHeader(
+              title: 'Thư viện truyện',
+              color: tt.gold,
+              icon: Icons.menu_book_rounded,
             ),
-          ),
-          if (state.isLoadingMore)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Center(
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(tt.primary),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await ref
+                      .read(kidLibraryControllerProvider.notifier)
+                      .loadInitial(search: _searchController.text);
+                },
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    if (state.isLocked)
+                      SliverToBoxAdapter(
+                          child: _buildLockedCard(context, state)),
+                    SliverPadding(
+                      padding: const EdgeInsets.all(16),
+                      sliver: SliverGrid(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.72,
+                        ),
+                        delegate:
+                            SliverChildBuilderDelegate((context, index) {
+                          final story = state.stories[index];
+                          return _buildStoryCard(context, story);
+                        }, childCount: state.stories.length),
+                      ),
                     ),
-                  ),
+                    if (state.isLoadingMore)
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: TtSkeleton(
+                              width: 120,
+                              height: 10,
+                              radius: BorderRadius.all(Radius.circular(8)),
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                  ],
                 ),
               ),
-            )
-          else
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -574,10 +614,11 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
           ),
           if (state.unlockStoryId != null) ...[
             const SizedBox(height: 12),
-            TtButton(
+            KidBtn3D(
               label: 'Đọc truyện mở khoá',
               icon: Icons.menu_book_rounded,
-              variant: TtButtonVariant.primary,
+              color: context.tt.goldDeep,
+              expand: true,
               onPressed: () => context.push('/kid/read/${state.unlockStoryId}'),
             ),
           ],

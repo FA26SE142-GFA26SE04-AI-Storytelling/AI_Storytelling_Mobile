@@ -6,6 +6,7 @@ import 'package:ai_storytelling_mobile/core/theme/kid_metrics.dart';
 
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_state_views.dart';
@@ -195,88 +196,31 @@ class _KidWishScreenState extends ConsumerState<KidWishScreen> {
   Widget _buildInvitationSection(BuildContext context) {
     final tt = context.tt;
 
-    return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: tt.panel.withValues(alpha: 0.92),
-            borderRadius: BorderRadius.circular(TtRadius.xl),
-            border: Border.all(
-              color: tt.gold.withValues(alpha: 0.35),
-              width: 2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: tt.gold.withValues(alpha: 0.08),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
+    return KidPanel(
+          borderColor: tt.gold.withValues(alpha: 0.6),
+          padding: EdgeInsets.zero,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const TtFrog(mood: TtFrogMood.happy, size: 110),
-              const SizedBox(height: 14),
-              Text(
-                'Em muốn nghe truyện gì?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 26,
-                  fontWeight: FontWeight.w900,
-                  color: tt.text,
-                  letterSpacing: -0.3,
-                ),
+              KidPanelHeader(
+                title: 'Em muốn nghe truyện gì?',
+                color: tt.goldDeep,
+                icon: Icons.auto_awesome_rounded,
               ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                height: 64,
-                child: FilledButton(
-                  onPressed: _isStartingDraft ? null : _handleStartDraft,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: tt.primaryStrong,
-                    foregroundColor: Colors.white,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: TtRadius.leaf,
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    const TtFrog(mood: TtFrogMood.happy, size: 110),
+                    const SizedBox(height: 14),
+                    KidBtn3D(
+                      label: 'Em ước một câu chuyện',
+                      color: tt.primaryStrong,
+                      icon: Icons.auto_awesome_rounded,
+                      expand: true,
+                      onPressed: _isStartingDraft ? null : _handleStartDraft,
                     ),
-                    elevation: 3,
-                    shadowColor: tt.primaryStrong.withValues(alpha: 0.3),
-                  ),
-                  child: _isStartingDraft
-                      ? const SizedBox(
-                          width: 28,
-                          height: 28,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 3,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.auto_awesome_rounded,
-                              size: 28,
-                              color: tt.gold,
-                            ),
-                            const SizedBox(width: 10),
-                            const Flexible(
-                              child: Text(
-                                'Em ước một câu chuyện',
-                                style: TextStyle(
-                                  fontFamily: 'Nunito',
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
+                  ],
                 ),
               ),
             ],
@@ -368,106 +312,94 @@ class _KidWishScreenState extends ConsumerState<KidWishScreen> {
         .where((s) => s.storyId != null)
         .toList();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: tt.panel.withValues(alpha: 0.90),
-        borderRadius: BorderRadius.circular(TtRadius.lg),
-        border: Border.all(color: tt.gold.withValues(alpha: 0.4), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: tt.gold.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+    return KidPanel(
+      borderColor: tt.gold.withValues(alpha: 0.5),
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          KidPanelHeader(
+            title: titleText,
+            color: tt.primaryStrong,
+            icon: Icons.auto_awesome_rounded,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Dòng thông điệp trạng thái
+                if (wish.message.isNotEmpty)
+                  Text(
+                    wish.message,
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: tt.muted,
+                    ),
+                  ),
+
+                // Nút "Đọc truyện" nếu đã fulfilled
+                if (wish.fulfilledStoryId != null) ...[
+                  const SizedBox(height: 14),
+                  TtButton(
+                    label: 'Đọc truyện',
+                    icon: Icons.auto_stories_rounded,
+                    variant: TtButtonVariant.primary,
+                    onPressed: () {
+                      context.push('/kid/read/${wish.fulfilledStoryId}');
+                    },
+                  ),
+                ],
+
+                // Danh sách gợi ý có storyId
+                if (validSuggestions.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: validSuggestions.map((suggestion) {
+                      return OutlinedButton.icon(
+                        onPressed: () {
+                          context.push('/kid/read/${suggestion.storyId}');
+                        },
+                        icon: Icon(
+                          Icons.book_rounded,
+                          size: 18,
+                          color: tt.primaryStrong,
+                        ),
+                        label: Text(
+                          suggestion.title,
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: tt.text,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: tt.surface,
+                          side: BorderSide(
+                            color: tt.gold.withValues(alpha: 0.4),
+                            width: 1.2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(TtRadius.md),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Nhãn thẻ đã chọn
-            Text(
-              titleText,
-              style: TextStyle(
-                fontFamily: 'Nunito',
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: tt.text,
-              ),
-            ),
-            const SizedBox(height: 6),
-
-            // Dòng thông điệp trạng thái
-            if (wish.message.isNotEmpty)
-              Text(
-                wish.message,
-                style: TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: tt.muted,
-                ),
-              ),
-
-            // Nút "Đọc truyện" nếu đã fulfilled
-            if (wish.fulfilledStoryId != null) ...[
-              const SizedBox(height: 14),
-              TtButton(
-                label: 'Đọc truyện',
-                icon: Icons.auto_stories_rounded,
-                variant: TtButtonVariant.primary,
-                onPressed: () {
-                  context.push('/kid/read/${wish.fulfilledStoryId}');
-                },
-              ),
-            ],
-
-            // Danh sách gợi ý có storyId
-            if (validSuggestions.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: validSuggestions.map((suggestion) {
-                  return OutlinedButton.icon(
-                    onPressed: () {
-                      context.push('/kid/read/${suggestion.storyId}');
-                    },
-                    icon: Icon(
-                      Icons.book_rounded,
-                      size: 18,
-                      color: tt.primaryStrong,
-                    ),
-                    label: Text(
-                      suggestion.title,
-                      style: TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: tt.text,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: tt.surface,
-                      side: BorderSide(
-                        color: tt.gold.withValues(alpha: 0.4),
-                        width: 1.2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(TtRadius.md),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }

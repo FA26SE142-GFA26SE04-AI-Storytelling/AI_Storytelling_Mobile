@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/kid_metrics.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
-import '../../../core/widgets/tt_button.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_network_image.dart';
 import '../../../core/widgets/tt_state_views.dart';
 import '../../../core/widgets/tt_toast.dart';
@@ -661,15 +661,13 @@ class _KidWishWizardState extends ConsumerState<KidWishWizard> {
 
           // Nút "Gửi" điều ước (chỉ bấm được khi canSubmit == true)
           Expanded(
-            child: SizedBox(
-              height: 64,
-              child: TtButton(
-                label: 'Gửi',
-                isLoading: _isSubmitting,
-                onPressed: (_draft.canSubmit && !_isSubmitting)
-                    ? _handleSubmitDraft
-                    : null,
-              ),
+            child: KidBtn3D(
+              label: 'Gửi',
+              icon: Icons.send_rounded,
+              color: tt.primary,
+              onPressed: (_draft.canSubmit && !_isSubmitting)
+                  ? _handleSubmitDraft
+                  : null,
             ),
           ),
         ],

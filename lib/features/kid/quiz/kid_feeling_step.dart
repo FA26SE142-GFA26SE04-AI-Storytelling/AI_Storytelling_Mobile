@@ -5,8 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
-import '../../../core/widgets/tt_button.dart';
-import '../../../core/widgets/tt_card.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_toast.dart';
 import '../../../models/child_reading_dto.dart';
@@ -238,7 +237,8 @@ class _KidFeelingStepState extends ConsumerState<KidFeelingStep> {
 
                         // 3. Khối phần thưởng (nếu có thông tin)
                         if (hasRewardInfo) ...[
-                          TtCard(
+                          KidPanel(
+                            borderColor: tt.goldDeep,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 14,
@@ -403,26 +403,19 @@ class _KidFeelingStepState extends ConsumerState<KidFeelingStep> {
             child: Row(
               children: [
                 Expanded(
-                  child: SizedBox(
-                    height: 64,
-                    child: TtButton(
-                      label: 'Bỏ qua',
-                      variant: TtButtonVariant.secondary,
-                      onPressed: _sending ? null : widget.onNext,
-                      expanded: true,
-                    ),
+                  child: KidBtn3D(
+                    label: 'Bỏ qua',
+                    color: tt.muted,
+                    onPressed: _sending ? null : widget.onNext,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: SizedBox(
-                    height: 64,
-                    child: TtButton(
-                      label: widget.isLast ? 'Về trang chính' : 'Tiếp',
-                      icon: widget.isLast ? Icons.home_rounded : null,
-                      onPressed: _sending ? null : widget.onNext,
-                      expanded: true,
-                    ),
+                  child: KidBtn3D(
+                    label: widget.isLast ? 'Về trang chính' : 'Tiếp',
+                    icon: widget.isLast ? Icons.home_rounded : null,
+                    color: tt.primary,
+                    onPressed: _sending ? null : widget.onNext,
                   ),
                 ),
               ],

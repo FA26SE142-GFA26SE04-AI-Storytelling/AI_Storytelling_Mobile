@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
-import '../../../core/widgets/tt_button.dart';
-import '../../../core/widgets/tt_card.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_network_image.dart';
 import '../../../models/my_roadmap_dto.dart';
@@ -29,12 +29,33 @@ class KidTodayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final open = roadmap.open;
+    final tt = context.tt;
 
-    return TtCard(
-      padding: const EdgeInsets.all(16),
-      child: open != null
-          ? _buildOpenStoryContent(context, open)
-          : _buildNoOpenStoryContent(context),
+    final headerColor = open != null ? tt.primary : tt.gold;
+    const headerTitle = 'Hôm nay em đọc';
+    final headerIcon =
+        open != null ? Icons.menu_book_rounded : Icons.auto_stories_rounded;
+
+    return KidPanel(
+      borderColor: headerColor,
+      padding: EdgeInsets.zero,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          KidPanelHeader(
+            title: headerTitle,
+            color: headerColor,
+            icon: headerIcon,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: open != null
+                ? _buildOpenStoryContent(context, open)
+                : _buildNoOpenStoryContent(context),
+          ),
+        ],
+      ),
     );
   }
 
@@ -43,31 +64,15 @@ class KidTodayCard extends StatelessWidget {
     MyRoadmapOpenStoryDto open,
   ) {
     final tt = context.tt;
+    final completedCount = roadmap.completedCount;
+    final totalCount = roadmap.totalCount;
+    final progress =
+        (totalCount > 0) ? (completedCount / totalCount).clamp(0.0, 1.0) : 0.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Icon(
-              Icons.star_rounded,
-              color: tt.goldDeep,
-              size: 32,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Hôm nay em đọc',
-              style: TextStyle(
-                fontFamily: 'Baloo2',
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: tt.text,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
         TtNetworkImage(
           url: open.coverImageUrl,
           height: 200,
@@ -75,20 +80,43 @@ class KidTodayCard extends StatelessWidget {
           fit: BoxFit.cover,
           radius: BorderRadius.circular(TtRadius.lg),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         Text(
           open.title ?? '',
-          style: TextStyle(
-            fontFamily: 'Baloo2',
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: tt.text,
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontFamily: 'Baloo2',
+                fontWeight: FontWeight.bold,
+                color: tt.text,
+              ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(TtRadius.full),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 8,
+                  backgroundColor: tt.line,
+                  valueColor: AlwaysStoppedAnimation<Color>(tt.primary),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              '$completedCount/$totalCount',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: tt.muted,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
+        ),
         if (open.note != null && open.note!.trim().isNotEmpty) ...[
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -98,37 +126,29 @@ class KidTodayCard extends StatelessWidget {
             ),
             child: Text(
               '💌 ${open.note!.trim()}',
-              style: TextStyle(
-                fontFamily: 'Nunito',
-                fontSize: 22,
-                fontWeight: FontWeight.w600,
-                color: tt.text,
-              ),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontFamily: 'Nunito',
+                    color: tt.text,
+                  ),
             ),
           ),
         ],
         if (open.isLocked) ...[
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Text(
             'Truyện này chưa mở, em chờ bố mẹ nhé.',
-            style: TextStyle(
-              fontFamily: 'Nunito',
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              color: tt.muted,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: tt.muted,
+                ),
           ),
         ],
         const SizedBox(height: 16),
-        SizedBox(
-          height: 64,
-          child: TtButton(
-            label: 'Đọc ngay',
-            icon: Icons.menu_book_rounded,
-            expanded: true,
-            variant: TtButtonVariant.primary,
-            onPressed: open.isLocked ? null : () => onRead(open.storyId),
-          ),
+        KidBtn3D(
+          label: 'Đọc ngay',
+          icon: Icons.menu_book_rounded,
+          color: tt.primary,
+          expand: true,
+          onPressed: open.isLocked ? null : () => onRead(open.storyId),
         ),
       ],
     );
@@ -152,22 +172,18 @@ class KidTodayCard extends StatelessWidget {
               ? 'Em đã đọc hết truyện bố mẹ chọn rồi. Giỏi quá!'
               : 'Hôm nay em muốn đọc truyện gì?',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Baloo2',
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: tt.text,
-          ),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontFamily: 'Baloo2',
+                color: tt.text,
+              ),
         ),
         const SizedBox(height: 16),
-        SizedBox(
-          height: 64,
-          child: TtButton(
-            label: 'Chọn truyện',
-            icon: Icons.search_rounded,
-            expanded: true,
-            onPressed: onChooseStory,
-          ),
+        KidBtn3D(
+          label: 'Chọn truyện',
+          icon: Icons.search_rounded,
+          color: tt.gold,
+          expand: true,
+          onPressed: () => context.go('/kid/library'),
         ),
       ],
     );
