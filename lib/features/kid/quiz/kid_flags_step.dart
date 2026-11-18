@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
-import '../../../core/widgets/tt_button.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_toast.dart';
 import '../../../models/child_reading_dto.dart';
@@ -211,30 +211,28 @@ class _KidFlagsStepState extends ConsumerState<KidFlagsStep> {
 
                 // Danh sách chip các cảnh hoặc thông báo rỗng
                 if (hasScenes) ...[
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    alignment: WrapAlignment.center,
-                    children: widget.scenes
-                        .map((scene) => _buildSceneChip(scene, tt))
-                        .toList(),
+                  KidPanel(
+                    borderColor: tt.gold,
+                    child: Center(
+                      child: Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        alignment: WrapAlignment.center,
+                        children: widget.scenes
+                            .map((scene) => _buildSceneChip(scene, tt))
+                            .toList(),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 28),
 
                   // Nút gửi hoặc dòng xác nhận đã gửi thành công
                   if (_isSent)
-                    Container(
+                    KidPanel(
+                      borderColor: tt.primary,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: tt.surface,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: tt.primary.withValues(alpha: 0.5),
-                          width: 1.5,
-                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -262,17 +260,14 @@ class _KidFlagsStepState extends ConsumerState<KidFlagsStep> {
                       ),
                     ).animate().fadeIn(duration: 300.ms)
                   else
-                    SizedBox(
-                      height: 64,
-                      width: double.infinity,
-                      child: TtButton(
-                        label: 'Gửi bố mẹ',
-                        icon: Icons.send_rounded,
-                        isLoading: _sending,
-                        onPressed: (!_sending && _selectedSceneIds.isNotEmpty)
-                            ? _sendFlags
-                            : null,
-                      ),
+                    KidBtn3D(
+                      label: 'Gửi bố mẹ',
+                      icon: Icons.send_rounded,
+                      color: tt.primary,
+                      expand: true,
+                      onPressed: (!_sending && _selectedSceneIds.isNotEmpty)
+                          ? _sendFlags
+                          : null,
                     ),
                 ] else ...[
                   Padding(
@@ -302,39 +297,30 @@ class _KidFlagsStepState extends ConsumerState<KidFlagsStep> {
                   children: [
                     // Nút Bỏ qua
                     Expanded(
-                      child: SizedBox(
-                        height: 64,
-                        child: TtButton(
-                          variant: TtButtonVariant.secondary,
-                          label: 'Bỏ qua',
-                          onPressed: _sending ? null : widget.onNext,
-                        ),
+                      child: KidBtn3D(
+                        label: 'Bỏ qua',
+                        color: tt.muted,
+                        onPressed: _sending ? null : widget.onNext,
                       ),
                     ),
                     const SizedBox(width: 16),
                     // Nút Tiếp / Về trang chính
                     Expanded(
-                      child: SizedBox(
-                        height: 64,
-                        child: TtButton(
-                          variant: TtButtonVariant.primary,
-                          label: widget.isLast ? 'Về trang chính' : 'Tiếp',
-                          icon: widget.isLast ? Icons.home_rounded : null,
-                          onPressed: _sending ? null : widget.onNext,
-                        ),
+                      child: KidBtn3D(
+                        label: widget.isLast ? 'Về trang chính' : 'Tiếp',
+                        icon: widget.isLast ? Icons.home_rounded : null,
+                        color: tt.primary,
+                        onPressed: _sending ? null : widget.onNext,
                       ),
                     ),
                   ],
                 )
-              : SizedBox(
-                  height: 64,
-                  width: double.infinity,
-                  child: TtButton(
-                    variant: TtButtonVariant.primary,
-                    label: widget.isLast ? 'Về trang chính' : 'Tiếp',
-                    icon: widget.isLast ? Icons.home_rounded : null,
-                    onPressed: _sending ? null : widget.onNext,
-                  ),
+              : KidBtn3D(
+                  label: widget.isLast ? 'Về trang chính' : 'Tiếp',
+                  icon: widget.isLast ? Icons.home_rounded : null,
+                  color: tt.primary,
+                  expand: true,
+                  onPressed: _sending ? null : widget.onNext,
                 ),
         ),
       ],

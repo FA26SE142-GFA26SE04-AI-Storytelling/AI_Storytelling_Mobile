@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ai_storytelling_mobile/core/theme/app_theme.dart';
-import 'package:ai_storytelling_mobile/core/widgets/tt_button.dart';
+import 'package:ai_storytelling_mobile/core/widgets/kid_panel.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/kid_repository.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/kid_session_controller.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/stored_kid_session.dart';
@@ -124,7 +124,7 @@ void main() {
       expect(find.text('Đọc ngay'), findsOneWidget);
 
       final button =
-          tester.widget<TtButton>(find.widgetWithText(TtButton, 'Đọc ngay'));
+          tester.widget<KidBtn3D>(find.widgetWithText(KidBtn3D, 'Đọc ngay'));
       expect(button.onPressed, isNotNull);
     });
 
@@ -150,7 +150,7 @@ void main() {
       );
 
       final button =
-          tester.widget<TtButton>(find.widgetWithText(TtButton, 'Đọc ngay'));
+          tester.widget<KidBtn3D>(find.widgetWithText(KidBtn3D, 'Đọc ngay'));
       expect(button.onPressed, isNull);
     });
 

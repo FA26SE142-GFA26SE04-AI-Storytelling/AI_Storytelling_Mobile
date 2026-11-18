@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_frog.dart';
+import '../../../core/widgets/tt_state_views.dart';
 import '../../../core/widgets/tt_toast.dart';
 import '../../../models/child_reading_dto.dart';
 import '../data/kid_reading_repository.dart';
@@ -251,13 +253,20 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
           children: [
             const TtFrog(mood: TtFrogMood.idle, size: 80),
             const SizedBox(height: 16),
-            Text(
-              'Đang chuẩn bị câu đố cho bé...',
-              style: TextStyle(
-                fontFamily: 'Nunito',
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: tt.muted,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: KidPanel(
+                borderColor: tt.primary,
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TtSkeleton(height: 24),
+                    SizedBox(height: 12),
+                    TtSkeleton(height: 24),
+                    SizedBox(height: 12),
+                    TtSkeleton(height: 24),
+                  ],
+                ),
               ),
             ),
           ],
@@ -424,28 +433,33 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Chỉ số câu hỏi và nội dung câu hỏi
-                Center(
-                  child: Text(
-                    'Câu ${_currentIndex + 1}/${_questions.length}',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: tt.muted,
-                    ),
+                KidPanel(
+                  borderColor: tt.primary,
+                  child: Column(
+                    children: [
+                      Text(
+                        'Câu ${_currentIndex + 1}/${_questions.length}',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: tt.muted,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        q.question,
+                        style: TextStyle(
+                          fontFamily: 'Baloo2',
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: tt.text,
+                          height: 1.25,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  q.question,
-                  style: TextStyle(
-                    fontFamily: 'Baloo2',
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: tt.text,
-                    height: 1.25,
-                  ),
-                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
 
@@ -739,7 +753,7 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
   }
 }
 
-/// Nút lớn chế độ bé với chiều cao tối thiểu 64dp, bo tròn và chữ 22sp.
+/// Nút lớn chế độ bé, dùng KidBtn3D; đang tải thì vô hiệu hoá.
 class _KidQuizButton extends StatelessWidget {
   const _KidQuizButton({
     required this.label,
@@ -758,60 +772,12 @@ class _KidQuizButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = context.tt;
-    final bg = isSecondary ? tt.panel : tt.primaryStrong;
-    final fg = isSecondary ? tt.text : Colors.white;
-
-    return SizedBox(
-      height: 64,
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: bg,
-          foregroundColor: fg,
-          disabledBackgroundColor: bg.withValues(alpha: 0.5),
-          disabledForegroundColor: fg.withValues(alpha: 0.5),
-          elevation: isSecondary ? 0 : 2,
-          side: isSecondary
-              ? BorderSide(color: tt.line2, width: 2)
-              : BorderSide.none,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-        ),
-        child: isLoading
-            ? SizedBox(
-                width: 26,
-                height: 26,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(fg),
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 26),
-                    const SizedBox(width: 10),
-                  ],
-                  Flexible(
-                    child: Text(
-                      label,
-                      style: const TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-      ),
+    return KidBtn3D(
+      label: label,
+      icon: icon,
+      color: isSecondary ? tt.muted : tt.primary,
+      expand: true,
+      onPressed: isLoading ? null : onPressed,
     );
   }
 }

@@ -7,9 +7,8 @@ import 'package:ai_storytelling_mobile/core/theme/kid_metrics.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
-import '../../../core/widgets/tt_card.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_confirm_dialog.dart';
-import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_state_views.dart';
 import '../../../core/widgets/tt_toast.dart';
 import '../../../models/child_reading_dto.dart';
@@ -229,93 +228,86 @@ class _KidNotebookScreenState extends ConsumerState<KidNotebookScreen> {
 
     return Opacity(
           opacity: isDeleting ? 0.5 : 1.0,
-          child: TtCard(
-            padding: const EdgeInsets.all(16),
+          child: KidPanel(
+            borderColor: tt.gold,
+            padding: EdgeInsets.zero,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: tt.gold.withValues(alpha: 0.22),
-                        borderRadius: BorderRadius.circular(TtRadius.sm),
-                      ),
-                      child: Icon(
-                        Icons.star_rounded,
-                        size: 20,
-                        color: tt.goldDeep,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        entry.term,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: tt.text,
-                            ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (isDeleting)
-                      SizedBox(
-                        width: 32,
-                        height: 32,
-                        child: Center(
-                          child: SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: tt.danger,
+                KidPanelHeader(
+                  title: entry.term,
+                  color: tt.gold,
+                  textColor: tt.inkWarm,
+                  icon: Icons.star_rounded,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              entry.definition,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: tt.inkWarm, height: 1.45),
                             ),
                           ),
-                        ),
-                      )
-                    else
-                      IconButton(
-                        icon: Icon(
-                          Icons.delete_outline_rounded,
-                          color: tt.muted,
-                          size: 22,
-                        ),
-                        tooltip: 'Xoá từ vựng',
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints.tightFor(
-                          width: kKidMinTap,
-                          height: kKidMinTap,
-                        ),
-                        onPressed: () => _onDeleteEntry(entry),
+                          const SizedBox(width: 8),
+                          if (isDeleting)
+                            SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: tt.danger,
+                                  ),
+                                ),
+                              ),
+                            )
+                          else
+                            IconButton(
+                              icon: Icon(
+                                Icons.delete_outline_rounded,
+                                color: tt.muted,
+                                size: 22,
+                              ),
+                              tooltip: 'Xoá từ vựng',
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints.tightFor(
+                                width: kKidMinTap,
+                                height: kKidMinTap,
+                              ),
+                              onPressed: () => _onDeleteEntry(entry),
+                            ),
+                        ],
                       ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  entry.definition,
-                  style: Theme.of(context).textTheme.bodyMedium
-                      ?.copyWith(color: tt.inkWarm, height: 1.45),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Icon(Icons.auto_stories_rounded, size: 14, color: tt.muted),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        entry.storyTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: tt.muted,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Icon(Icons.auto_stories_rounded, size: 14, color: tt.muted),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              entry.storyTitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: tt.muted,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -332,35 +324,50 @@ class _KidNotebookScreenState extends ConsumerState<KidNotebookScreen> {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: 4,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder: (_, _) => Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: tt.panel,
-          borderRadius: BorderRadius.circular(TtRadius.lg),
-          border: Border.all(color: tt.line2, width: 1.5),
-        ),
+      itemBuilder: (_, _) => KidPanel(
+        borderColor: tt.gold,
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                TtSkeleton(
-                  width: 32,
-                  height: 32,
-                  radius: BorderRadius.circular(TtRadius.sm),
-                ),
-                const SizedBox(width: 10),
-                const TtSkeleton(width: 140, height: 20),
-                const Spacer(),
-                const TtSkeleton(width: 24, height: 24),
-              ],
+            Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: tt.gold.withValues(alpha: 0.5),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(21)),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              child: Row(
+                children: [
+                  TtSkeleton(
+                    width: 22,
+                    height: 22,
+                    radius: BorderRadius.circular(TtRadius.sm),
+                  ),
+                  const SizedBox(width: 8),
+                  const TtSkeleton(width: 120, height: 18),
+                ],
+              ),
             ),
-            const SizedBox(height: 14),
-            const TtSkeleton(height: 16),
-            const SizedBox(height: 8),
-            const TtSkeleton(width: 220, height: 16),
-            const SizedBox(height: 14),
-            const TtSkeleton(width: 130, height: 14),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Expanded(child: TtSkeleton(height: 16)),
+                      const SizedBox(width: 8),
+                      const TtSkeleton(width: 24, height: 24),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const TtSkeleton(width: 220, height: 16),
+                  const SizedBox(height: 14),
+                  const TtSkeleton(width: 130, height: 14),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -368,23 +375,10 @@ class _KidNotebookScreenState extends ConsumerState<KidNotebookScreen> {
   }
 
   Widget _buildEmptyState(TtColors tt) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const TtFrog(mood: TtFrogMood.idle, size: 130),
-            const SizedBox(height: 20),
-            Text(
-              'Đọc truyện và cất từ mới vào sổ tay nhé',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge
-                  ?.copyWith(color: tt.muted, fontWeight: FontWeight.w500),
-            ),
-          ],
-        ),
-      ),
+    return TtEmptyState(
+      icon: Icons.menu_book_rounded,
+      title: 'Chưa có từ vựng',
+      message: 'Đọc truyện và cất từ mới vào sổ tay nhé',
     ).animate().fadeIn(duration: 400.ms);
   }
 }

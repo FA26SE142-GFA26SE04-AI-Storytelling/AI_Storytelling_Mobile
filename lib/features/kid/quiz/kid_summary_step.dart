@@ -11,7 +11,7 @@ import 'package:record/record.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
-import '../../../core/widgets/tt_button.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_confirm_dialog.dart';
 import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_toast.dart';
@@ -476,26 +476,21 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
           child: Row(
             children: [
               Expanded(
-                child: SizedBox(
-                  height: 64,
-                  child: TtButton(
-                    label: 'Bỏ qua',
-                    variant: TtButtonVariant.secondary,
-                    onPressed: isLocked ? null : _handleNext,
-                  ),
+                child: KidBtn3D(
+                  label: 'Bỏ qua',
+                  color: tt.muted,
+                  onPressed: isLocked ? null : _handleNext,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: SizedBox(
-                  height: 64,
-                  child: TtButton(
-                    label: widget.isLast ? 'Về trang chính' : 'Tiếp',
-                    icon: widget.isLast
-                        ? Icons.home_rounded
-                        : Icons.arrow_forward_rounded,
-                    onPressed: isLocked ? null : _handleNext,
-                  ),
+                child: KidBtn3D(
+                  label: widget.isLast ? 'Về trang chính' : 'Tiếp',
+                  icon: widget.isLast
+                      ? Icons.home_rounded
+                      : Icons.arrow_forward_rounded,
+                  color: tt.primary,
+                  onPressed: isLocked ? null : _handleNext,
                 ),
               ),
             ],
@@ -510,13 +505,9 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
 
     // Trạng thái đã gửi thành công
     if (_state == _SummaryStepState.sent) {
-      return Container(
+      return KidPanel(
+        borderColor: tt.primary,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        decoration: BoxDecoration(
-          color: tt.surface2,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: tt.primary, width: 2),
-        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -540,25 +531,11 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
     }
 
     // Khung viền và đồng hồ có chút sắc vàng gold
-    return Container(
+    return KidPanel(
+      borderColor: _state == _SummaryStepState.recording
+          ? tt.goldDeep
+          : tt.gold,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: tt.panel,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: _state == _SummaryStepState.recording
-              ? tt.goldDeep
-              : tt.gold.withValues(alpha: 0.6),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: tt.shadow.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -600,25 +577,20 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
 
           // Các nút hành động tùy trạng thái
           if (_state == _SummaryStepState.idle) ...[
-            SizedBox(
-              height: 64,
-              width: double.infinity,
-              child: TtButton(
-                label: 'Bấm để kể',
-                icon: Icons.mic_rounded,
-                onPressed: _startRecording,
-              ),
+            KidBtn3D(
+              label: 'Bấm để kể',
+              icon: Icons.mic_rounded,
+              color: tt.primary,
+              expand: true,
+              onPressed: _startRecording,
             ),
           ] else if (_state == _SummaryStepState.recording) ...[
-            SizedBox(
-              height: 64,
-              width: double.infinity,
-              child: TtButton(
-                label: 'Dừng (${_formatDuration(_elapsed)})',
-                icon: Icons.stop_circle_rounded,
-                variant: TtButtonVariant.danger,
-                onPressed: _stopRecording,
-              ),
+            KidBtn3D(
+              label: 'Dừng (${_formatDuration(_elapsed)})',
+              icon: Icons.stop_circle_rounded,
+              color: tt.danger,
+              expand: true,
+              onPressed: _stopRecording,
             ),
           ] else if (_state == _SummaryStepState.recorded ||
               _state == _SummaryStepState.sending) ...[
@@ -626,16 +598,13 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
               children: [
                 // Nút nghe lại
                 Expanded(
-                  child: SizedBox(
-                    height: 64,
-                    child: TtButton(
-                      label: _isPlaying ? 'Dừng' : 'Nghe lại',
-                      icon: _isPlaying
-                          ? Icons.stop_rounded
-                          : Icons.play_arrow_rounded,
-                      variant: TtButtonVariant.secondary,
-                      onPressed: _isSending ? null : _togglePlay,
-                    ),
+                  child: KidBtn3D(
+                    label: _isPlaying ? 'Dừng' : 'Nghe lại',
+                    icon: _isPlaying
+                        ? Icons.stop_rounded
+                        : Icons.play_arrow_rounded,
+                    color: tt.sky,
+                    onPressed: _isSending ? null : _togglePlay,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -666,14 +635,11 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
 
                 // Nút gửi bố mẹ
                 Expanded(
-                  child: SizedBox(
-                    height: 64,
-                    child: TtButton(
-                      label: 'Gửi bố mẹ',
-                      icon: Icons.send_rounded,
-                      isLoading: _isSending,
-                      onPressed: _isSending ? null : _sendSummary,
-                    ),
+                  child: KidBtn3D(
+                    label: 'Gửi bố mẹ',
+                    icon: Icons.send_rounded,
+                    color: tt.primary,
+                    onPressed: _isSending ? null : _sendSummary,
                   ),
                 ),
               ],

@@ -99,6 +99,11 @@ Tham khảo web: `features/kid/*`, `childAccessService.ts`, `childReadingService
 - [x] Màn tương tác "Đoán tranh": ô trắng là do ảnh chưa tải xong lúc chụp (chụp lại: cả hai ảnh đáp án trả 200 và hiện đủ), không phải lỗi.
 - [x] Khổ 360: toast hiện đè lên thanh đáy ◀ 🔊 🎤 ▶ của màn đọc (toast ở màn đọc nâng lên 96dp, `showTtToast(bottomOffset:)`).
 
+### Giao diện chế độ bé đồng bộ với web (18/11)
+
+- [x] Khung `KidPanel` / `KidPanelHeader` / nút nổi `KidBtn3D` (`core/widgets/kid_panel.dart`) dùng cho Hành trình, Kho truyện, Sổ tay, Điều ước, Huy hiệu, câu đố, kể lại, chọn cảnh thắc mắc, cảm xúc, màn đọc (khung chữ, nút "Em đọc xong rồi") và nút Gửi của Điều ước. Màn đọc / câu đố có khung xương khi đang tải. Tiêu đề thẻ Hành trình luôn là "Hôm nay em đọc"; chuỗi trống Sổ tay dùng "Chưa có từ vựng" (như web). Sửa tràn 10px thẻ huy hiệu ở máy rất nhỏ.
+- [ ] Biểu mẫu Điều ước (`kid_wish_wizard.dart`) vẫn là màn nhiều bước toàn màn hình, chưa đổi sang popup (thay đổi lớn). Chưa chụp màn hình kiểm tra (hoãn theo yêu cầu).
+
 ## Giai đoạn 3: Phụ huynh, thông tin của bé (F-01, F-02, F-12)
 
 Tham khảo web: `features/children`, `features/safety`, `childProfileService.ts`, `guardianService.ts`, `profileLifecycleService.ts`.

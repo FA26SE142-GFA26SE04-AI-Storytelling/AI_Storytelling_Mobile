@@ -6,7 +6,7 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/theme/kid_metrics.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
-import '../../../core/widgets/tt_button.dart';
+import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_card.dart';
 import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_knowledge_tree.dart';
@@ -331,32 +331,51 @@ class _KidRewardsScreenState extends ConsumerState<KidRewardsScreen> {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       child: Column(
         children: [
-          TtCard(
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+          KidPanel(
+            borderColor: tt.gold,
+            padding: EdgeInsets.zero,
             child: Column(
               children: [
-                TtSkeleton(
-                  width: 220,
-                  height: 220,
-                  radius: BorderRadius.circular(TtRadius.xl),
+                KidPanelHeader(
+                  title: 'Cây tri thức',
+                  color: tt.goldDeep,
+                  icon: Icons.park_outlined,
                 ),
-                const SizedBox(height: 20),
-                const TtSkeleton(width: 180, height: 26),
-                const SizedBox(height: 16),
-                const TtSkeleton(width: double.infinity, height: 12),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    5,
-                    (_) => const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 6),
-                      child: TtSkeleton(
-                        width: 28,
-                        height: 28,
-                        radius: BorderRadius.all(Radius.circular(14)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 24,
+                    horizontal: 20,
+                  ),
+                  child: Column(
+                    children: [
+                      TtSkeleton(
+                        width: 220,
+                        height: 220,
+                        radius: BorderRadius.circular(TtRadius.xl),
                       ),
-                    ),
+                      const SizedBox(height: 20),
+                      const TtSkeleton(width: 180, height: 26),
+                      const SizedBox(height: 16),
+                      const TtSkeleton(
+                        width: double.infinity,
+                        height: 12,
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          5,
+                          (_) => const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 6),
+                            child: TtSkeleton(
+                              width: 28,
+                              height: 28,
+                              radius: BorderRadius.all(Radius.circular(14)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -414,62 +433,80 @@ class _KidRewardsScreenState extends ConsumerState<KidRewardsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TtCard(
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+            KidPanel(
+              borderColor: tt.gold,
+              padding: EdgeInsets.zero,
               child: Column(
                 children: [
-                  treeWidget,
-                  const SizedBox(height: 16),
-                  Text.rich(
-                    TextSpan(
+                  KidPanelHeader(
+                    title: 'Cây tri thức',
+                    color: tt.goldDeep,
+                    icon: Icons.park_outlined,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 24,
+                      horizontal: 20,
+                    ),
+                    child: Column(
                       children: [
-                        TextSpan(
-                          text: '${rewards.expTotal} ',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: tt.text,
+                        treeWidget,
+                        const SizedBox(height: 16),
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '${rewards.expTotal} ',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: tt.text,
+                                ),
+                              ),
+                              TextSpan(
+                                text: 'EXP',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: tt.goldDeep,
+                                ),
+                              ),
+                              TextSpan(
+                                text: ' · ${knowledgeTree.stageName}',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: tt.text,
+                                ),
+                              ),
+                            ],
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                        TextSpan(
-                          text: 'EXP',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: tt.goldDeep,
+                        if (knowledgeTree.nextStageAt != null) ...[
+                          const SizedBox(height: 14),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LinearProgressIndicator(
+                              value:
+                                  (knowledgeTree.nextStageAt! > 0
+                                          ? knowledgeTree.currentTreeExp /
+                                                knowledgeTree.nextStageAt!
+                                          : 0.0)
+                                      .clamp(0.0, 1.0),
+                              minHeight: 12,
+                              backgroundColor: tt.surface2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                tt.primary,
+                              ),
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: ' · ${knowledgeTree.stageName}',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: tt.text,
-                          ),
-                        ),
+                        ],
+                        const SizedBox(height: 20),
+                        _buildStageDots(stageIndex: stageIndex, tt: tt),
                       ],
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                  if (knowledgeTree.nextStageAt != null) ...[
-                    const SizedBox(height: 14),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: LinearProgressIndicator(
-                        value:
-                            (knowledgeTree.nextStageAt! > 0
-                                    ? knowledgeTree.currentTreeExp /
-                                          knowledgeTree.nextStageAt!
-                                    : 0.0)
-                                .clamp(0.0, 1.0),
-                        minHeight: 12,
-                        backgroundColor: tt.surface2,
-                        valueColor: AlwaysStoppedAnimation<Color>(tt.primary),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 20),
-                  _buildStageDots(stageIndex: stageIndex, tt: tt),
                 ],
               ),
             ),
@@ -478,33 +515,12 @@ class _KidRewardsScreenState extends ConsumerState<KidRewardsScreen> {
               clipBehavior: Clip.none,
               alignment: Alignment.center,
               children: [
-                ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 64),
-                  child: SizedBox(
-                    height: 64,
-                    child: Theme(
-                      data: Theme.of(context).copyWith(
-                        filledButtonTheme: FilledButtonThemeData(
-                          style: ButtonStyle(
-                            textStyle: const WidgetStatePropertyAll(
-                              TextStyle(
-                                fontFamily: 'Nunito',
-                                fontSize: 24,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      child: TtButton(
-                        label: 'Tưới cây (+${knowledgeTree.expToWater})',
-                        icon: Icons.water_drop,
-                        expanded: true,
-                        isLoading: _isWatering,
-                        onPressed: canWater ? _waterTree : null,
-                      ),
-                    ),
-                  ),
+                KidBtn3D(
+                  label: 'Tưới cây (+${knowledgeTree.expToWater})',
+                  color: tt.primary,
+                  icon: Icons.water_drop,
+                  expand: true,
+                  onPressed: canWater ? _waterTree : null,
                 ),
                 if (_lastExpPoured != null && _floatingExpKey > 0)
                   Positioned(
@@ -547,81 +563,97 @@ class _KidRewardsScreenState extends ConsumerState<KidRewardsScreen> {
               ],
             ),
             const SizedBox(height: 28),
-            Text(
-              'Huy hiệu của em  $earnedCount/${badges.length}',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: tt.text,
+            KidPanel(
+              borderColor: tt.goldDeep,
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  KidPanelHeader(
+                    title: 'Huy hiệu của em  $earnedCount/${badges.length}',
+                    color: tt.goldDeep,
+                    icon: Icons.emoji_events,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: badges.isEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Center(
+                              child: Text(
+                                'Chưa có thông tin huy hiệu',
+                                style: TextStyle(
+                                  color: tt.muted,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          )
+                        : GridView.count(
+                            crossAxisCount: 2,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 0.85,
+                            children: badges.map((badge) {
+                              final Widget cardChild = Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.emoji_events,
+                                    size: 38,
+                                    color:
+                                        badge.earned ? tt.goldDeep : tt.muted,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    badge.name,
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: tt.text,
+                                    ),
+                                  ),
+                                ],
+                              );
+
+                              Widget card = TtCard(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 12,
+                                ),
+                                onTap: () => _showBadgeDetail(badge, tt),
+                                child: cardChild,
+                              );
+
+                              if (badge.earned) {
+                                card = Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(
+                                      TtRadius.lg,
+                                    ),
+                                    border: Border.all(
+                                      color: tt.gold,
+                                      width: 2.0,
+                                    ),
+                                  ),
+                                  child: card,
+                                );
+                              } else {
+                                card = Opacity(opacity: 0.45, child: card);
+                              }
+
+                              return card;
+                            }).toList(),
+                          ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            if (badges.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Center(
-                  child: Text(
-                    'Chưa có thông tin huy hiệu',
-                    style: TextStyle(color: tt.muted, fontSize: 16),
-                  ),
-                ),
-              )
-            else
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1.0,
-                children: badges.map((badge) {
-                  final Widget cardChild = Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.emoji_events,
-                        size: 38,
-                        color: badge.earned ? tt.goldDeep : tt.muted,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        badge.name,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: tt.text,
-                        ),
-                      ),
-                    ],
-                  );
-
-                  Widget card = TtCard(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 12,
-                    ),
-                    onTap: () => _showBadgeDetail(badge, tt),
-                    child: cardChild,
-                  );
-
-                  if (badge.earned) {
-                    card = Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(TtRadius.lg),
-                        border: Border.all(color: tt.gold, width: 2.0),
-                      ),
-                      child: card,
-                    );
-                  } else {
-                    card = Opacity(opacity: 0.45, child: card);
-                  }
-
-                  return card;
-                }).toList(),
-              ),
           ],
         ),
       ),
