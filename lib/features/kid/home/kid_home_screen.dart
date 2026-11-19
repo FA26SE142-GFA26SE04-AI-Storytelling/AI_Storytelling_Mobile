@@ -14,9 +14,7 @@ import '../../auth/application/auth_controller.dart';
 import '../data/kid_session_controller.dart';
 import '../gate/parental_gate_dialog.dart';
 import 'kid_home_providers.dart';
-import 'kid_roadmap_strip.dart';
-import 'kid_tile_grid.dart';
-import 'kid_today_card.dart';
+import 'kid_lobby.dart';
 
 /// Trang chính Chế độ của bé (route /kid).
 class KidHomeScreen extends ConsumerWidget {
@@ -43,14 +41,15 @@ class KidHomeScreen extends ConsumerWidget {
     }
   }
 
-  Widget _animateBlock(BuildContext context, Widget child, {int delayMs = 0}) {
-    if (MediaQuery.disableAnimationsOf(context)) {
-      return child;
-    }
-    return child
-        .animate(delay: delayMs.ms)
-        .fadeIn(duration: 350.ms)
-        .slideY(begin: 0.08, end: 0);
+  void _refresh(WidgetRef ref) {
+    ref.invalidate(kidHomeDataProvider);
+    ref.invalidate(kidLobbyRewardsProvider);
+  }
+
+  /// Mở màn con; quay về thì tải lại badge (bé có thể vừa tưới cây, nhận huy hiệu).
+  Future<void> _open(BuildContext context, WidgetRef ref, String route) async {
+    await context.push(route);
+    if (context.mounted) ref.invalidate(kidLobbyRewardsProvider);
   }
 
   @override
@@ -109,6 +108,20 @@ class KidHomeScreen extends ConsumerWidget {
     };
   }
 
+  /// Bảng tên lắc lư -2° ↔ 2° quanh mép trên, chu kỳ 4.5s (kls-swing web).
+  Widget _swing(BuildContext context, Widget child) {
+    if (MediaQuery.disableAnimationsOf(context)) return child;
+    return child
+        .animate(onPlay: (c) => c.repeat(reverse: true))
+        .rotate(
+          begin: -2 / 360,
+          end: 2 / 360,
+          alignment: Alignment.topCenter,
+          duration: 2250.ms,
+          curve: Curves.easeInOut,
+        );
+  }
+
   Widget _buildHeader(BuildContext context, WidgetRef ref) {
     final tt = context.tt;
     final homeDataAsync = ref.watch(kidHomeDataProvider);
@@ -130,17 +143,20 @@ class KidHomeScreen extends ConsumerWidget {
           const SizedBox(width: 8),
           // Expanded (không dùng Spacer + Flexible) để tên dùng hết khoảng giữa hai nút.
           Expanded(
-            child: Text(
-              displayName,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Baloo2',
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: tt.text,
+            child: _swing(
+              context,
+              Text(
+                displayName,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Baloo2',
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: tt.text,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
           const SizedBox(width: 8),
@@ -148,7 +164,7 @@ class KidHomeScreen extends ConsumerWidget {
             size: kKidMinTap,
             icon: Icons.refresh_rounded,
             tooltip: 'Tải lại',
-            onPressed: () => ref.invalidate(kidHomeDataProvider),
+            onPressed: () => _refresh(ref),
           ),
         ],
       ),
@@ -178,96 +194,27 @@ class KidHomeScreen extends ConsumerWidget {
           child: TtErrorState(
             title: 'Chưa mở được trang của em',
             message: message,
-            onRetry: () => ref.invalidate(kidHomeDataProvider),
+            onRetry: () => _refresh(ref),
           ),
         );
       },
       data: (data) => RefreshIndicator(
         onRefresh: () async {
-          ref.invalidate(kidHomeDataProvider);
+          _refresh(ref);
           try {
             await ref.read(kidHomeDataProvider.future);
           } catch (_) {}
         },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isTablet = constraints.maxWidth >= 600;
-
-              final todayCard = _animateBlock(
-                context,
-                KidTodayCard(
-                  roadmap: data.roadmap,
-                  onRead: (storyId) => context.push('/kid/read/$storyId'),
-                  onChooseStory: () => context.push('/kid/library'),
-                ),
-                delayMs: 0,
-              );
-
-              final roadmapStrip = _animateBlock(
-                context,
-                KidRoadmapStrip(
-                  roadmap: data.roadmap,
-                  onRead: (storyId) => context.push('/kid/read/$storyId'),
-                ),
-                delayMs: 100,
-              );
-
-              final tileGrid = _animateBlock(
-                context,
-                KidTileGrid(
-                  onOpen: (title) {
-                    const routes = {
-                      'Truyện': '/kid/library',
-                      'Sổ tay': '/kid/notebook',
-                      'Điều ước': '/kid/wish',
-                      'Phần thưởng': '/kid/rewards',
-                    };
-                    final route = routes[title];
-                    if (route != null) {
-                      context.push(route);
-                    } else {
-                      context.push('/kid/soon', extra: title);
-                    }
-                  },
-                ),
-                delayMs: 200,
-              );
-
-              if (isTablet) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          todayCard,
-                          const SizedBox(height: 24),
-                          roadmapStrip,
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 24),
-                    Expanded(child: tileGrid),
-                  ],
-                );
-              }
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  todayCard,
-                  const SizedBox(height: 24),
-                  roadmapStrip,
-                  const SizedBox(height: 24),
-                  tileGrid,
-                ],
-              );
-            },
-          ),
+        child: KidLobby(
+          roadmap: data.roadmap,
+          // Lỗi tải phần thưởng chỉ ẩn badge, không chặn sảnh.
+          rewards: ref.watch(kidLobbyRewardsProvider).value,
+          onRead: (id) => _open(context, ref, '/kid/read/$id'),
+          onLibrary: () => _open(context, ref, '/kid/library'),
+          onJourney: () => _open(context, ref, '/kid/journey'),
+          onNotebook: () => _open(context, ref, '/kid/notebook'),
+          onWish: () => _open(context, ref, '/kid/wish'),
+          onRewards: () => _open(context, ref, '/kid/rewards'),
         ),
       ),
     );
