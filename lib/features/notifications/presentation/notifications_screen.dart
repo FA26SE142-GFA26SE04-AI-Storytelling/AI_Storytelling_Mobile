@@ -67,7 +67,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     if (n.childProfileId != null) {
       ref.read(selectedChildIdProvider.notifier).select(n.childProfileId!);
     }
-    context.go(target);
+    // Quản lý bé là màn đẩy (ngoài thanh đáy): thay màn Thông báo để Back về tab cũ.
+    if (target == '/kids') {
+      context.pushReplacement(target);
+    } else {
+      context.go(target);
+    }
   }
 
   Future<void> _delete(NotificationDto n) async {

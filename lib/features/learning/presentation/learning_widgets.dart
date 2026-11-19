@@ -14,9 +14,8 @@ import '../../../models/parent_reading_feedback_dto.dart';
 import 'learning_providers.dart';
 
 /// Câu lỗi dễ hiểu từ ApiException; lỗi khác dùng câu chung.
-String learningErrorText(Object? error) => error is ApiException
-    ? error.message
-    : ApiException.defaultFallbackMessage;
+String learningErrorText(Object? error) =>
+    error is ApiException ? error.message : ApiException.defaultFallbackMessage;
 
 /// Ngày dạng dd/MM/yyyy theo giờ máy.
 String learningDate(DateTime? d) {
@@ -86,7 +85,10 @@ class LearningChip extends StatelessWidget {
 }
 
 /// Chip cảm xúc và điểm câu đố của một truyện đã đọc xong (như web).
-List<Widget> feedbackChips(BuildContext context, ParentReadingFeedbackItemDto i) {
+List<Widget> feedbackChips(
+  BuildContext context,
+  ParentReadingFeedbackItemDto i,
+) {
   final tt = context.tt;
   final quiz = i.quizBestPercent?.round();
   return [
@@ -100,15 +102,15 @@ List<Widget> feedbackChips(BuildContext context, ParentReadingFeedbackItemDto i)
       quiz == null
           ? LearningChip(label: 'Chưa làm câu đố', color: tt.muted)
           : quiz >= 80
-              ? LearningChip(
-                  label: '⭐ Câu đố $quiz%',
-                  color: tt.goldDeep,
-                  fill: tt.gold,
-                )
-              : LearningChip(
-                  label: 'Câu đố $quiz%',
-                  color: quiz >= 50 ? tt.okInk : tt.danger,
-                ),
+          ? LearningChip(
+              label: '⭐ Câu đố $quiz%',
+              color: tt.goldDeep,
+              fill: tt.gold,
+            )
+          : LearningChip(
+              label: 'Câu đố $quiz%',
+              color: quiz >= 50 ? tt.okInk : tt.danger,
+            ),
     LearningChip(
       label: learningDate(i.completedAt),
       color: tt.muted,
@@ -150,23 +152,29 @@ class LearningSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium,
+              // Tiêu đề + số đếm chiếm hết phần còn lại để nút luôn sát mép phải.
+              Expanded(
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    if (count != null) ...[
+                      const SizedBox(width: 8),
+                      LearningChip(
+                        label: '$count',
+                        color: tt.goldDeep,
+                        fill: tt.gold,
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              if (count != null) ...[
-                const SizedBox(width: 8),
-                LearningChip(
-                  label: '$count',
-                  color: tt.goldDeep,
-                  fill: tt.gold,
-                ),
-              ],
-              const Spacer(),
               ?trailing,
             ],
           ),
@@ -246,21 +254,23 @@ class LearningTabList extends ConsumerWidget {
 
 /// Khung xương khi tab đang tải.
 List<Widget> learningSkeleton({int count = 3, double height = 110}) => [
-      for (var i = 0; i < count; i++)
-        TtSkeleton(
-          height: height,
-          radius: const BorderRadius.all(Radius.circular(TtRadius.lg)),
-        ),
-    ];
+  for (var i = 0; i < count; i++)
+    TtSkeleton(
+      height: height,
+      radius: const BorderRadius.all(Radius.circular(TtRadius.lg)),
+    ),
+];
 
 /// Trạng thái lỗi + thử lại cho cả tab.
-Widget learningError(Object? error, VoidCallback onRetry,
-        {String title = 'Chưa tải được dữ liệu'}) =>
-    TtErrorState(
-      title: title,
-      message: learningErrorText(error),
-      onRetry: onRetry,
-    );
+Widget learningError(
+  Object? error,
+  VoidCallback onRetry, {
+  String title = 'Chưa tải được dữ liệu',
+}) => TtErrorState(
+  title: title,
+  message: learningErrorText(error),
+  onRetry: onRetry,
+);
 
 /// Lỗi gọn trong một thẻ (Tổng quan) kèm nút thử lại.
 class LearningInlineError extends StatelessWidget {
@@ -285,9 +295,7 @@ class LearningInlineError extends StatelessWidget {
             learningErrorText(error),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
+            style: Theme.of(context).textTheme.bodyMedium
                 ?.copyWith(color: tt.danger),
           ),
         ),

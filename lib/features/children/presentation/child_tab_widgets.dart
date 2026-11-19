@@ -180,42 +180,89 @@ class _AddChildButton extends StatelessWidget {
   final TextTheme textTheme;
 
   @override
+  Widget build(BuildContext context) => ChildStripAction(
+    icon: Icons.add_rounded,
+    label: 'Thêm bé',
+    semanticsLabel: 'Thêm bé',
+    onTap: onAdd,
+  );
+}
+
+/// Nút tròn + nhãn nhỏ cùng cỡ với ảnh bé trong dải chọn bé (Thêm bé, Vào học,
+/// Quản lý bé). [fill] khác null thì nền tròn đặc màu đó; [loading] hiện vòng tải.
+class ChildStripAction extends StatelessWidget {
+  const ChildStripAction({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.semanticsLabel,
+    required this.onTap,
+    this.fill,
+    this.loading = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final String semanticsLabel;
+  final VoidCallback? onTap;
+  final Color? fill;
+  final bool loading;
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onAdd,
-      child: Container(
-        margin: const EdgeInsets.only(right: 4),
-        width: 68,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: tt.line2, width: 2),
-                color: tt.surface,
+    final tt = context.tt;
+    // Nền vàng giống nhau ở hai theme nên icon/chữ trên nền vàng luôn tối.
+    final ink = fill == null ? tt.primary : TtColors.light.inkWarm;
+    final tap = loading ? null : onTap;
+    return Semantics(
+      button: true,
+      label: semanticsLabel,
+      excludeSemantics: true,
+      onTap: tap,
+      child: GestureDetector(
+        onTap: tap,
+        child: Container(
+          margin: const EdgeInsets.only(right: 4),
+          width: 68,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: fill == null ? tt.line2 : tt.goldDeep,
+                    width: 2,
+                  ),
+                  color: fill ?? tt.surface,
+                ),
+                child: loading
+                    ? Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: ink,
+                        ),
+                      )
+                    : Icon(icon, size: 28, color: ink),
               ),
-              child: Icon(
-                Icons.add_rounded,
-                size: 28,
-                color: tt.primary,
+              const SizedBox(height: 4),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontFamily: 'Nunito',
+                  fontWeight: FontWeight.w700,
+                  color: fill == null ? tt.primary : tt.text,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Thêm bé',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: textTheme.labelSmall?.copyWith(
-                fontFamily: 'Nunito',
-                fontWeight: FontWeight.w600,
-                color: tt.primary,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

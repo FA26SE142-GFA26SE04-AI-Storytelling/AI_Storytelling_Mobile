@@ -20,6 +20,7 @@ import 'package:ai_storytelling_mobile/features/kid/data/kid_session_controller.
 import 'package:ai_storytelling_mobile/features/kid/home/kid_home_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/entry/kid_qr_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/home/kid_coming_soon_screen.dart';
+import 'package:ai_storytelling_mobile/features/kid/home/kid_journey_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/reader/kid_reader_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/library/kid_library_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/rewards/kid_notebook_screen.dart';
@@ -32,6 +33,7 @@ import 'package:ai_storytelling_mobile/features/children/presentation/create_chi
 import 'package:ai_storytelling_mobile/features/safety/presentation/child_safety_screen.dart';
 import 'package:ai_storytelling_mobile/features/access/presentation/child_access_screen.dart';
 import 'package:ai_storytelling_mobile/features/notifications/presentation/notifications_screen.dart';
+import 'package:ai_storytelling_mobile/features/library/presentation/search_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Hằng số đường dẫn tập trung — dùng chung toàn app
@@ -45,6 +47,7 @@ abstract final class AppRoutes {
   static const String resetPassword = '/reset-password';
   static const String blocked = '/blocked';
   static const String home = '/home';
+  static const String search = '/search';
   static const String kids = '/kids';
   static const String kidsNew = '/kids/new';
   static const String learning = '/learning';
@@ -58,6 +61,7 @@ abstract final class AppRoutes {
   static const String kidRewards = '/kid/rewards';
   static const String kidNotebook = '/kid/notebook';
   static const String kidWish = '/kid/wish';
+  static const String kidJourney = '/kid/journey';
 }
 
 // ---------------------------------------------------------------------------
@@ -220,10 +224,52 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const KidWishScreen(),
       ),
       GoRoute(
+        path: AppRoutes.kidJourney,
+        builder: (context, state) => const KidJourneyScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.kidSoon,
         builder: (context, state) => KidComingSoonScreen(
           title: (state.extra as String?) ?? 'Sắp có',
         ),
+      ),
+
+      // --- Quản lý bé (mở từ tab Học tập): màn đẩy lên trên thanh đáy, có nút quay lại.
+      // Luôn mở bằng context.push để Back trở về tab cũ, không thoát app.
+      GoRoute(
+        path: AppRoutes.kids,
+        builder: (context, state) => const ChildrenTabScreen(),
+        routes: [
+          GoRoute(
+            path: 'new',
+            builder: (context, state) =>
+                const CreateChildWizardScreen(),
+          ),
+          GoRoute(
+            path: ':childId/profile',
+            builder: (context, state) => ChildProfileScreen(
+              childId: int.parse(state.pathParameters['childId']!),
+            ),
+          ),
+          GoRoute(
+            path: ':childId/learning',
+            builder: (context, state) => ChildLearningScreen(
+              childId: int.parse(state.pathParameters['childId']!),
+            ),
+          ),
+          GoRoute(
+            path: ':childId/safety',
+            builder: (context, state) => ChildSafetyScreen(
+              childId: int.parse(state.pathParameters['childId']!),
+            ),
+          ),
+          GoRoute(
+            path: ':childId/access',
+            builder: (context, state) => ChildAccessScreen(
+              childId: int.parse(state.pathParameters['childId']!),
+            ),
+          ),
+        ],
       ),
 
       // --- Shell chứa bottom navigation / navigation rail ---
@@ -241,45 +287,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
-          // Tab 1: Bé
+          // Tab 1: Tìm kiếm
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.kids,
-                builder: (context, state) => const ChildrenTabScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'new',
-                    // Wizard toàn màn hình: đè lên thanh đáy.
-                    parentNavigatorKey: _rootNavigatorKey,
-                    builder: (context, state) =>
-                        const CreateChildWizardScreen(),
-                  ),
-                  GoRoute(
-                    path: ':childId/profile',
-                    builder: (context, state) => ChildProfileScreen(
-                      childId: int.parse(state.pathParameters['childId']!),
-                    ),
-                  ),
-                  GoRoute(
-                    path: ':childId/learning',
-                    builder: (context, state) => ChildLearningScreen(
-                      childId: int.parse(state.pathParameters['childId']!),
-                    ),
-                  ),
-                  GoRoute(
-                    path: ':childId/safety',
-                    builder: (context, state) => ChildSafetyScreen(
-                      childId: int.parse(state.pathParameters['childId']!),
-                    ),
-                  ),
-                  GoRoute(
-                    path: ':childId/access',
-                    builder: (context, state) => ChildAccessScreen(
-                      childId: int.parse(state.pathParameters['childId']!),
-                    ),
-                  ),
-                ],
+                path: AppRoutes.search,
+                builder: (context, state) => const SearchScreen(),
               ),
             ],
           ),

@@ -106,6 +106,7 @@ Future<(ProviderContainer, _FakeRepo)> _pump(
   List<NotificationDto>? items,
   bool failList = false,
   Size size = const Size(412, 915),
+  String initial = '/notifications',
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -122,11 +123,27 @@ Future<(ProviderContainer, _FakeRepo)> _pump(
   addTearDown(container.dispose);
 
   final router = GoRouter(
-    initialLocation: '/notifications',
+    initialLocation: initial,
     routes: [
       GoRoute(
         path: '/notifications',
         builder: (_, _) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/home',
+        builder: (context, _) => Scaffold(
+          body: TextButton(
+            onPressed: () => context.push('/notifications'),
+            child: const Text('HOME_TAB'),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/kids',
+        builder: (_, _) => Scaffold(
+          appBar: AppBar(leading: const BackButton()),
+          body: const Text('MANAGE_CHILDREN'),
+        ),
       ),
       GoRoute(
         path: '/learning',
@@ -147,6 +164,7 @@ Future<(ProviderContainer, _FakeRepo)> _pump(
 }
 
 void main() {
+  supervisorTests();
   testWidgets('hiện danh sách: câu dễ hiểu, tên bé, không lộ JSON',
       (tester) async {
     await _pump(tester);
@@ -250,5 +268,34 @@ void main() {
         expect(tester.takeException(), isNull);
       });
     }
+  });
+}
+
+void supervisorTests() {
+  testWidgets('thông báo giám sát mở Quản lý bé; Back về màn trước Thông báo', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      initial: '/home',
+      items: [
+        NotificationDto(
+          id: 9,
+          type: 'SupervisorInvited',
+          group: 'supervisors',
+          status: 'Unread',
+          createdAt: DateTime.now(),
+        ),
+      ],
+    );
+    await tester.tap(find.text('HOME_TAB'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bạn có thông báo mới'));
+    await tester.pumpAndSettle();
+    expect(find.text('MANAGE_CHILDREN'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.text('HOME_TAB'), findsOneWidget);
   });
 }

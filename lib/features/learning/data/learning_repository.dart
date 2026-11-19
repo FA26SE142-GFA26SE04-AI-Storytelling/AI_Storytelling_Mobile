@@ -7,7 +7,7 @@ import '../../../models/parent_story_summary_dto.dart';
 import '../../../models/story_wish_dto.dart';
 
 /// Dữ liệu tab Học tập của phụ huynh. Truyện đã đọc xong và lộ trình dùng
-/// [HomeRepository] (cùng API với Trang chủ).
+/// [HomeRepository].
 abstract class LearningRepository {
   /// GET /ParentStorySummary/{childId}: phần bé kể lại, mới nhất trước.
   Future<ParentStorySummaryPageDto> fetchSummaries(

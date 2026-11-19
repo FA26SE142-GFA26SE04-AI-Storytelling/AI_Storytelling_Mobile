@@ -1,8 +1,14 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ai_storytelling_mobile/core/theme/app_theme.dart';
 import 'package:ai_storytelling_mobile/core/router/app_router.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/kid_session_controller.dart';
+
+/// Flutter web/desktop mặc định không cho kéo bằng chuột → danh sách ngang không cuộn được.
+final appScrollBehavior = const MaterialScrollBehavior().copyWith(
+  dragDevices: PointerDeviceKind.values.toSet(),
+);
 
 class TaleTaleApp extends ConsumerWidget {
   const TaleTaleApp({super.key});
@@ -13,9 +19,10 @@ class TaleTaleApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Đầm Sen Kể Chuyện',
       debugShowCheckedModeBanner: false,
+      // Luôn dùng theme sáng, không theo chế độ tối của máy.
       theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
+      scrollBehavior: appScrollBehavior,
       routerConfig: router,
       // Mỗi lần chạm màn hình tính là bé còn đang dùng (phiên bé hết hạn sau 20 phút không hoạt động).
       builder: (context, child) => Listener(

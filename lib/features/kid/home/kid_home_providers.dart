@@ -1,21 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../models/child_rewards_dto.dart';
 import '../../../models/my_roadmap_dto.dart';
 import '../data/kid_repository.dart';
+import '../data/kid_rewards_repository.dart';
 import '../data/kid_session_controller.dart';
 
 class KidHomeData {
-  const KidHomeData({
-    required this.nickname,
-    required this.roadmap,
-  });
+  const KidHomeData({required this.nickname, required this.roadmap});
 
   final String nickname;
   final MyRoadmapDto roadmap;
 }
 
-final kidHomeDataProvider = FutureProvider.autoDispose<KidHomeData>((ref) async {
+final kidHomeDataProvider = FutureProvider.autoDispose<KidHomeData>((
+  ref,
+) async {
   final state = ref.watch(kidSessionProvider);
   if (state is! KidActive) {
     throw const ApiException(
@@ -30,8 +31,11 @@ final kidHomeDataProvider = FutureProvider.autoDispose<KidHomeData>((ref) async 
   final profile = await repo.getSessionProfile(token);
   final roadmap = await repo.getMyRoadmap(token);
 
-  return KidHomeData(
-    nickname: profile.nickname,
-    roadmap: roadmap,
-  );
+  return KidHomeData(nickname: profile.nickname, roadmap: roadmap);
 });
+
+/// Phần thưởng cho badge trên sảnh (số huy hiệu, giọt nước chờ tưới).
+/// Tách khỏi [kidHomeDataProvider]: lỗi ở đây chỉ ẩn badge, sảnh vẫn hiện.
+final kidLobbyRewardsProvider = FutureProvider.autoDispose<ChildRewards>(
+  (ref) => ref.watch(kidRewardsRepositoryProvider).rewards(),
+);
