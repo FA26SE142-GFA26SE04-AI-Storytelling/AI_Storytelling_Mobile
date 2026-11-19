@@ -68,7 +68,8 @@ class TtColors extends ThemeExtension<TtColors> {
     surface2: Color(0xFFDCF0E5),
     paper: Color(0xFFFCFFFC),
     line: Color(0xFFDCEBE1),
-    line2: Color(0xFFC3DCCC),
+    // Viền khung/thẻ/ô nhập: xanh đủ đậm để thấy rõ trên nền trắng.
+    line2: Color(0xFF8CC7A1),
     text: Color(0xFF1F2F27),
     muted: Color(0xFF547062),
     faint: Color(0xFF8FA89B),
