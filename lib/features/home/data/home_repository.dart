@@ -6,7 +6,7 @@ import '../../../core/network/dio_client.dart';
 import '../../../models/child_roadmap_dto.dart';
 import '../../../models/parent_reading_feedback_dto.dart';
 
-/// Dữ liệu phụ huynh cần cho Trang chủ: bé đã đọc gì và lộ trình của bé.
+/// Bé đã đọc gì và lộ trình của bé (dùng ở tab Học tập).
 abstract class HomeRepository {
   /// GET /ParentReadingFeedback/{childId}: truyện đã đọc xong, mới nhất trước.
   Future<ParentReadingFeedbackPageDto> fetchReadingFeedback(
@@ -43,18 +43,15 @@ class ApiHomeRepository implements HomeRepository {
     int childId, {
     int pageIndex = 1,
     int pageSize = 20,
-  }) =>
-      runApi(() async {
-        final response = await dio.get<dynamic>(
-          '/ParentReadingFeedback/$childId',
-          queryParameters: {'pageIndex': pageIndex, 'pageSize': pageSize},
-        );
-        final data = _unwrap(response);
-        if (data == null) return const ParentReadingFeedbackPageDto();
-        return ParentReadingFeedbackPageDto.fromJson(
-          data as Map<String, dynamic>,
-        );
-      });
+  }) => runApi(() async {
+    final response = await dio.get<dynamic>(
+      '/ParentReadingFeedback/$childId',
+      queryParameters: {'pageIndex': pageIndex, 'pageSize': pageSize},
+    );
+    final data = _unwrap(response);
+    if (data == null) return const ParentReadingFeedbackPageDto();
+    return ParentReadingFeedbackPageDto.fromJson(data as Map<String, dynamic>);
+  });
 
   @override
   Future<ChildRoadmapDto?> fetchRoadmap(int childId) async {

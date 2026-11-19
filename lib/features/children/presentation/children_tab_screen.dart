@@ -14,6 +14,8 @@ import 'child_lifecycle_actions.dart';
 import 'child_tab_widgets.dart';
 import 'children_providers.dart';
 
+/// Màn Quản lý bé (mở từ tab Học tập, có nút quay lại): dải chọn bé gồm cả bé
+/// tạm dừng / lưu trữ, thẻ bé, Hồ sơ · Học tập · An toàn · Mã QR, thêm bé.
 class ChildrenTabScreen extends ConsumerStatefulWidget {
   const ChildrenTabScreen({super.key});
 
@@ -53,6 +55,10 @@ class _ChildrenTabScreenState extends ConsumerState<ChildrenTabScreen> {
 
     return Scaffold(
       backgroundColor: tt.bg,
+      appBar: AppBar(
+        leading: const BackButton(),
+        title: const Text('Quản lý bé'),
+      ),
       body: SafeArea(
         child: childrenAsync.when(
           loading: () => _buildSkeleton(),

@@ -152,7 +152,7 @@ class _CreateChildWizardScreenState
         context,
         title: _createdId != null ? 'Dừng tạo hồ sơ?' : 'Bỏ hồ sơ đang tạo?',
         message: _createdId != null
-            ? 'Hồ sơ đã được lưu ở trạng thái Nháp, bạn hoàn tất sau trong tab Bé.'
+            ? 'Hồ sơ đã được lưu ở trạng thái Nháp, bạn hoàn tất sau trong Quản lý bé (tab Học tập).'
             : 'Các thông tin đã điền sẽ bị xoá.',
         confirmLabel: _createdId != null ? 'Dừng' : 'Bỏ',
         destructive: _createdId == null,

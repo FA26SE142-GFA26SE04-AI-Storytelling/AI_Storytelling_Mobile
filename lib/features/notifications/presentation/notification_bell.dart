@@ -38,7 +38,9 @@ class UnreadBadge extends StatelessWidget {
 
 /// Nút chuông ở Trang chủ, kèm số chưa đọc.
 class NotificationBellButton extends ConsumerWidget {
-  const NotificationBellButton({super.key});
+  const NotificationBellButton({super.key, this.size = 48});
+
+  final double size;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,6 +50,7 @@ class NotificationBellButton extends ConsumerWidget {
       child: TtIconButton(
         icon: Icons.notifications_rounded,
         tooltip: count > 0 ? 'Thông báo, $count chưa đọc' : 'Thông báo',
+        size: size,
         onPressed: () => openNotifications(context, ref),
       ),
     );

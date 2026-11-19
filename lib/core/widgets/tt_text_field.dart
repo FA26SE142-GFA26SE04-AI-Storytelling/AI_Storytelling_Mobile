@@ -18,6 +18,9 @@ class TtTextField extends StatefulWidget {
     this.autofillHints,
     this.hint,
     this.autofocus = false,
+    this.prefixIcon,
+    this.hideLabel = false,
+    this.focusNode,
   });
 
   /// Nhãn hiển thị phía trên ô nhập.
@@ -52,6 +55,15 @@ class TtTextField extends StatefulWidget {
 
   /// Tự động lấy tiêu điểm khi hiển thị.
   final bool autofocus;
+
+  /// Icon ở đầu ô nhập (vd. kính lúp cho ô tìm kiếm).
+  final IconData? prefixIcon;
+
+  /// Ẩn nhãn phía trên; nhãn vẫn dùng cho trình đọc màn hình.
+  final bool hideLabel;
+
+  /// Điều khiển tiêu điểm từ bên ngoài (vd. mở màn Tìm kiếm thì focus sẵn).
+  final FocusNode? focusNode;
 
   @override
   State<TtTextField> createState() => _TtTextFieldState();
@@ -122,41 +134,50 @@ class _TtTextFieldState extends State<TtTextField> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(widget.label, style: labelStyle),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: widget.controller,
-            validator: widget.validator,
-            // Kiểm tra lại khi người dùng gõ, để lỗi tự mất khi đã nhập đúng.
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            keyboardType: widget.keyboardType,
-            textInputAction: widget.textInputAction,
-            onFieldSubmitted: widget.onSubmitted,
-            enabled: widget.enabled,
-            autofocus: widget.autofocus,
-            autofillHints: widget.autofillHints,
-            obscureText: widget.obscure ? _obscured : false,
-            style: inputStyle,
-            decoration: InputDecoration(
-              hintText: widget.hint,
-              filled: true,
-              fillColor: tt.panel,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
+          if (!widget.hideLabel) ...[
+            Text(widget.label, style: labelStyle),
+            const SizedBox(height: 8),
+          ],
+          Semantics(
+            label: widget.hideLabel ? widget.label : null,
+            child: TextFormField(
+              controller: widget.controller,
+              focusNode: widget.focusNode,
+              validator: widget.validator,
+              // Kiểm tra lại khi người dùng gõ, để lỗi tự mất khi đã nhập đúng.
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              keyboardType: widget.keyboardType,
+              textInputAction: widget.textInputAction,
+              onFieldSubmitted: widget.onSubmitted,
+              enabled: widget.enabled,
+              autofocus: widget.autofocus,
+              autofillHints: widget.autofillHints,
+              obscureText: widget.obscure ? _obscured : false,
+              style: inputStyle,
+              decoration: InputDecoration(
+                hintText: widget.hint,
+                filled: true,
+                fillColor: tt.panel,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                border: border,
+                enabledBorder: border,
+                focusedBorder: border.copyWith(
+                  borderSide: BorderSide(color: tt.primary, width: 2.0),
+                ),
+                errorBorder: border.copyWith(
+                  borderSide: BorderSide(color: tt.danger, width: 1.5),
+                ),
+                focusedErrorBorder: border.copyWith(
+                  borderSide: BorderSide(color: tt.danger, width: 2.0),
+                ),
+                prefixIcon: widget.prefixIcon == null
+                    ? null
+                    : Icon(widget.prefixIcon, color: tt.muted),
+                suffixIcon: suffixIcon,
               ),
-              border: border,
-              enabledBorder: border,
-              focusedBorder: border.copyWith(
-                borderSide: BorderSide(color: tt.primary, width: 2.0),
-              ),
-              errorBorder: border.copyWith(
-                borderSide: BorderSide(color: tt.danger, width: 1.5),
-              ),
-              focusedErrorBorder: border.copyWith(
-                borderSide: BorderSide(color: tt.danger, width: 2.0),
-              ),
-              suffixIcon: suffixIcon,
             ),
           ),
         ],

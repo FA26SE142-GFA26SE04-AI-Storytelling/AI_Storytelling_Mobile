@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:ai_storytelling_mobile/core/network/api_exception.dart';
 import 'package:ai_storytelling_mobile/core/theme/app_theme.dart';
@@ -161,6 +162,7 @@ Future<(_FakeHome, _FakeLearning)> _pump(
   List<ChildProfileDto> children = const [_an, _binh, _draft],
   Size size = const Size(412, 915),
   _FakeHome? home,
+  List<int>? handed,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -181,7 +183,33 @@ Future<(_FakeHome, _FakeLearning)> _pump(
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: MaterialApp(theme: AppTheme.light(), home: const LearningScreen()),
+      child: MaterialApp.router(
+        theme: AppTheme.light(),
+        routerConfig: GoRouter(
+          initialLocation: '/learning',
+          routes: [
+            GoRoute(
+              path: '/learning',
+              builder: (_, _) => LearningScreen(
+                handover: (_, _, child) async => handed?.add(child.id),
+              ),
+            ),
+            GoRoute(
+              path: '/kids',
+              builder: (_, _) => Scaffold(
+                appBar: AppBar(leading: const BackButton()),
+                body: const Text('MANAGE'),
+              ),
+              routes: [
+                GoRoute(
+                  path: 'new',
+                  builder: (_, _) => const Scaffold(body: Text('NEW_CHILD')),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -198,6 +226,7 @@ Future<void> _openTab(WidgetTester tester, String label) async {
 }
 
 void main() {
+  navigationTests();
   testWidgets('4 tab hiện; Tổng quan đúng số liệu; bé Nháp không hiện', (tester) async {
     await _pump(tester);
 
@@ -344,7 +373,7 @@ void main() {
     expect(learning.calls, containsAll(['summaries:2', 'wishes:2']));
   });
 
-  for (final size in const [Size(360, 740), Size(800, 1280)]) {
+  for (final size in const [Size(320, 640), Size(360, 740), Size(390, 844), Size(1024, 768)]) {
     testWidgets('Không tràn ở ${size.width.toInt()}x${size.height.toInt()}', (tester) async {
       await _pump(tester, size: size);
       expect(tester.takeException(), isNull);
@@ -358,4 +387,41 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+}
+
+void navigationTests() {
+  testWidgets('Vào học: giao máy cho đúng bé đang chọn', (tester) async {
+    final handed = <int>[];
+    await _pump(tester, handed: handed);
+
+    await tester.tap(find.bySemanticsLabel('Cho Bé An vào học'));
+    await tester.pumpAndSettle();
+    expect(handed, [1]);
+
+    await tester.tap(find.text('Bé Bình'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Cho Bé Bình vào học'));
+    await tester.pumpAndSettle();
+    expect(handed, [1, 2]);
+  });
+
+  testWidgets('⚙ mở Quản lý bé, Back quay về Học tập', (tester) async {
+    await _pump(tester);
+    await tester.tap(find.bySemanticsLabel('Quản lý bé'));
+    await tester.pumpAndSettle();
+    expect(find.text('MANAGE'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(TabBar), findsOneWidget);
+  });
+
+  testWidgets('Không có bé đang hoạt động: nút Quản lý bé / Thêm bé', (
+    tester,
+  ) async {
+    await _pump(tester, children: const [_draft]);
+    await tester.tap(find.text('Thêm bé'));
+    await tester.pumpAndSettle();
+    expect(find.text('NEW_CHILD'), findsOneWidget);
+  });
 }

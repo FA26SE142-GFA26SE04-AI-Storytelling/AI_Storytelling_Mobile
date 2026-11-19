@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_state_views.dart';
 import '../../../models/child_profile_dto.dart';
 import '../../children/presentation/child_tab_widgets.dart';
 import '../../children/presentation/children_providers.dart';
+import '../../kid/data/handover_action.dart';
 import 'learning_overview_tab.dart';
 import 'learning_providers.dart';
 import 'learning_results_tab.dart';
@@ -19,10 +21,14 @@ import 'summary_audio.dart';
 /// Tab "Học tập" của phụ huynh (Luồng 4 như web): chọn bé rồi xem
 /// Tổng quan · Lộ trình · Kết quả đọc · Điều ước. Chỉ xem, sửa làm trên web.
 class LearningScreen extends ConsumerStatefulWidget {
-  const LearningScreen({super.key, this.audio});
+  const LearningScreen({super.key, this.audio, this.handover});
 
   /// Cho test truyền player giả; mặc định tự tạo.
   final SummaryAudio? audio;
+
+  /// Cho test thay việc giao máy cho bé; mặc định [handoverChildToKid].
+  final Future<void> Function(BuildContext, WidgetRef, ChildProfileDto)?
+  handover;
 
   @override
   ConsumerState<LearningScreen> createState() => _LearningScreenState();
@@ -34,6 +40,19 @@ class _LearningScreenState extends ConsumerState<LearningScreen>
     ..addListener(_onTabChanged);
   late final SummaryAudio _audio = widget.audio ?? SummaryAudio();
   ResultsView _resultsView = ResultsView.readings;
+  bool _handoverLoading = false;
+
+  /// "Vào học": cho bé đang chọn vào chế độ bé; chặn bấm đúp khi đang tải.
+  Future<void> _handover(ChildProfileDto child) async {
+    if (_handoverLoading) return;
+    _audio.stop();
+    setState(() => _handoverLoading = true);
+    try {
+      await (widget.handover ?? handoverChildToKid)(context, ref, child);
+    } finally {
+      if (mounted) setState(() => _handoverLoading = false);
+    }
+  }
 
   void _onTabChanged() {
     if (_tabs.index != 2) _audio.stop();
@@ -108,11 +127,23 @@ class _LearningScreenState extends ConsumerState<LearningScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             const LearningEmpty(title: 'Chưa có bé nào đang hoạt động'),
-            TtButton(
-              label: 'Mở tab Bé',
-              icon: Icons.child_care_rounded,
-              variant: TtButtonVariant.secondary,
-              onPressed: () => context.go('/kids'),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                TtButton(
+                  label: 'Quản lý bé',
+                  icon: Icons.settings_rounded,
+                  variant: TtButtonVariant.secondary,
+                  onPressed: () => context.push(AppRoutes.kids),
+                ),
+                TtButton(
+                  label: 'Thêm bé',
+                  icon: Icons.add_rounded,
+                  onPressed: () => context.push(AppRoutes.kidsNew),
+                ),
+              ],
             ),
           ],
         ),
@@ -142,14 +173,36 @@ class _LearningScreenState extends ConsumerState<LearningScreen>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 8),
-        ChildPickerStrip(
-          children: active,
-          selectedId: id,
-          onSelect: (newId) {
-            if (newId == id) return;
-            _audio.stop();
-            ref.read(selectedChildIdProvider.notifier).select(newId);
-          },
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ChildPickerStrip(
+                children: active,
+                selectedId: id,
+                onSelect: (newId) {
+                  if (newId == id) return;
+                  _audio.stop();
+                  ref.read(selectedChildIdProvider.notifier).select(newId);
+                },
+              ),
+            ),
+            ChildStripAction(
+              icon: Icons.play_arrow_rounded,
+              label: 'Vào học',
+              semanticsLabel: 'Cho ${child.nickname} vào học',
+              fill: tt.gold,
+              loading: _handoverLoading,
+              onTap: () => _handover(child),
+            ),
+            ChildStripAction(
+              icon: Icons.settings_rounded,
+              label: 'Quản lý',
+              semanticsLabel: 'Quản lý bé',
+              onTap: () => context.push(AppRoutes.kids),
+            ),
+            const SizedBox(width: 12),
+          ],
         ),
         TabBar(
           controller: _tabs,

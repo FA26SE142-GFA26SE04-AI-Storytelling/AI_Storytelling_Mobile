@@ -70,7 +70,7 @@ String notificationText(NotificationDto n) {
 }
 
 /// Màn mở khi chạm thông báo; null = chỉ đánh dấu đã đọc.
-/// Việc của bé (lộ trình, điều ước, tóm tắt đọc) → tab Học tập; giám sát → tab Bé.
+/// Việc của bé (lộ trình, điều ước, tóm tắt đọc) → tab Học tập; giám sát → màn Quản lý bé.
 String? notificationTarget(NotificationDto n) {
   final key = notificationKey(n.type);
   if (key.startsWith('roadmap_') ||
