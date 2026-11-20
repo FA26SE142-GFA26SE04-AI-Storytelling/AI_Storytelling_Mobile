@@ -104,4 +104,10 @@ void bannerAndNewTests() {
     expect(s.isNewAt(DateTime(2026, 1, 17)), isFalse);
     expect(const LibraryStoryDto(id: 1).isNewAt(DateTime(2026)), isFalse);
   });
+
+  test('foldVietnamese bỏ dấu để tìm không dấu', () {
+    expect(foldVietnamese('Đêm Hội Trông Trăng Ở Làng Quê'),
+        'dem hoi trong trang o lang que');
+    expect(foldVietnamese('Chú Cuội ước được bay'), 'chu cuoi uoc duoc bay');
+  });
 }

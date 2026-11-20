@@ -98,6 +98,20 @@ List<LibraryStoryDto> mergeLibrary(
     ..sort((a, b) => (b.createdAt ?? epoch).compareTo(a.createdAt ?? epoch));
 }
 
+const _vnFrom = 'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ';
+const _vnTo = 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyd';
+
+/// Chữ thường, bỏ dấu tiếng Việt để tìm "dem hoi" ra "Đêm Hội".
+String foldVietnamese(String s) {
+  final lower = s.toLowerCase();
+  final out = StringBuffer();
+  for (final ch in lower.split('')) {
+    final i = _vnFrom.indexOf(ch);
+    out.write(i < 0 ? ch : _vnTo[i]);
+  }
+  return out.toString();
+}
+
 /// Các kệ của thư viện, tính từ danh sách đã gộp ([sorted] mới trước).
 class LibraryShelves {
   LibraryShelves(this.sorted)
@@ -125,8 +139,8 @@ class LibraryShelves {
       : sorted.where((s) => s.sourceKey == source).toList();
 
   List<LibraryStoryDto> search(String query) {
-    final needle = query.trim().toLowerCase();
-    return sorted.where((s) => s.title.toLowerCase().contains(needle)).toList();
+    final needle = foldVietnamese(query.trim());
+    return sorted.where((s) => foldVietnamese(s.title).contains(needle)).toList();
   }
 
   /// Tìm theo tên, thêm lọc theo chủ đề khi [topic] khác null.
