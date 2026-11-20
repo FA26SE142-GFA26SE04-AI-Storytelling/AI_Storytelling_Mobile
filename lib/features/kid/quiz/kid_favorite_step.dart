@@ -214,9 +214,15 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Hiện trọn tranh như màn đọc (không cắt), phần thừa là tranh làm mờ.
-                        AspectRatio(
-                          aspectRatio: 16 / 10,
-                          child: TtWholeImage(url: tile.imageUrl),
+                        // Màn ngang thấp: giới hạn cao để nút Gửi không bị đẩy xuống.
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: wide ? 130 : double.infinity,
+                          ),
+                          child: AspectRatio(
+                            aspectRatio: 16 / 10,
+                            child: TtWholeImage(url: tile.imageUrl),
+                          ),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(

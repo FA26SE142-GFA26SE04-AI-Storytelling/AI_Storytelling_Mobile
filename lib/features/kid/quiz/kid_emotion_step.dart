@@ -234,20 +234,22 @@ class _KidEmotionStepState extends ConsumerState<KidEmotionStep> {
   @override
   Widget build(BuildContext context) {
     final tt = context.tt;
+    // Màn thấp (điện thoại ngang): bớt khoảng đệm để đủ 2 hàng cảm xúc.
+    final short = MediaQuery.sizeOf(context).height < 500;
 
     return Column(
       children: [
         Expanded(
           child:
               SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
+                    padding: EdgeInsets.symmetric(
                       horizontal: 20,
-                      vertical: 20,
+                      vertical: short ? 8 : 20,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SizedBox(height: 8),
+                        if (!short) const SizedBox(height: 8),
                         Text(
                           'Truyện làm em cảm thấy gì?',
                           textAlign: TextAlign.center,
@@ -258,7 +260,7 @@ class _KidEmotionStepState extends ConsumerState<KidEmotionStep> {
                             color: tt.text,
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        SizedBox(height: short ? 10 : 24),
                         LayoutBuilder(
                           builder: (context, constraints) {
                             final width = constraints.maxWidth;
