@@ -137,6 +137,19 @@ class _KidEmotionStepState extends ConsumerState<KidEmotionStep> {
     final borderColor = isSelected ? tt.gold : tt.line2;
     final borderWidth = isSelected ? 4.0 : 2.0;
     final bgColor = isSelected ? tt.gold.withValues(alpha: 0.14) : tt.panel;
+    final label = FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text(
+        option.label,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontFamily: 'Nunito',
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: isSelected ? tt.warnInk : tt.text,
+        ),
+      ),
+    );
 
     return Material(
       color: Colors.transparent,
@@ -147,7 +160,7 @@ class _KidEmotionStepState extends ConsumerState<KidEmotionStep> {
           duration: const Duration(milliseconds: 200),
           // Màn thấp (điện thoại xoay ngang) thì ô thấp lại để không phải cuộn.
           constraints: BoxConstraints(
-            minHeight: MediaQuery.sizeOf(context).height < 500 ? 76 : 110,
+            minHeight: MediaQuery.sizeOf(context).height < 500 ? 56 : 110,
           ),
           padding: EdgeInsets.symmetric(
             horizontal: 10,
@@ -170,7 +183,12 @@ class _KidEmotionStepState extends ConsumerState<KidEmotionStep> {
           child: Stack(
             children: [
               Center(
-                child: Column(
+                child: Flex(
+                  // Màn thấp: emoji cạnh chữ (ô nằm ngang) để 2 hàng vừa màn.
+                  direction: MediaQuery.sizeOf(context).height < 500
+                      ? Axis.horizontal
+                      : Axis.vertical,
+                  mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -182,20 +200,12 @@ class _KidEmotionStepState extends ConsumerState<KidEmotionStep> {
                             : 44,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        option.label,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Nunito',
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: isSelected ? tt.warnInk : tt.text,
-                        ),
-                      ),
-                    ),
+                    const SizedBox(width: 8, height: 6),
+                    // Ô nằm ngang: Flexible để chữ dài co lại thay vì tràn.
+                    if (MediaQuery.sizeOf(context).height < 500)
+                      Flexible(child: label)
+                    else
+                      label,
                   ],
                 ),
               ),
