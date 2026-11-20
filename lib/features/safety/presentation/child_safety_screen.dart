@@ -15,6 +15,7 @@ import '../../../models/content_category_dto.dart';
 import '../../../models/safety_policy_dto.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../children/data/child_profile_repository.dart';
+import '../../children/presentation/children_providers.dart';
 import 'safety_rules_form.dart';
 
 class ChildSafetyScreen extends ConsumerStatefulWidget {
@@ -112,8 +113,10 @@ class _ChildSafetyScreenState extends ConsumerState<ChildSafetyScreen> {
     try {
       final repo = ref.read(childProfileRepositoryProvider);
       await repo.setSafety(widget.childId, body);
+      // Ô "An toàn" ở Quản lý bé đọc từ overview: làm mới để không hiện giá trị cũ.
+      ref.invalidate(childOverviewProvider(widget.childId));
       if (!mounted) return;
-      showTtToast(context, 'Đã lưu', type: TtToastType.success);
+      showTtToast(context, 'Đã lưu cài đặt an toàn', type: TtToastType.success);
       try {
         final fresh = await repo.fetchSafety(widget.childId);
         if (!mounted) return;
@@ -461,6 +464,7 @@ class _ChildSafetyScreenState extends ConsumerState<ChildSafetyScreen> {
     try {
       final repo = ref.read(childProfileRepositoryProvider);
       await repo.setSafety(widget.childId, body);
+      ref.invalidate(childOverviewProvider(widget.childId));
       if (!mounted) return;
       showTtToast(context, 'Đã tạo cài đặt an toàn',
           type: TtToastType.success);
@@ -500,6 +504,7 @@ class _ChildSafetyScreenState extends ConsumerState<ChildSafetyScreen> {
     try {
       final repo = ref.read(childProfileRepositoryProvider);
       await repo.reconsent(widget.childId);
+      ref.invalidate(childOverviewProvider(widget.childId));
       if (!mounted) return;
       showTtToast(context, 'Đã đồng ý điều khoản mới',
           type: TtToastType.success);
