@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../models/parent_reading_feedback_dto.dart';
 import '../../../models/parent_story_summary_dto.dart';
 import '../../../models/story_wish_dto.dart';
 
@@ -18,6 +19,10 @@ abstract class LearningRepository {
 
   /// DELETE /ParentStorySummary/{childId}/{summaryId}: xoá bản ghi âm và phần kể lại.
   Future<void> deleteSummary(int childId, int summaryId);
+
+  /// GET /ParentReadingFeedback/{childId}/sessions/{sessionId}/reflection:
+  /// cảm xúc, cảnh thích nhất và lời bé gửi sau một lần đọc.
+  Future<ParentStoryReflectionDto> fetchReflection(int childId, int sessionId);
 
   /// GET /parent/wishes?childProfileId=: mọi điều ước bé đã gửi.
   Future<List<ParentWish>> fetchWishes(int childId);
@@ -50,41 +55,54 @@ class ApiLearningRepository implements LearningRepository {
     int childId, {
     int pageIndex = 1,
     int pageSize = 20,
-  }) =>
-      runApi(() async {
-        final response = await dio.get<dynamic>(
-          '/ParentStorySummary/$childId',
-          queryParameters: {'pageIndex': pageIndex, 'pageSize': pageSize},
-        );
-        final data = _unwrap(response);
-        if (data == null) return const ParentStorySummaryPageDto();
-        return ParentStorySummaryPageDto.fromJson(data as Map<String, dynamic>);
-      });
+  }) => runApi(() async {
+    final response = await dio.get<dynamic>(
+      '/ParentStorySummary/$childId',
+      queryParameters: {'pageIndex': pageIndex, 'pageSize': pageSize},
+    );
+    final data = _unwrap(response);
+    if (data == null) return const ParentStorySummaryPageDto();
+    return ParentStorySummaryPageDto.fromJson(data as Map<String, dynamic>);
+  });
+
+  @override
+  Future<ParentStoryReflectionDto> fetchReflection(
+    int childId,
+    int sessionId,
+  ) => runApi(() async {
+    final data = _unwrap(
+      await dio.get<dynamic>(
+        '/ParentReadingFeedback/$childId/sessions/$sessionId/reflection',
+      ),
+    );
+    if (data == null) return ParentStoryReflectionDto(sessionId: sessionId);
+    return ParentStoryReflectionDto.fromJson(data as Map<String, dynamic>);
+  });
 
   @override
   Future<void> deleteSummary(int childId, int summaryId) => runApi(() async {
-        _unwrap(
-          await dio.delete<dynamic>('/ParentStorySummary/$childId/$summaryId'),
-        );
-      });
+    _unwrap(
+      await dio.delete<dynamic>('/ParentStorySummary/$childId/$summaryId'),
+    );
+  });
 
   @override
   Future<List<ParentWish>> fetchWishes(int childId) => runApi(() async {
-        final response = await dio.get<dynamic>(
-          '/parent/wishes',
-          queryParameters: {'childProfileId': childId},
-        );
-        final data = _unwrap(response) as List<dynamic>? ?? const [];
-        return data
-            .map((e) => ParentWish.fromJson(e as Map<String, dynamic>))
-            .toList();
-      });
+    final response = await dio.get<dynamic>(
+      '/parent/wishes',
+      queryParameters: {'childProfileId': childId},
+    );
+    final data = _unwrap(response) as List<dynamic>? ?? const [];
+    return data
+        .map((e) => ParentWish.fromJson(e as Map<String, dynamic>))
+        .toList();
+  });
 
   @override
   Future<String?> fetchStoryCover(int storyId) => runApi(() async {
-        final data = _unwrap(await dio.get<dynamic>('/Story/$storyId'));
-        return (data as Map<String, dynamic>?)?['coverImageUrl'] as String?;
-      });
+    final data = _unwrap(await dio.get<dynamic>('/Story/$storyId'));
+    return (data as Map<String, dynamic>?)?['coverImageUrl'] as String?;
+  });
 }
 
 final learningRepositoryProvider = Provider<LearningRepository>(

@@ -8,7 +8,6 @@ import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_state_views.dart';
 import '../../../models/child_profile_dto.dart';
 import 'learning_providers.dart';
-import 'learning_results_tab.dart';
 import 'learning_roadmap_tab.dart';
 import 'learning_widgets.dart';
 
@@ -22,8 +21,8 @@ class LearningOverviewTab extends ConsumerWidget {
 
   final ChildProfileDto child;
 
-  /// Chuyển sang tab [index]; tab Kết quả đọc mở đúng phần [view].
-  final void Function(int index, [ResultsView? view]) onTab;
+  /// Chuyển sang tab [index].
+  final ValueChanged<int> onTab;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -59,20 +58,23 @@ class LearningOverviewTab extends ConsumerWidget {
       _Tile(
         icon: Icons.route_rounded,
         label: 'Lộ trình',
-        value: value(roadmap, (r) => '${r?.completedCount ?? 0}/${r?.totalCount ?? 0}'),
+        value: value(
+          roadmap,
+          (r) => '${r?.completedCount ?? 0}/${r?.totalCount ?? 0}',
+        ),
         onTap: () => onTab(1),
       ),
       _Tile(
         icon: Icons.menu_book_rounded,
         label: 'Đã đọc xong',
         value: value(feedback, (p) => '${p.totalCount}'),
-        onTap: () => onTab(2, ResultsView.readings),
+        onTap: () => onTab(2),
       ),
       _Tile(
         icon: Icons.mic_rounded,
         label: 'Bé kể lại',
         value: value(summaries, (p) => '${p.totalCount}'),
-        onTap: () => onTab(2, ResultsView.summaries),
+        onTap: () => onTab(2),
       ),
       _Tile(
         icon: Icons.auto_awesome_rounded,
@@ -123,8 +125,8 @@ class LearningOverviewTab extends ConsumerWidget {
                       const SizedBox(height: 6),
                       LearningChip(
                         label: 'Hạn ${learningDate(open.expectedCompletionAt)}',
-                        color: open.expectedCompletionAt!
-                                .isBefore(DateTime.now())
+                        color:
+                            open.expectedCompletionAt!.isBefore(DateTime.now())
                             ? tt.danger
                             : tt.muted,
                         icon: Icons.schedule_rounded,
@@ -236,7 +238,7 @@ class LearningOverviewTab extends ConsumerWidget {
                   icon: Icons.chevron_right_rounded,
                   tooltip: 'Xem tất cả',
                   size: 36,
-                  onPressed: () => onTab(2, ResultsView.readings),
+                  onPressed: () => onTab(2),
                 )
               : null,
           child: recentBody,

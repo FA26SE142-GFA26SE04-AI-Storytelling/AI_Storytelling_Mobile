@@ -25,6 +25,25 @@ String learningDate(DateTime? d) {
   return '${two(l.day)}/${two(l.month)}/${l.year}';
 }
 
+/// Ngày dạng dd/MM theo giờ máy (bản ngắn của web); chuỗi ISO sai thì trả '—'.
+String learningShortDate(Object? d) {
+  final dt = d is DateTime ? d : DateTime.tryParse('$d');
+  if (dt == null) return '—';
+  final l = dt.toLocal();
+  String two(int v) => v.toString().padLeft(2, '0');
+  return '${two(l.day)}/${two(l.month)}';
+}
+
+const emotionFace = {
+  'Happy': '😄',
+  'Funny': '😂',
+  'Surprised': '😮',
+  'Excited': '😆',
+  'Touched': '🥹',
+  'Sad': '😢',
+  'Scared': '😨',
+};
+
 const feelingFace = {
   'VeryLike': '😍',
   'Like': '🙂',
@@ -84,39 +103,132 @@ class LearningChip extends StatelessWidget {
   }
 }
 
-/// Chip cảm xúc và điểm câu đố của một truyện đã đọc xong (như web).
-List<Widget> feedbackChips(
-  BuildContext context,
-  ParentReadingFeedbackItemDto i,
-) {
+/// Chip mức thích của một lần đọc; null khi bé chưa chọn.
+Widget? feelingChip(BuildContext context, ParentReadingFeedbackItemDto i) {
+  if (i.feeling == null) return null;
+  return LearningChip(
+    label: '${feelingFace[i.feeling] ?? ''} ${i.feelingLabel ?? i.feeling}'
+        .trim(),
+    color: context.tt.rose,
+  );
+}
+
+/// Chip điểm câu đố tốt nhất; null khi truyện không có câu đố.
+Widget? quizChip(BuildContext context, ParentReadingFeedbackItemDto i) {
+  if (i.quizTotalQuestions == 0) return null;
   final tt = context.tt;
   final quiz = i.quizBestPercent?.round();
+  if (quiz == null) {
+    return LearningChip(label: 'Chưa làm câu đố', color: tt.muted);
+  }
+  if (quiz >= 80) {
+    return LearningChip(
+      label: '⭐ Câu đố $quiz%',
+      color: tt.goldDeep,
+      fill: tt.gold,
+    );
+  }
+  return LearningChip(
+    label: 'Câu đố $quiz%',
+    color: quiz >= 50 ? tt.okInk : tt.danger,
+  );
+}
+
+/// Chip cảm xúc, điểm câu đố (và ngày đọc xong nếu [withDate]) của một lần đọc (như web).
+List<Widget> feedbackChips(
+  BuildContext context,
+  ParentReadingFeedbackItemDto i, {
+  bool withDate = true,
+}) {
   return [
-    if (i.feeling != null)
+    ?feelingChip(context, i),
+    ?quizChip(context, i),
+    if (withDate)
       LearningChip(
-        label: '${feelingFace[i.feeling] ?? ''} ${i.feelingLabel ?? i.feeling}'
-            .trim(),
-        color: tt.rose,
+        label: learningDate(i.completedAt),
+        color: context.tt.muted,
+        icon: Icons.event_rounded,
       ),
-    if (i.quizTotalQuestions > 0)
-      quiz == null
-          ? LearningChip(label: 'Chưa làm câu đố', color: tt.muted)
-          : quiz >= 80
-          ? LearningChip(
-              label: '⭐ Câu đố $quiz%',
-              color: tt.goldDeep,
-              fill: tt.gold,
-            )
-          : LearningChip(
-              label: 'Câu đố $quiz%',
-              color: quiz >= 50 ? tt.okInk : tt.danger,
-            ),
-    LearningChip(
-      label: learningDate(i.completedAt),
-      color: tt.muted,
-      icon: Icons.event_rounded,
-    ),
   ];
+}
+
+/// Mở bảng trượt từ đáy có tiêu đề nổi bật và nút đóng; [builder] trả nội dung cuộn.
+Future<void> showLearningSheet(
+  BuildContext context, {
+  required String title,
+  required Widget Function(ScrollController controller) builder,
+  double initialSize = 0.75,
+}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    backgroundColor: Colors.transparent,
+    constraints: const BoxConstraints(maxWidth: 720),
+    builder: (sheetContext) {
+      final tt = sheetContext.tt;
+      return DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: initialSize,
+        minChildSize: 0.45,
+        maxChildSize: 0.95,
+        builder: (_, controller) => Container(
+          decoration: BoxDecoration(
+            color: tt.panel,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(TtRadius.xl),
+            ),
+            border: Border.all(color: tt.line2, width: 1.5),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: tt.line2,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 8, 4),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: tt.gold,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(sheetContext).textTheme.titleMedium,
+                      ),
+                    ),
+                    TtIconButton(
+                      icon: Icons.close_rounded,
+                      tooltip: 'Đóng',
+                      size: 40,
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: tt.line),
+              Expanded(child: builder(controller)),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 /// Thẻ một nhóm nội dung: tiêu đề nổi bật, có thể kèm số đếm và nút bên phải.
