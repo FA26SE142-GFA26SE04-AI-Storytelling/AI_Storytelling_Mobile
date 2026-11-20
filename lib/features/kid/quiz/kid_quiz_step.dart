@@ -20,14 +20,10 @@ class KidQuizStep extends ConsumerStatefulWidget {
     super.key,
     required this.sessionId,
     required this.onExpGained,
-    required this.onNext,
-    this.isLast = false,
   });
 
   final int sessionId;
   final ValueChanged<int> onExpGained;
-  final VoidCallback onNext;
-  final bool isLast;
 
   @override
   ConsumerState<KidQuizStep> createState() => _KidQuizStepState();
@@ -295,40 +291,24 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
     }
 
     if (_questions.isEmpty) {
-      return Column(
-        children: [
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const TtFrog(mood: TtFrogMood.idle, size: 80),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Truyện này chưa có câu đố.',
-                    style: TextStyle(
-                      fontFamily: 'Baloo2',
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: tt.text,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const TtFrog(mood: TtFrogMood.idle, size: 80),
+            const SizedBox(height: 16),
+            Text(
+              'Truyện này chưa có câu đố.',
+              style: TextStyle(
+                fontFamily: 'Baloo2',
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: tt.text,
               ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: _KidQuizButton(
-              label: widget.isLast ? 'Về trang chính' : 'Tiếp',
-              icon: widget.isLast
-                  ? Icons.home_rounded
-                  : Icons.arrow_forward_rounded,
-              onPressed: widget.onNext,
-            ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
@@ -394,24 +374,11 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
           ),
           Padding(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _KidQuizButton(
-                  label: widget.isLast ? 'Về trang chính' : 'Tiếp',
-                  icon: widget.isLast
-                      ? Icons.home_rounded
-                      : Icons.arrow_forward_rounded,
-                  onPressed: widget.onNext,
-                ),
-                const SizedBox(height: 12),
-                _KidQuizButton(
-                  label: 'Làm lại câu đố',
-                  icon: Icons.refresh_rounded,
-                  isSecondary: true,
-                  onPressed: _loadQuiz,
-                ),
-              ],
+            child: _KidQuizButton(
+              label: 'Làm lại câu đố',
+              icon: Icons.refresh_rounded,
+              isSecondary: true,
+              onPressed: _loadQuiz,
             ),
           ),
         ],

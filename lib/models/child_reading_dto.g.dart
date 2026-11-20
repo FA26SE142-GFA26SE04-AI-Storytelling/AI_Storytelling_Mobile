@@ -424,3 +424,53 @@ Map<String, dynamic> _$StorySummarySentToJson(_StorySummarySent instance) =>
       'summaryId': instance.summaryId,
       'message': instance.message,
     };
+
+_StoryEmotion _$StoryEmotionFromJson(Map<String, dynamic> json) =>
+    _StoryEmotion(code: json['code'] as String, label: json['label'] as String);
+
+Map<String, dynamic> _$StoryEmotionToJson(_StoryEmotion instance) =>
+    <String, dynamic>{'code': instance.code, 'label': instance.label};
+
+_ChildStoryReflection _$ChildStoryReflectionFromJson(
+  Map<String, dynamic> json,
+) => _ChildStoryReflection(
+  sessionId: (json['sessionId'] as num).toInt(),
+  emotions:
+      (json['emotions'] as List<dynamic>?)
+          ?.map((e) => StoryEmotion.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const <StoryEmotion>[],
+  favoriteSceneId: (json['favoriteSceneId'] as num?)?.toInt(),
+  noteText: json['noteText'] as String?,
+  hasNoteRecording: json['hasNoteRecording'] as bool? ?? false,
+  canRecord: json['canRecord'] as bool? ?? false,
+  message: json['message'] as String?,
+);
+
+Map<String, dynamic> _$ChildStoryReflectionToJson(
+  _ChildStoryReflection instance,
+) => <String, dynamic>{
+  'sessionId': instance.sessionId,
+  'emotions': instance.emotions,
+  'favoriteSceneId': instance.favoriteSceneId,
+  'noteText': instance.noteText,
+  'hasNoteRecording': instance.hasNoteRecording,
+  'canRecord': instance.canRecord,
+  'message': instance.message,
+};
+
+_StorySummaryQuestionSent _$StorySummaryQuestionSentFromJson(
+  Map<String, dynamic> json,
+) => _StorySummaryQuestionSent(
+  summaryId: (json['summaryId'] as num).toInt(),
+  questionId: (json['questionId'] as num).toInt(),
+  message: json['message'] as String,
+);
+
+Map<String, dynamic> _$StorySummaryQuestionSentToJson(
+  _StorySummaryQuestionSent instance,
+) => <String, dynamic>{
+  'summaryId': instance.summaryId,
+  'questionId': instance.questionId,
+  'message': instance.message,
+};

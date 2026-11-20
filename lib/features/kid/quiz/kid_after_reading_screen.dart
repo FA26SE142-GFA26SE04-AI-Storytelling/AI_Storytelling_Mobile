@@ -1,20 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:ai_storytelling_mobile/core/theme/kid_metrics.dart';
+
+import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
+import '../../../core/widgets/kid_panel.dart';
+import '../../../core/widgets/tt_toast.dart';
 import '../../../models/child_reading_dto.dart';
+import '../data/kid_reading_repository.dart';
+import '../data/kid_rewards_repository.dart';
+import './kid_emotion_step.dart';
+import './kid_favorite_step.dart';
 import './kid_feeling_step.dart';
-import './kid_flags_step.dart';
+import './kid_questions_step.dart';
 import './kid_quiz_step.dart';
+import './kid_scene_grid.dart';
 import './kid_summary_step.dart';
 
-/// Màn hình wizard "Sau khi đọc xong" dành cho bé (toàn màn hình).
+/// Màn hình wizard "Sau khi đọc xong" dành cho bé — 7 trang.
 ///
-/// Quản lý thanh trạng thái bước, điểm thưởng EXP và điều phối chuyển bước.
-/// Nội dung và hành động chuyển tiếp của từng bước do widget bước đó tự quản lý.
-class KidAfterReadingScreen extends StatefulWidget {
+/// Trang 0: KidFeelingStep    — "Em thấy truyện này thế nào?"
+/// Trang 1: KidEmotionStep    — "Truyện làm em cảm thấy gì?"
+/// Trang 2: KidSceneGrid      — "Tranh em thích nhất"
+/// Trang 3: KidFavoriteStep   — "Điều gì em thích ở tranh này?"
+/// Trang 4: KidSummaryStep    — "Em kể lại cho bố mẹ nghe nhé"
+/// Trang 5: KidQuestionsStep  — "Chỗ nào em còn thắc mắc?"
+/// Trang 6: KidQuizStep       — "Câu đố về truyện"
+class KidAfterReadingScreen extends ConsumerStatefulWidget {
   const KidAfterReadingScreen({
     super.key,
     required this.sessionId,
@@ -27,188 +42,577 @@ class KidAfterReadingScreen extends StatefulWidget {
   final List<ReadingScene> scenes;
 
   @override
-  State<KidAfterReadingScreen> createState() => _KidAfterReadingScreenState();
+  ConsumerState<KidAfterReadingScreen> createState() =>
+      _KidAfterReadingScreenState();
 }
 
-class _KidAfterReadingScreenState extends State<KidAfterReadingScreen> {
-  int _stepIndex = 0;
+class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
+  static const int _totalPages = 7;
+
+  int _pageIndex = 0;
+  int _prevPageIndex = 0; // dùng để tính hướng animation
+  bool _userNavigated = false; // true khi bé tự lật trang ít nhất 1 lần
+
   int _bonusExp = 0;
 
-  int get _totalSteps => widget.scenes.isNotEmpty ? 4 : 3;
+  // ── Trạng thái reflection ──────────────────────────────────────────────────
+  ChildStoryReflection? _reflection;
+
+  // ── Trạng thái trang 2–3 ──────────────────────────────────────────────────
+  late final List<KidSceneTile> _tiles;
+  KidSceneTile? _favoriteTile;
+  bool _pickingFavorite = false;
+
+  // ── Trạng thái trang 5 ────────────────────────────────────────────────────
+  final Set<String> _askedKeys = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _tiles = buildKidSceneTiles(widget.scenes);
+    _loadReflection();
+    // Kết quả đọc chỉ có mã huy hiệu: lấy tên từ bảng phần thưởng (như web).
+    if (widget.result.newBadges.isNotEmpty) {
+      ref.read(kidRewardsRepositoryProvider).rewards().then((r) {
+        if (mounted) {
+          setState(
+            () => _badgeNames = {for (final b in r.badges) b.code: b.name},
+          );
+        }
+      }, onError: (_) {}); // không lấy được tên thì hiện mã
+    }
+  }
+
+  Map<String, String> _badgeNames = const {};
+
+  Future<void> _loadReflection() async {
+    try {
+      final repo = ref.read(kidReadingRepositoryProvider);
+      final r = await repo.reflection(widget.sessionId);
+      if (!mounted) return;
+
+      // Khởi tạo _favoriteTile nếu đã có favoriteSceneId
+      KidSceneTile? favTile;
+      if (r.favoriteSceneId != null) {
+        for (final t in _tiles) {
+          if (t.sceneId == r.favoriteSceneId) {
+            favTile = t;
+            break;
+          }
+        }
+      }
+
+      setState(() {
+        _reflection = r;
+        _favoriteTile = favTile;
+      });
+
+      // Nhảy tới trang chưa làm (chỉ khi bé chưa tự lật trang)
+      if (!_userNavigated) {
+        final target = _resumePage(r);
+        if (target > 0) {
+          _goToPage(target, markUserNav: false);
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      showTtToast(
+        context,
+        e is ApiException ? e.message : 'Chưa tải được cảm nhận của em.',
+        type: TtToastType.error,
+      );
+    }
+  }
+
+  /// Tính trang bé nên nhảy vào dựa trên phản hồi từ server.
+  int _resumePage(ChildStoryReflection r) {
+    if (r.noteText != null || r.hasNoteRecording) return 4;
+    if (r.favoriteSceneId != null) return 3;
+    if (r.emotions.isNotEmpty) return 2;
+    return 0;
+  }
 
   void _onExpGained(int delta) {
     if (delta <= 0) return;
+    setState(() => _bonusExp += delta);
+  }
+
+  void _goToPage(int index, {bool markUserNav = true}) {
+    if (index < 0 || index >= _totalPages) return;
+    if (index == _pageIndex) return;
     setState(() {
-      _bonusExp += delta;
+      _prevPageIndex = _pageIndex;
+      _pageIndex = index;
+      if (markUserNav) _userNavigated = true;
     });
   }
 
-  void _next() {
-    if (_stepIndex >= _totalSteps - 1) {
-      if (mounted) {
-        context.go('/kid');
-      }
-      return;
+  void _goNext() {
+    if (_pageIndex < _totalPages - 1) {
+      _goToPage(_pageIndex + 1);
     }
-    setState(() {
-      _stepIndex++;
-    });
   }
 
-  Widget _buildCurrentStep(bool isLast) {
-    switch (_stepIndex) {
+  void _goPrev() {
+    if (_pageIndex > 0) {
+      _goToPage(_pageIndex - 1);
+    }
+  }
+
+  Future<void> _pickFavoriteScene(KidSceneTile tile) async {
+    if (_pickingFavorite) return;
+    setState(() => _pickingFavorite = true);
+    try {
+      final repo = ref.read(kidReadingRepositoryProvider);
+      await repo.reflectionFavoriteScene(widget.sessionId, tile.sceneId);
+      if (!mounted) return;
+      setState(() {
+        _favoriteTile = tile;
+        _pickingFavorite = false;
+      });
+      _goToPage(3);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _pickingFavorite = false);
+      showTtToast(context, e.message, type: TtToastType.error);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _pickingFavorite = false);
+      showTtToast(
+        context,
+        'Có lỗi xảy ra. Vui lòng thử lại.',
+        type: TtToastType.error,
+      );
+    }
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Build các trang — mỗi trang phải có thể expand để vừa với IndexedStack
+  // ────────────────────────────────────────────────────────────────────────────
+
+  Widget _buildPage(int index) {
+    switch (index) {
+      // 0 — Cảm nhận tổng thể
       case 0:
-        return KidFeelingStep(
-          sessionId: widget.sessionId,
-          result: widget.result,
-          onNext: _next,
-          isLast: isLast,
-        );
+        return KidFeelingStep(sessionId: widget.sessionId, onNext: _goNext);
+
+      // 1 — Cảm xúc chi tiết
       case 1:
+        return KidEmotionStep(
+          sessionId: widget.sessionId,
+          initialCodes:
+              _reflection?.emotions.map((e) => e.code).toList() ??
+              const <String>[],
+          onNext: _goNext,
+        );
+
+      // 2 — Chọn tranh yêu thích
+      case 2:
+        return _buildScenePickPage();
+
+      // 3 — Chia sẻ về tranh đã chọn
+      case 3:
+        return KidFavoriteStep(
+          sessionId: widget.sessionId,
+          pickedTile: _favoriteTile,
+          canRecord: _reflection?.canRecord ?? true,
+          onBackToPick: () => _goToPage(2),
+          onSent: () => _goToPage(4),
+        );
+
+      // 4 — Kể lại truyện
+      case 4:
+        return KidSummaryStep(sessionId: widget.sessionId);
+
+      // 5 — Thắc mắc
+      // KidQuestionsStep tự trả về SingleChildScrollView nên cần bọc Expanded.
+      case 5:
+        return Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: KidQuestionsStep(
+                  sessionId: widget.sessionId,
+                  tiles: _tiles,
+                  askedKeys: _askedKeys,
+                  onAsked: (tile) {
+                    setState(() => _askedKeys.add(tile.key));
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+
+      // 6 — Câu đố
+      case 6:
         return KidQuizStep(
           sessionId: widget.sessionId,
           onExpGained: _onExpGained,
-          onNext: _next,
-          isLast: isLast,
         );
-      case 2:
-        return KidSummaryStep(
-          sessionId: widget.sessionId,
-          onNext: _next,
-          isLast: isLast,
-        );
-      case 3:
-        return KidFlagsStep(
-          sessionId: widget.sessionId,
-          scenes: widget.scenes,
-          onNext: _next,
-          isLast: isLast,
-        );
+
       default:
         return const SizedBox.shrink();
     }
   }
 
+  Widget _buildScenePickPage() {
+    final tt = context.tt;
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Tranh em thích nhất',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Baloo2',
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    color: tt.text,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Em bấm vào tranh em thích nhất nhé',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: tt.muted,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                if (_tiles.isEmpty)
+                  Center(
+                    child: Text(
+                      'Truyện này chưa có tranh minh hoạ.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: tt.muted,
+                      ),
+                    ),
+                  )
+                else
+                  AbsorbPointer(
+                    absorbing: _pickingFavorite,
+                    child: KidSceneGrid(
+                      tiles: _tiles,
+                      pickedKey: _favoriteTile?.key,
+                      onPick: _pickFavoriteScene,
+                    ),
+                  ),
+                if (_pickingFavorite) ...[
+                  const SizedBox(height: 20),
+                  const Center(child: CircularProgressIndicator()),
+                ],
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Build UI
+  // ────────────────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final tt = context.tt;
-    final totalSteps = _totalSteps;
-    final isLast = _stepIndex >= totalSteps - 1;
-    final totalExp = widget.result.expGained + _bonusExp;
+    final res = widget.result;
+    final totalExp = res.expGained + _bonusExp;
+    final badges = res.newBadges.map((c) => _badgeNames[c] ?? c).toList();
+    final rewards = [
+      if (res.isRetake) 'Em đọc lại truyện này',
+      if (totalExp > 0) '+$totalExp EXP',
+      if (badges.isNotEmpty) 'Huy hiệu mới: ${badges.join(', ')}',
+      if (res.roadmapStepCompleted) 'Thêm một bước hành trình',
+    ];
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isNarrow = screenWidth < 400;
+    final goingForward = _pageIndex >= _prevPageIndex;
 
     return Scaffold(
       backgroundColor: tt.bg,
       body: SafeArea(
         child: Column(
           children: [
-            // Thanh trên: Nút thoát ✕, thanh chấm lá sen và chip EXP
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: SizedBox(
-                height: 48,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Nút thoát (✕)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.close_rounded,
-                          color: tt.text,
-                          size: 28,
-                        ),
-                        tooltip: 'Thoát',
-                        constraints: const BoxConstraints.tightFor(
-                          width: kKidMinTap,
-                          height: kKidMinTap,
-                        ),
-                        onPressed: () {
-                          if (mounted) {
-                            context.go('/kid');
-                          }
-                        },
-                      ),
-                    ),
-
-                    // Hàng chấm lá sen thể hiện tiến trình
-                    Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: List.generate(totalSteps, (index) {
-                          final isCurrent = index == _stepIndex;
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.easeInOut,
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            width: isCurrent ? 24 : 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: isCurrent ? tt.gold : tt.line2,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
-
-                    // Chip hiển thị EXP tích lũy (+N EXP)
-                    if (totalExp > 0)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Container(
+            // ── Dòng phần thưởng (như web): EXP, huy hiệu mới, bước hành trình ──
+            if (rewards.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                child:
+                    Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
+                            horizontal: 14,
+                            vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: tt.gold.withValues(alpha: 0.25),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: tt.gold.withValues(alpha: 0.5),
-                            ),
+                            color: tt.gold.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: tt.gold, width: 2),
                           ),
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 Icons.stars_rounded,
                                 color: tt.goldDeep,
-                                size: 20,
+                                size: 26,
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '+$totalExp EXP',
-                                style: TextStyle(
-                                  fontFamily: 'Baloo2',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                  color: tt.warnInk,
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  rewards.join(' · '),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontFamily: 'Baloo2',
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800,
+                                    color: tt.warnInk,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
+                        )
+                        .animate()
+                        .fadeIn(duration: 300.ms)
+                        .scale(
+                          begin: const Offset(0.96, 0.96),
+                          duration: 300.ms,
+                          curve: Curves.easeOutBack,
                         ),
-                      ),
-                  ],
-                ),
+              ),
+
+            // ── Nội dung trang — IndexedStack giữ state, animate overlay ──────
+            Expanded(
+              child: _AnimatedIndexedStack(
+                index: _pageIndex,
+                goingForward: goingForward,
+                children: List.generate(_totalPages, (i) => _buildPage(i)),
               ),
             ),
 
-            // Khung nội dung chuyển bước
-            Expanded(
-              child:
-                  KeyedSubtree(
-                        key: ValueKey(_stepIndex),
-                        child: _buildCurrentStep(isLast),
-                      )
-                      .animate()
-                      .fadeIn(duration: 300.ms)
-                      .slideX(begin: 0.05, end: 0, duration: 300.ms),
-            ),
+            // ── Thanh điều hướng dưới ─────────────────────────────────────────
+            _buildBottomBar(tt, isNarrow),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildBottomBar(TtColors tt, bool isNarrow) {
+    // Dùng kích thước nút nhỏ hơn khi màn hẹp để tránh overflow
+    final double navBtnSize = isNarrow ? 40.0 : kKidMinTap;
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isNarrow ? 6 : 12,
+        vertical: 10,
+      ),
+      decoration: BoxDecoration(
+        color: tt.bg,
+        border: Border(top: BorderSide(color: tt.line2, width: 1)),
+      ),
+      child: Row(
+        children: [
+          // Nút ‹ — tắt ở trang 0
+          SizedBox(
+            width: navBtnSize,
+            height: navBtnSize,
+            child: _pageIndex == 0
+                ? const SizedBox.shrink()
+                : IconButton(
+                    icon: Icon(
+                      Icons.chevron_left_rounded,
+                      size: 32,
+                      color: tt.text,
+                    ),
+                    tooltip: 'Trang trước',
+                    padding: EdgeInsets.zero,
+                    onPressed: _goPrev,
+                  ),
+          ),
+
+          // 7 chấm tiến độ — nằm trong Expanded, margin thu nhỏ khi hẹp
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(_totalPages, (i) {
+                final isCurrent = i == _pageIndex;
+                final isPast = i < _pageIndex;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  margin: EdgeInsets.symmetric(horizontal: isNarrow ? 2 : 3),
+                  width: isCurrent ? 22 : 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: isCurrent
+                        ? tt.primary
+                        : isPast
+                        ? tt.gold
+                        : tt.line2,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                );
+              }),
+            ),
+          ),
+
+          // Nút › — tắt ở trang 6
+          SizedBox(
+            width: navBtnSize,
+            height: navBtnSize,
+            child: _pageIndex == _totalPages - 1
+                ? const SizedBox.shrink()
+                : IconButton(
+                    icon: Icon(
+                      Icons.chevron_right_rounded,
+                      size: 32,
+                      color: tt.text,
+                    ),
+                    tooltip: 'Bỏ qua',
+                    padding: EdgeInsets.zero,
+                    onPressed: _goNext,
+                  ),
+          ),
+
+          // Khoảng cách trước nút thư viện — ẩn khi màn hẹp
+          if (!isNarrow) const SizedBox(width: 6),
+
+          // Nút "Về thư viện"
+          _buildLibraryButton(tt, isNarrow),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLibraryButton(TtColors tt, bool isNarrow) {
+    if (isNarrow) {
+      return SizedBox(
+        width: kKidMinTap,
+        height: kKidMinTap,
+        child: IconButton(
+          icon: const Icon(
+            Icons.local_library_rounded,
+            color: Colors.white,
+            size: 24,
+          ),
+          tooltip: 'Về thư viện',
+          style: IconButton.styleFrom(
+            backgroundColor: tt.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          onPressed: () {
+            if (mounted) context.go('/kid');
+          },
+        ),
+      );
+    }
+
+    return KidBtn3D(
+      label: 'Về thư viện',
+      icon: Icons.local_library_rounded,
+      color: tt.primary,
+      onPressed: () {
+        if (mounted) context.go('/kid');
+      },
+    );
+  }
+}
+
+// ── AnimatedIndexedStack ──────────────────────────────────────────────────────
+
+/// IndexedStack giữ state tất cả các trang; trang đang hiện được animate
+/// trượt + mờ mỗi khi [index] thay đổi.
+class _AnimatedIndexedStack extends StatefulWidget {
+  const _AnimatedIndexedStack({
+    required this.index,
+    required this.goingForward,
+    required this.children,
+  });
+
+  final int index;
+  final bool goingForward;
+  final List<Widget> children;
+
+  @override
+  State<_AnimatedIndexedStack> createState() => _AnimatedIndexedStackState();
+}
+
+class _AnimatedIndexedStackState extends State<_AnimatedIndexedStack>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _opacity;
+  late final Animation<double> _slide;
+
+  int _displayedIndex = 0;
+  bool _goingForward = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _displayedIndex = widget.index;
+    _goingForward = widget.goingForward;
+
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    );
+    _opacity = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
+    _slide = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
+    _ctrl.value = 1.0; // bắt đầu đã hiện
+  }
+
+  @override
+  void didUpdateWidget(covariant _AnimatedIndexedStack oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.index != oldWidget.index) {
+      _displayedIndex = widget.index;
+      _goingForward = widget.goingForward;
+      _ctrl.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (context, _) {
+        final slideBegin = _goingForward ? 0.06 : -0.06;
+        final slide = slideBegin * (1.0 - _slide.value);
+        return FractionalTranslation(
+          translation: Offset(slide, 0),
+          child: Opacity(
+            opacity: _opacity.value.clamp(0.0, 1.0),
+            child: IndexedStack(
+              index: _displayedIndex,
+              children: widget.children,
+            ),
+          ),
+        );
+      },
     );
   }
 }
