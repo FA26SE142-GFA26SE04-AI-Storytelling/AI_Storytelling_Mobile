@@ -13,10 +13,12 @@ import 'kid_lobby_frog.dart';
 import 'kid_lobby_layout.dart';
 import 'kid_lobby_motion.dart';
 import 'kid_stage_button.dart';
-import 'kid_today_card.dart';
 
-/// Sảnh của bé kiểu "hai cột kẹp ếch": thẻ Hôm nay ở trên, bốn nút ở bốn góc quanh bạn ếch,
-/// hàng dưới là Kho truyện | ĐỌC | Cây. Vừa một màn điện thoại; màn thấp hơn thì cuộn.
+/// Thông báo khi bé bấm vào truyện bố mẹ chưa mở.
+const String kKidLockedStoryMessage = 'Truyện này chưa mở, em chờ bố mẹ nhé.';
+
+/// Sảnh của bé kiểu "hai cột kẹp ếch": ba nút + cúp huy hiệu ở bốn góc quanh bạn ếch,
+/// hàng dưới là ĐỌC (chưa có truyện thì mở Kho truyện) | Cây. Màn thấp thì cuộn.
 class KidLobby extends StatefulWidget {
   const KidLobby({
     super.key,
@@ -152,20 +154,7 @@ class _KidLobbyState extends State<KidLobby> {
       child: KidMagnet(onDown: () => _cue.act(KidFrogAction.wave), child: go),
     );
 
-    final card = _pop(
-      KidBob(
-        period: const Duration(seconds: 6),
-        amplitude: 3,
-        child: KidTodayCard(
-          roadmap: w.roadmap,
-          onRead: (id) => _go(() => w.onRead(id)),
-          onChooseStory: () => _go(w.onLibrary),
-        ),
-      ),
-      0,
-    );
     final parts = KidLobbyParts(
-      card: card,
       frog: (size) => _pop(KidLobbyFrog(size: size, cue: _cue), 2),
       journey: _btn(
         'Hành trình',
@@ -194,31 +183,18 @@ class _KidLobbyState extends State<KidLobby> {
         phase: 0.5,
         iconColor: kKidInkOnBright,
       ),
-      badges: _btn(
-        'Huy hiệu',
-        Icons.emoji_events_rounded,
-        tt.gold,
-        w.onRewards,
-        KidFrogAction.tongue,
-        order: 3,
-        periodMs: 3800,
-        phase: 0.5,
-        iconColor: kKidInkOnBright,
-        badge: earned,
-        badgeLabel: 'em có $earned huy hiệu',
+      // Cúp chỉ để xem (không bấm): số huy hiệu bé đã đạt.
+      badges: _pop(
+        KidBob(
+          period: const Duration(milliseconds: 3800),
+          phase: 0.5,
+          child: KidTrophyMedal(count: earned, diameter: _button),
+        ),
+        3,
       ),
       bottom: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _btn(
-            'Kho truyện',
-            Icons.local_library_rounded,
-            tt.sky,
-            w.onLibrary,
-            KidFrogAction.wink,
-            order: 4,
-          ),
-          const SizedBox(width: 6),
           Expanded(child: _pop(go, 5)),
           const SizedBox(width: 6),
           _btn(
