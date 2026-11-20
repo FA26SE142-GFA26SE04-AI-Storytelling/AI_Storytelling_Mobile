@@ -5,6 +5,7 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../models/child_roadmap_dto.dart';
 import '../../../models/parent_reading_feedback_dto.dart';
+import '../../../models/story_handover_dto.dart';
 
 /// Bé đã đọc gì và lộ trình của bé (dùng ở tab Học tập).
 abstract class HomeRepository {
@@ -17,6 +18,12 @@ abstract class HomeRepository {
 
   /// GET /ChildRoadmap/{childId}; null khi bé chưa có lộ trình (404).
   Future<ChildRoadmapDto?> fetchRoadmap(int childId);
+
+  /// POST /ChildRoadmap/stories: thêm truyện vào cuối lộ trình (chặng mới) của từng bé.
+  Future<List<RoadmapAddResult>> addRoadmapStory({
+    required int storyId,
+    required List<int> childIds,
+  });
 }
 
 class ApiHomeRepository implements HomeRepository {
@@ -67,6 +74,35 @@ class ApiHomeRepository implements HomeRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<List<RoadmapAddResult>> addRoadmapStory({
+    required int storyId,
+    required List<int> childIds,
+  }) => runApi(() async {
+    final data =
+        _unwrap(
+              await dio.post<dynamic>(
+                '/ChildRoadmap/stories',
+                data: {
+                  'storyId': storyId,
+                  'childProfileIds': childIds,
+                  'position': 'End',
+                  'expectedDays': null,
+                  'note': null,
+                },
+              ),
+            )
+            as Map<String, dynamic>?;
+    return [
+      for (final r in data?['results'] as List<dynamic>? ?? const [])
+        (
+          childProfileId: (r as Map<String, dynamic>)['childProfileId'] as int,
+          outcome: r['outcome'] as String? ?? '',
+          message: r['message'] as String?,
+        ),
+    ];
+  });
 }
 
 final homeRepositoryProvider = Provider<HomeRepository>(

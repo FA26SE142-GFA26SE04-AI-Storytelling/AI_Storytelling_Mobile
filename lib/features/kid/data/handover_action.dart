@@ -6,6 +6,7 @@ import 'package:ai_storytelling_mobile/core/network/api_exception.dart';
 import 'package:ai_storytelling_mobile/core/storage/token_storage.dart';
 import 'package:ai_storytelling_mobile/core/widgets/tt_toast.dart';
 import 'package:ai_storytelling_mobile/models/child_profile_dto.dart';
+import 'package:ai_storytelling_mobile/models/child_session_dto.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/kid_repository.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/kid_session_controller.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/stored_kid_session.dart';
@@ -14,7 +15,41 @@ Future<void> handoverChildToKid(
   BuildContext context,
   WidgetRef ref,
   ChildProfileDto child,
-) async {
+) => _handover(
+  context,
+  ref,
+  child.id,
+  (repo, refresh) =>
+      repo.startHandover(childId: child.id, supervisorRefreshToken: refresh),
+);
+
+/// Giao máy cho bé và mở thẳng truyện [storyId] trong Chế độ của bé.
+Future<void> handoverStoryToKid(
+  BuildContext context,
+  WidgetRef ref,
+  int childId,
+  int storyId,
+) => _handover(
+  context,
+  ref,
+  childId,
+  (repo, refresh) => repo.startStoryHandover(
+    childId: childId,
+    storyId: storyId,
+    supervisorRefreshToken: refresh,
+  ),
+  storyId: storyId,
+);
+
+Future<void> _handover(
+  BuildContext context,
+  WidgetRef ref,
+  int childId,
+  Future<ChildSessionDto> Function(KidRepository repo, String refresh) login, {
+  int? storyId,
+}) async {
+  // Lấy router trước: bật phiên bé sẽ đổi trang và có thể gỡ màn đang mở.
+  final router = GoRouter.of(context);
   try {
     final refresh = await ref.read(tokenStorageProvider).readRefreshToken();
     if (refresh == null || refresh.trim().isEmpty) {
@@ -29,14 +64,11 @@ Future<void> handoverChildToKid(
     }
 
     final repo = ref.read(kidRepositoryProvider);
-    final login = await repo.startHandover(
-      childId: child.id,
-      supervisorRefreshToken: refresh.trim(),
-    );
+    final session = await login(repo, refresh.trim());
 
     var gate = true;
     try {
-      final policy = await repo.getSafetyPolicy(child.id);
+      final policy = await repo.getSafetyPolicy(childId);
       gate = policy.parentalGateEnabled;
     } catch (_) {
       gate = true;
@@ -44,15 +76,14 @@ Future<void> handoverChildToKid(
 
     await ref.read(kidSessionProvider.notifier).start(
           StoredKidSession.fromChildSession(
-            login,
+            session,
             via: KidSessionVia.handover,
             parentalGateEnabled: gate,
           ),
         );
 
-    if (context.mounted) {
-      context.go('/kid');
-    }
+    router.go('/kid');
+    if (storyId != null) router.push('/kid/read/$storyId');
   } on ApiException catch (e) {
     if (context.mounted) {
       showTtToast(context, e.message, type: TtToastType.error);

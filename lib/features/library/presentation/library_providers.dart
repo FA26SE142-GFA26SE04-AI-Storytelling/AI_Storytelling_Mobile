@@ -68,6 +68,15 @@ final libraryProvider = FutureProvider.autoDispose<LibraryData>((ref) async {
 final storyPreviewProvider = FutureProvider.autoDispose
     .family<List<PreviewPage>, ({int id, bool creator})>((ref, arg) async {
       final repo = ref.watch(libraryRepositoryProvider);
+      // Truyện Creator không đọc được qua /Story/{id} (404): chữ lấy luôn từ gói media.
+      if (arg.creator) {
+        try {
+          return previewPages('', await repo.media(arg.id, creator: true));
+        } catch (_) {
+          // Media lỗi thì thử lấy chữ qua /Story/{id}; cũng lỗi thì báo lỗi.
+          return previewPages((await repo.story(arg.id)).content ?? '', null);
+        }
+      }
       final results = await Future.wait<Object?>([
         repo.story(arg.id).then((s) => s.content ?? ''),
         repo
