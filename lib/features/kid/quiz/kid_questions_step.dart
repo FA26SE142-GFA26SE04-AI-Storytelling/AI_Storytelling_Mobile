@@ -331,6 +331,7 @@ class _KidQuestionsStepState extends ConsumerState<KidQuestionsStep> {
                             icon: Icons.send_rounded,
                             color: tt.primary,
                             expand: true,
+                            big: true,
                             onPressed: canSend
                                 ? () => _sendQuestion(pickedTile!)
                                 : null,

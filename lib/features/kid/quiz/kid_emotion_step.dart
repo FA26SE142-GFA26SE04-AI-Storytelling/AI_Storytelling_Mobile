@@ -145,8 +145,14 @@ class _KidEmotionStepState extends ConsumerState<KidEmotionStep> {
         borderRadius: BorderRadius.circular(TtRadius.xl),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          constraints: const BoxConstraints(minHeight: 110),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+          // Màn thấp (điện thoại xoay ngang) thì ô thấp lại để không phải cuộn.
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.sizeOf(context).height < 500 ? 76 : 110,
+          ),
+          padding: EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: MediaQuery.sizeOf(context).height < 500 ? 8 : 14,
+          ),
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(TtRadius.xl),
@@ -168,8 +174,15 @@ class _KidEmotionStepState extends ConsumerState<KidEmotionStep> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(option.emoji, style: const TextStyle(fontSize: 44)),
-                    const SizedBox(height: 8),
+                    Text(
+                      option.emoji,
+                      style: TextStyle(
+                        fontSize: MediaQuery.sizeOf(context).height < 500
+                            ? 32
+                            : 44,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
@@ -245,22 +258,16 @@ class _KidEmotionStepState extends ConsumerState<KidEmotionStep> {
                             color: tt.text,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Em hãy chọn tối đa $kReflectionMaxEmotions cảm xúc nhé',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: tt.muted,
-                          ),
-                        ),
                         const SizedBox(height: 24),
                         LayoutBuilder(
                           builder: (context, constraints) {
                             final width = constraints.maxWidth;
-                            final columns = width > 520 ? 3 : 2;
+                            // Màn ngang 4 cột để 7 cảm xúc vừa 2 hàng.
+                            final columns = width > 700
+                                ? 4
+                                : width > 520
+                                ? 3
+                                : 2;
                             const spacing = 12.0;
                             final itemWidth =
                                 (width - spacing * (columns - 1)) / columns;

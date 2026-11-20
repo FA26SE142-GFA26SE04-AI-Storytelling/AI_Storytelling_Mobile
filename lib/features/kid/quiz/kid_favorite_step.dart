@@ -168,12 +168,15 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
   Widget _buildContent(TtColors tt, KidSceneTile tile) {
     final trimmed = _textController.text.trim();
     final canSubmit = (trimmed.isNotEmpty || _audioPath != null) && !_sending;
+    final size = MediaQuery.sizeOf(context);
+    // Màn ngang: tranh trái, ô viết + nút gửi phải để không phải cuộn.
+    final wide = size.width >= 600 && size.width > size.height;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 440),
+          constraints: BoxConstraints(maxWidth: wide ? 820 : 440),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -188,130 +191,151 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
                 ),
               ),
               const SizedBox(height: 14),
-              // Tranh với viền vàng dày và nhãn tranh
-              Container(
-                decoration: BoxDecoration(
-                  color: tt.panel,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: tt.gold, width: 3.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: tt.goldDeep.withValues(alpha: 0.22),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14.5),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 180),
-                        child: AspectRatio(
-                          aspectRatio: 16 / 9,
-                          child: TtNetworkImage(
-                            url: tile.imageUrl,
-                            fit: BoxFit.cover,
-                            radius: BorderRadius.zero,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        color: tt.panel,
-                        child: Text(
-                          tile.label,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: tt.warnInk,
-                          ),
-                        ),
+              _sideBySide(
+                wide,
+                // Tranh với viền vàng dày và nhãn tranh
+                Container(
+                  decoration: BoxDecoration(
+                    color: tt.panel,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: tt.gold, width: 3.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: tt.goldDeep.withValues(alpha: 0.22),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 14),
-              // Ô viết chia sẻ
-              TextField(
-                controller: _textController,
-                maxLength: 200,
-                maxLines: 3,
-                minLines: 2,
-                enabled: !_sending,
-                style: TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: tt.text,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Em viết điều em thích nhé...',
-                  hintStyle: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: tt.muted,
-                  ),
-                  filled: true,
-                  fillColor: tt.panel,
-                  contentPadding: const EdgeInsets.all(14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: tt.line2, width: 1.5),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: tt.line2, width: 1.5),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: tt.primary, width: 2),
-                  ),
-                  counterStyle: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: tt.muted,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14.5),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Hiện trọn tranh như màn đọc (không cắt), phần thừa là tranh làm mờ.
+                        AspectRatio(
+                          aspectRatio: 16 / 10,
+                          child: TtWholeImage(url: tile.imageUrl),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          color: tt.panel,
+                          child: Text(
+                            tile.label,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: tt.warnInk,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              // Thu âm giọng nói (chỉ hiện khi được phép)
-              if (_canRecord) ...[
-                const SizedBox(height: 8),
-                KidVoiceRecorder(
-                  audioPath: _audioPath,
-                  onChanged: _sending
-                      ? (_) {}
-                      : (path) => setState(() => _audioPath = path),
-                  enabled: _canRecord && !_sending,
-                  sending: _sending,
-                ),
-              ],
-              const SizedBox(height: 18),
-              // Nút gửi bố mẹ
-              KidBtn3D(
-                label: 'Gửi bố mẹ',
-                icon: Icons.favorite_rounded,
-                color: tt.primary,
-                expand: true,
-                big: true,
-                onPressed: canSubmit ? _handleSend : null,
+                [
+                  // Ô viết chia sẻ
+                  TextField(
+                    controller: _textController,
+                    maxLength: 200,
+                    maxLines: 3,
+                    minLines: 2,
+                    enabled: !_sending,
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: tt.text,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Em viết điều em thích nhé...',
+                      hintStyle: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: tt.muted,
+                      ),
+                      filled: true,
+                      fillColor: tt.panel,
+                      contentPadding: const EdgeInsets.all(14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: tt.line2, width: 1.5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: tt.line2, width: 1.5),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: tt.primary, width: 2),
+                      ),
+                      counterStyle: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: tt.muted,
+                      ),
+                    ),
+                  ),
+                  // Thu âm giọng nói (chỉ hiện khi được phép)
+                  if (_canRecord) ...[
+                    const SizedBox(height: 8),
+                    KidVoiceRecorder(
+                      audioPath: _audioPath,
+                      onChanged: _sending
+                          ? (_) {}
+                          : (path) => setState(() => _audioPath = path),
+                      enabled: _canRecord && !_sending,
+                      sending: _sending,
+                    ),
+                  ],
+                  const SizedBox(height: 18),
+                  // Nút gửi bố mẹ
+                  KidBtn3D(
+                    label: 'Gửi bố mẹ',
+                    icon: Icons.favorite_rounded,
+                    color: tt.primary,
+                    expand: true,
+                    big: true,
+                    onPressed: canSubmit ? _handleSend : null,
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  /// Màn ngang: tranh trái, phần viết phải; màn dọc: xếp dọc.
+  Widget _sideBySide(bool wide, Widget picture, List<Widget> form) {
+    if (!wide) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [picture, const SizedBox(height: 14), ...form],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: picture),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: form,
+          ),
+        ),
+      ],
     );
   }
 

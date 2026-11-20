@@ -186,6 +186,7 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
                       icon: Icons.send_rounded,
                       color: tt.primary,
                       expand: true,
+                      big: true,
                       onPressed: _sending ? null : _sendSummary,
                     ),
                   ).animate().fadeIn(duration: 300.ms),

@@ -136,12 +136,13 @@ class _KidFeelingStepState extends ConsumerState<KidFeelingStep> {
   @override
   Widget build(BuildContext context) {
     final tt = context.tt;
+    final wide = MediaQuery.sizeOf(context).width >= 600;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
+          constraints: BoxConstraints(maxWidth: wide ? 760 : 560),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -156,20 +157,22 @@ class _KidFeelingStepState extends ConsumerState<KidFeelingStep> {
                 ),
               ),
               const SizedBox(height: 16),
-              for (var row = 0; row < 2; row++) ...[
-                if (row > 0) const SizedBox(height: 12),
+              // Màn rộng (ngang / tablet) xếp 4 mặt một hàng để không phải cuộn; màn dọc 2x2.
+              for (final row
+                  in wide
+                      ? [_kFeelingOptions]
+                      : [
+                          _kFeelingOptions.sublist(0, 2),
+                          _kFeelingOptions.sublist(2),
+                        ]) ...[
+                if (row.first != _kFeelingOptions.first)
+                  const SizedBox(height: 12),
                 Row(
                   children: [
-                    Expanded(
-                      child: _buildFeelingCard(_kFeelingOptions[row * 2], tt),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildFeelingCard(
-                        _kFeelingOptions[row * 2 + 1],
-                        tt,
-                      ),
-                    ),
+                    for (var i = 0; i < row.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 12),
+                      Expanded(child: _buildFeelingCard(row[i], tt)),
+                    ],
                   ],
                 ),
               ],

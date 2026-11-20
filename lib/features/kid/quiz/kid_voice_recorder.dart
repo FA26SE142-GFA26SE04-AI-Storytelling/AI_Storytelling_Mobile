@@ -392,6 +392,7 @@ class _KidVoiceRecorderState extends ConsumerState<KidVoiceRecorder> {
               icon: Icons.stop_rounded,
               color: tt.danger,
               expand: true,
+              big: true,
               onPressed: widget.sending ? null : () => _stopRecording(),
             ),
           ] else if (hasRecording) ...[
@@ -439,6 +440,7 @@ class _KidVoiceRecorderState extends ConsumerState<KidVoiceRecorder> {
                 icon: Icons.mic_rounded,
                 color: tt.primary,
                 expand: true,
+                big: true,
                 onPressed: (widget.enabled && !widget.sending)
                     ? _startRecording
                     : null,
