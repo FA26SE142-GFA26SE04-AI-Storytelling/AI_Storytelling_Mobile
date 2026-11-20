@@ -227,12 +227,19 @@ class FakeKidReadingRepository implements KidReadingRepository {
   }
 
   @override
-  Future<StorySummarySent> summaryFlags(
-    String sessionId, {
-    required List<int> sceneIds,
-  }) {
-    throw UnimplementedError();
-  }
+  Future<ChildStoryReflection> reflection(int sessionId) => throw UnimplementedError();
+
+  @override
+  Future<ChildStoryReflection> reflectionEmotions(int sessionId, List<String> codes) => throw UnimplementedError();
+
+  @override
+  Future<ChildStoryReflection> reflectionFavoriteScene(int sessionId, int sceneId) => throw UnimplementedError();
+
+  @override
+  Future<ChildStoryReflection> reflectionNote(int sessionId, {String? text, String? audioPath}) => throw UnimplementedError();
+
+  @override
+  Future<StorySummaryQuestionSent> summaryQuestion(int sessionId, {required int sceneId, int? beatOrder, String? text, String? audioPath}) => throw UnimplementedError();
 }
 
 List<ReadingScene> makeScenes(int count) {

@@ -31,7 +31,9 @@ enum KidReaderLayout { stacked, sideBySide, book }
 KidReaderLayout kidReaderLayoutFor(Size size) {
   final landscape = size.width > size.height;
   if (!landscape) return KidReaderLayout.stacked;
-  return size.shortestSide >= 600 ? KidReaderLayout.book : KidReaderLayout.sideBySide;
+  return size.shortestSide >= 600
+      ? KidReaderLayout.book
+      : KidReaderLayout.sideBySide;
 }
 
 /// Widget hiển thị MỘT trang (= một cảnh/scene) của truyện dành cho chế độ đọc của bé.
@@ -113,7 +115,9 @@ class _KidReaderPageState extends State<KidReaderPage> {
           final matched = illustrations.where((ill) {
             return ill.startOffset <= offset && offset < ill.endOffset;
           }).firstOrNull;
-          if (matched != null && matched.url != null && matched.url!.isNotEmpty) {
+          if (matched != null &&
+              matched.url != null &&
+              matched.url!.isNotEmpty) {
             return matched.url;
           }
         }
@@ -132,9 +136,7 @@ class _KidReaderPageState extends State<KidReaderPage> {
     if (segmentId == null || text.isEmpty) return null;
 
     final segments = widget.scene.segments;
-    final seg = segments
-        .where((s) => s.segmentId == segmentId)
-        .firstOrNull;
+    final seg = segments.where((s) => s.segmentId == segmentId).firstOrNull;
     if (seg == null) return null;
 
     if (seg.startOffset != null && seg.endOffset != null) {
@@ -229,10 +231,10 @@ class _KidReaderPageState extends State<KidReaderPage> {
     final allCandidates = <_VocabCandidate>[];
 
     // Lọc và sắp xếp từ vựng: ưu tiên từ dài trước để tránh khớp chèn từ con
-    final validVocab = widget.vocabulary
-        .where((v) => v.term.trim().isNotEmpty)
-        .toList()
-      ..sort((a, b) => b.term.trim().length.compareTo(a.term.trim().length));
+    final validVocab =
+        widget.vocabulary.where((v) => v.term.trim().isNotEmpty).toList()..sort(
+          (a, b) => b.term.trim().length.compareTo(a.term.trim().length),
+        );
 
     for (final v in validVocab) {
       final term = v.term.trim();
@@ -243,12 +245,14 @@ class _KidReaderPageState extends State<KidReaderPage> {
         final idx = lowerText.indexOf(lowerTerm, searchIndex);
         if (idx == -1) break;
         final end = idx + lowerTerm.length;
-        allCandidates.add(_VocabCandidate(
-          start: idx,
-          end: end,
-          vocab: v,
-          isWholeWord: _isWholeWord(text, idx, end),
-        ));
+        allCandidates.add(
+          _VocabCandidate(
+            start: idx,
+            end: end,
+            vocab: v,
+            isWholeWord: _isWholeWord(text, idx, end),
+          ),
+        );
         searchIndex = end;
       }
     }
@@ -393,11 +397,7 @@ class _KidReaderPageState extends State<KidReaderPage> {
         );
       }
 
-      spans.add(TextSpan(
-        text: slice,
-        style: style,
-        recognizer: recognizer,
-      ));
+      spans.add(TextSpan(text: slice, style: style, recognizer: recognizer));
 
       start = end;
     }
@@ -412,10 +412,7 @@ class _KidReaderPageState extends State<KidReaderPage> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        border: Border.all(
-          color: tt.line,
-          width: 2,
-        ),
+        border: Border.all(color: tt.line, width: 2),
         boxShadow: [
           BoxShadow(
             color: tt.shadow.withValues(alpha: 0.08),
@@ -427,20 +424,15 @@ class _KidReaderPageState extends State<KidReaderPage> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(TtRadius.xl - 2),
         child: AspectRatio(
-          aspectRatio: 4 / 3,
+          // 16:10 như web: tranh truyện thường 16:9 nên ít phần nền mờ thừa hơn 4:3.
+          aspectRatio: 16 / 10,
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             transitionBuilder: (child, animation) {
               return FadeTransition(opacity: animation, child: child);
             },
-            child: TtNetworkImage(
-              key: ValueKey(imageUrl ?? ''),
-              url: imageUrl,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-              radius: BorderRadius.zero,
-            ),
+            // Hiện trọn tranh, không cắt hai bên; phần thừa là chính tranh làm mờ.
+            child: TtWholeImage(key: ValueKey(imageUrl ?? ''), url: imageUrl),
           ),
         ),
       ),
@@ -535,9 +527,7 @@ class _KidReaderPageState extends State<KidReaderPage> {
           const SizedBox(width: 16),
           Expanded(
             flex: 6,
-            child: SingleChildScrollView(
-              child: _buildTextCard(context, spans),
-            ),
+            child: SingleChildScrollView(child: _buildTextCard(context, spans)),
           ),
         ],
       ),
@@ -571,10 +561,7 @@ class _KidReaderPageState extends State<KidReaderPage> {
                       decoration: BoxDecoration(
                         color: tt.paper,
                         borderRadius: BorderRadius.circular(TtRadius.xl),
-                        border: Border.all(
-                          color: tt.line,
-                          width: 2,
-                        ),
+                        border: Border.all(color: tt.line, width: 2),
                         boxShadow: [
                           BoxShadow(
                             color: tt.shadow.withValues(alpha: 0.08),
@@ -590,22 +577,15 @@ class _KidReaderPageState extends State<KidReaderPage> {
                           children: [
                             Expanded(
                               flex: 1,
-                              child: TtNetworkImage(
+                              child: TtWholeImage(
                                 key: ValueKey(imageUrl ?? ''),
                                 url: imageUrl,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
-                                radius: BorderRadius.zero,
                               ),
                             ),
                             Stack(
                               clipBehavior: Clip.none,
                               children: [
-                                Container(
-                                  width: 2,
-                                  color: tt.line,
-                                ),
+                                Container(width: 2, color: tt.line),
                                 Positioned(
                                   top: 0,
                                   bottom: 0,

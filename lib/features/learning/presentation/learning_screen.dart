@@ -39,7 +39,6 @@ class _LearningScreenState extends ConsumerState<LearningScreen>
   late final TabController _tabs = TabController(length: 4, vsync: this)
     ..addListener(_onTabChanged);
   late final SummaryAudio _audio = widget.audio ?? SummaryAudio();
-  ResultsView _resultsView = ResultsView.readings;
   bool _handoverLoading = false;
 
   /// "Vào học": cho bé đang chọn vào chế độ bé; chặn bấm đúp khi đang tải.
@@ -72,10 +71,7 @@ class _LearningScreenState extends ConsumerState<LearningScreen>
     super.dispose();
   }
 
-  void _goTab(int index, [ResultsView? view]) {
-    if (view != null) setState(() => _resultsView = view);
-    _tabs.animateTo(index);
-  }
+  void _goTab(int index) => _tabs.animateTo(index);
 
   @override
   Widget build(BuildContext context) {
@@ -96,12 +92,16 @@ class _LearningScreenState extends ConsumerState<LearningScreen>
         children: [
           const TtSkeleton(height: 80),
           const SizedBox(height: 16),
-          for (final w in learningSkeleton()) ...[w, const SizedBox(height: 12)],
+          for (final w in learningSkeleton()) ...[
+            w,
+            const SizedBox(height: 12),
+          ],
         ],
       );
     } else {
-      final active =
-          childrenAsync.value!.where((c) => c.status == 'Active').toList();
+      final active = childrenAsync.value!
+          .where((c) => c.status == 'Active')
+          .toList();
       body = active.isEmpty ? _buildNoChild() : _buildContent(active);
     }
 
@@ -162,7 +162,8 @@ class _LearningScreenState extends ConsumerState<LearningScreen>
     ref.listen(readingFeedbackProvider(id), (_, _) {});
     ref.listen(storySummariesProvider(id), (_, _) {});
     ref.listen(learningRoadmapProvider(id), (_, _) {});
-    final pending = ref
+    final pending =
+        ref
             .watch(learningWishesProvider(id))
             .value
             ?.where((w) => w.status == 'Pending')
@@ -245,15 +246,7 @@ class _LearningScreenState extends ConsumerState<LearningScreen>
             children: [
               LearningOverviewTab(child: child, onTab: _goTab),
               LearningRoadmapTab(child: child),
-              LearningResultsTab(
-                child: child,
-                view: _resultsView,
-                onView: (v) {
-                  _audio.stop();
-                  setState(() => _resultsView = v);
-                },
-                audio: _audio,
-              ),
+              LearningResultsTab(child: child, audio: _audio),
               LearningWishesTab(child: child),
             ],
           ),

@@ -7,6 +7,8 @@ import 'package:ai_storytelling_mobile/features/kid/data/kid_reading_repository.
 import 'package:ai_storytelling_mobile/features/kid/data/kid_rewards_repository.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/kid_wish_repository.dart';
 import 'package:ai_storytelling_mobile/features/kid/quiz/kid_after_reading_screen.dart';
+import 'package:ai_storytelling_mobile/features/kid/quiz/kid_emotion_step.dart';
+import 'package:ai_storytelling_mobile/features/kid/quiz/kid_feeling_step.dart';
 import 'package:ai_storytelling_mobile/features/kid/rewards/kid_notebook_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/rewards/kid_rewards_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/wish/kid_wish_screen.dart';
@@ -116,6 +118,25 @@ class _Reading implements KidReadingRepository {
   }) => throw UnimplementedError();
 
   @override
+  Future<ChildStoryReflection> reflection(int sessionId) async =>
+      const ChildStoryReflection(
+        sessionId: 1,
+        emotions: [],
+        favoriteSceneId: null,
+        noteText: null,
+        hasNoteRecording: false,
+        canRecord: true,
+        message: null,
+      );
+
+  @override
+  Future<ReadingFeelingResult> feeling(
+    String sessionId, {
+    required String feeling,
+  }) async =>
+      const ReadingFeelingResult(sessionId: 1, feeling: 'VeryLike', label: 'Rất thích');
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -144,6 +165,10 @@ void main() {
     'điện thoại nhỏ': Size(360, 640),
     'điện thoại rất nhỏ': Size(320, 640),
     'tablet ngang': Size(1024, 768),
+    'điện thoại 360x740': Size(360, 740),
+    'điện thoại 390x844': Size(390, 844),
+    'ngang 844x390': Size(844, 390),
+    'desktop 1280x800': Size(1280, 800),
   };
   final screens = <String, Widget Function()>{
     'Phần thưởng': () => const KidRewardsScreen(),
@@ -170,4 +195,49 @@ void main() {
       });
     }
   }
+
+  testWidgets('Sau khi đọc: chạm "Rất thích" chuyển sang trang cảm xúc', (tester) async {
+    await _pump(
+      tester,
+      const Size(390, 844),
+      const KidAfterReadingScreen(
+        sessionId: 1,
+        result: ReadingCompleted(
+          sessionId: 1,
+          storyId: 1,
+          expGained: 12,
+          roadmapStepCompleted: true,
+          newBadges: ['B0'],
+        ),
+        scenes: [],
+      ),
+    );
+
+    // Xác nhận trang 0 (KidFeelingStep) đã hiển thị trước khi tap.
+    expect(find.text('Rất thích'), findsWidgets);
+
+    await tester.tap(find.text('Rất thích').first);
+
+    // Pump tối đa 30 × 100 ms đợi đến khi trang cảm xúc (trang 1) xuất hiện.
+    var found = false;
+    for (var i = 0; i < 30; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (find.text('Truyện làm em cảm thấy gì?').evaluate().isNotEmpty) {
+        found = true;
+        break;
+      }
+    }
+
+    // Chẩn đoán: in số lượng KidEmotionStep và KidFeelingStep trong cây.
+    debugPrint(
+      '[DIAG] KidEmotionStep count=${find.byType(KidEmotionStep).evaluate().length}'
+      ' | KidFeelingStep count=${find.byType(KidFeelingStep).evaluate().length}'
+      ' | found=$found',
+    );
+
+    // Trang 1 (KidEmotionStep) phải được dựng bởi IndexedStack.
+    expect(find.byType(KidEmotionStep), findsOneWidget);
+
+    expect(find.text('Truyện làm em cảm thấy gì?'), findsWidgets);
+  });
 }

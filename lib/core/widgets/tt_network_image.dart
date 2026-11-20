@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
 import '../theme/tt_colors.dart';
@@ -22,6 +24,38 @@ final _cropTail = RegExp(r'#crop=(-?[\d.]+),(-?[\d.]+),([\d.]+),([\d.]+)$');
     src: src,
     crop: (x: x.clamp(0, 1 - w), y: y.clamp(0, 1 - h), w: w, h: h),
   );
+}
+
+/// Hiện TRỌN ảnh (không cắt, không méo) trong khung bất kỳ tỉ lệ: ảnh chính `contain`,
+/// phần thừa của khung lấp bằng chính ảnh đó phủ kín + làm mờ. Bỏ đuôi `#crop`
+/// (vùng cắt 3:4 chỉ dành cho thẻ bìa). Hai lớp cùng link nên ImageCache chỉ tải một lần.
+class TtWholeImage extends StatelessWidget {
+  const TtWholeImage({super.key, this.url, this.radius = BorderRadius.zero});
+
+  final String? url;
+  final BorderRadiusGeometry radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final src = splitCover(url).src;
+    return ClipRRect(
+      borderRadius: radius,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: TtNetworkImage(url: src, radius: BorderRadius.zero),
+          ),
+          TtNetworkImage(
+            url: src,
+            fit: BoxFit.contain,
+            radius: BorderRadius.zero,
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Thành phần hiển thị hình ảnh từ internet kèm hiệu ứng tải và ảnh dự phòng.

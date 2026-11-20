@@ -83,9 +83,31 @@ abstract class KidReadingRepository {
     required String filePath,
   });
 
-  Future<StorySummarySent> summaryFlags(
-    String sessionId, {
-    required List<int> sceneIds,
+  Future<ChildStoryReflection> reflection(int sessionId);
+
+  Future<ChildStoryReflection> reflectionEmotions(
+    int sessionId,
+    List<String> codes,
+  );
+
+  Future<ChildStoryReflection> reflectionFavoriteScene(
+    int sessionId,
+    int sceneId,
+  );
+
+  Future<ChildStoryReflection> reflectionNote(
+    int sessionId, {
+    String? text,
+    String? audioPath,
+  });
+
+  /// 409 = tranh này đã hỏi rồi
+  Future<StorySummaryQuestionSent> summaryQuestion(
+    int sessionId, {
+    required int sceneId,
+    int? beatOrder,
+    String? text,
+    String? audioPath,
   });
 
   /// Trẻ trả lời một tương tác lúc nghe. Chỉ truyền trường cần thiết: Checkpoint/PicturePrediction truyền optionId; FillBlank truyền answer; EventOrdering truyền orderedOptionIds; RolePlay không truyền gì (body rỗng).
@@ -428,18 +450,112 @@ class ApiKidReadingRepository implements KidReadingRepository {
   });
 
   @override
-  Future<StorySummarySent> summaryFlags(
-    String sessionId, {
-    required List<int> sceneIds,
+  Future<ChildStoryReflection> reflection(int sessionId) =>
+      _childCall(() async {
+        final response = await dio.get<dynamic>(
+          '/child/reading/sessions/$sessionId/reflection',
+          options: _childOptions(_token),
+        );
+        final data = _unwrap(response) as Map<String, dynamic>;
+        return ChildStoryReflection.fromJson(data);
+      });
+
+  @override
+  Future<ChildStoryReflection> reflectionEmotions(
+    int sessionId,
+    List<String> codes,
+  ) => _childCall(() async {
+        final response = await dio.put<dynamic>(
+          '/child/reading/sessions/$sessionId/reflection/emotions',
+          data: {'emotions': codes},
+          options: _childOptions(_token),
+        );
+        final data = _unwrap(response) as Map<String, dynamic>;
+        return ChildStoryReflection.fromJson(data);
+      });
+
+  @override
+  Future<ChildStoryReflection> reflectionFavoriteScene(
+    int sessionId,
+    int sceneId,
+  ) => _childCall(() async {
+        final response = await dio.put<dynamic>(
+          '/child/reading/sessions/$sessionId/reflection/favorite-scene',
+          data: {'sceneId': sceneId},
+          options: _childOptions(_token),
+        );
+        final data = _unwrap(response) as Map<String, dynamic>;
+        return ChildStoryReflection.fromJson(data);
+      });
+
+  @override
+  Future<ChildStoryReflection> reflectionNote(
+    int sessionId, {
+    String? text,
+    String? audioPath,
+  }) => runApi(() async {
+        final map = <String, dynamic>{};
+        final trimmedText = text?.trim();
+        if (trimmedText != null && trimmedText.isNotEmpty) {
+          map['Text'] = trimmedText;
+        }
+        if (audioPath != null) {
+          map['Audio'] = await MultipartFile.fromFile(
+            audioPath,
+            filename: 'note.wav',
+            contentType: DioMediaType('audio', 'wav'),
+          );
+        }
+        try {
+          final response = await dio.post<dynamic>(
+            '/child/reading/sessions/$sessionId/reflection/note',
+            data: FormData.fromMap(map),
+            options: _childOptions(_token),
+          );
+          final data = _unwrap(response) as Map<String, dynamic>;
+          return ChildStoryReflection.fromJson(data);
+        } on DioException catch (e) {
+          if (e.response?.statusCode == 401) {
+            onChildSessionEnded();
+          }
+          rethrow;
+        }
+      });
+
+  @override
+  // 409 = tranh này đã hỏi rồi
+  Future<StorySummaryQuestionSent> summaryQuestion(
+    int sessionId, {
+    required int sceneId,
+    int? beatOrder,
+    String? text,
+    String? audioPath,
   }) => _childCall(() async {
-    final response = await dio.post<dynamic>(
-      '/child/reading/sessions/$sessionId/summary/flags',
-      data: {'sceneIds': sceneIds},
-      options: _childOptions(_token),
-    );
-    final data = _unwrap(response) as Map<String, dynamic>;
-    return StorySummarySent.fromJson(data);
-  });
+        final map = <String, dynamic>{
+          'SceneId': sceneId,
+        };
+        if (beatOrder != null) {
+          map['BeatOrder'] = beatOrder;
+        }
+        final trimmedText = text?.trim();
+        if (trimmedText != null && trimmedText.isNotEmpty) {
+          map['Text'] = trimmedText;
+        }
+        if (audioPath != null) {
+          map['Audio'] = await MultipartFile.fromFile(
+            audioPath,
+            filename: 'question.wav',
+            contentType: DioMediaType('audio', 'wav'),
+          );
+        }
+        final response = await dio.post<dynamic>(
+          '/child/reading/sessions/$sessionId/summary/questions',
+          data: FormData.fromMap(map),
+          options: _childOptions(_token),
+        );
+        final data = _unwrap(response) as Map<String, dynamic>;
+        return StorySummaryQuestionSent.fromJson(data);
+      });
 
   @override
   Future<ListeningAttemptResult> attemptInteraction(

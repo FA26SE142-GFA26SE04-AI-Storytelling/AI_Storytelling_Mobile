@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
@@ -109,25 +108,8 @@ class _LibraryBannerState extends State<LibraryBanner> {
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
-                                // Nền: chính ảnh đó phủ kín + làm mờ, để ảnh chính hiện trọn
-                                // (không cắt, không méo) mà hai bên không trống.
-                                ImageFiltered(
-                                  imageFilter: ImageFilter.blur(
-                                    sigmaX: 18,
-                                    sigmaY: 18,
-                                  ),
-                                  child: TtNetworkImage(
-                                    url: splitCover(s.coverImageUrl).src,
-                                    radius: BorderRadius.zero,
-                                  ),
-                                ),
-                                // Bỏ đuôi #crop (vùng cắt dọc 3:4 cho thẻ truyện): ảnh có vùng
-                                // cắt luôn bị kéo cho đầy khung, sang khung 16:9 thì méo.
-                                TtNetworkImage(
-                                  url: splitCover(s.coverImageUrl).src,
-                                  radius: BorderRadius.zero,
-                                  fit: BoxFit.contain,
-                                ),
+                                // Hiện trọn ảnh gốc (bỏ vùng cắt 3:4 của thẻ bìa) trên nền mờ.
+                                TtWholeImage(url: s.coverImageUrl),
                                 // Lớp tối phía dưới để chữ trắng đọc rõ trên mọi ảnh.
                                 DecoratedBox(
                                   decoration: BoxDecoration(

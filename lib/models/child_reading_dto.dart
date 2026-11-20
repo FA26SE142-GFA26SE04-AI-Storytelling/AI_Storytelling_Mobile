@@ -297,5 +297,44 @@ abstract class StorySummarySent with _$StorySummarySent {
       _$StorySummarySentFromJson(json);
 }
 
+@freezed
+abstract class StoryEmotion with _$StoryEmotion {
+  const factory StoryEmotion({
+    required String code,
+    required String label,
+  }) = _StoryEmotion;
+
+  factory StoryEmotion.fromJson(Map<String, dynamic> json) =>
+      _$StoryEmotionFromJson(json);
+}
+
+@freezed
+abstract class ChildStoryReflection with _$ChildStoryReflection {
+  const factory ChildStoryReflection({
+    required int sessionId,
+    @Default(<StoryEmotion>[]) List<StoryEmotion> emotions,
+    int? favoriteSceneId,
+    String? noteText,
+    @Default(false) bool hasNoteRecording,
+    @Default(false) bool canRecord,
+    String? message,
+  }) = _ChildStoryReflection;
+
+  factory ChildStoryReflection.fromJson(Map<String, dynamic> json) =>
+      _$ChildStoryReflectionFromJson(json);
+}
+
+@freezed
+abstract class StorySummaryQuestionSent with _$StorySummaryQuestionSent {
+  const factory StorySummaryQuestionSent({
+    required int summaryId,
+    required int questionId,
+    required String message,
+  }) = _StorySummaryQuestionSent;
+
+  factory StorySummaryQuestionSent.fromJson(Map<String, dynamic> json) =>
+      _$StorySummaryQuestionSentFromJson(json);
+}
+
 const int kSummaryMaxBytes = 3000000;
 const int kSummaryMaxFlags = 5;

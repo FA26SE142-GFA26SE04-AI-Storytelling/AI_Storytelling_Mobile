@@ -1,356 +1,49 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:record/record.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/widgets/kid_panel.dart';
-import '../../../core/widgets/tt_confirm_dialog.dart';
-import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_toast.dart';
-import '../../../models/child_reading_dto.dart';
 import '../data/kid_reading_repository.dart';
-
-/// Trạng thái của bước kể lại câu chuyện cho bé.
-enum _SummaryStepState { idle, recording, recorded, sending, sent }
+import 'kid_voice_recorder.dart';
 
 /// Bước kể lại truyện bằng giọng nói cho bố mẹ nghe trong wizard sau khi đọc xong.
 class KidSummaryStep extends ConsumerStatefulWidget {
-  const KidSummaryStep({
-    super.key,
-    required this.sessionId,
-    required this.onNext,
-    required this.isLast,
-  });
+  const KidSummaryStep({super.key, required this.sessionId});
 
   /// Mã phiên đọc truyện.
   final int sessionId;
-
-  /// Callback chuyển sang bước tiếp theo.
-  final VoidCallback onNext;
-
-  /// Cờ đánh dấu đây có phải bước cuối cùng không.
-  final bool isLast;
 
   @override
   ConsumerState<KidSummaryStep> createState() => _KidSummaryStepState();
 }
 
 class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
-  // WAV mono 16 kHz 16-bit = 32000 byte/giây
-  static const int _maxDurationSeconds = (kSummaryMaxBytes - 44) ~/ 32000;
-
-  _SummaryStepState _state = _SummaryStepState.idle;
-  late final AudioRecorder _recorder;
-  late final AudioPlayer _player;
-  StreamSubscription<PlayerState>? _playerSub;
-
-  Timer? _timer;
-  int _elapsed = 0;
-  String? _recordedPath;
+  String? _audioPath;
+  bool _sending = false;
+  bool _sent = false;
   String? _sentMessage;
-  bool _isPlaying = false;
-
-  bool get _isSending => _state == _SummaryStepState.sending;
-
-  @override
-  void initState() {
-    super.initState();
-    _recorder = AudioRecorder();
-    _player = AudioPlayer();
-    _playerSub = _player.playerStateStream.listen((playerState) {
-      final playing =
-          playerState.playing &&
-          playerState.processingState != ProcessingState.completed;
-      if (_isPlaying != playing) {
-        if (mounted) {
-          setState(() {
-            _isPlaying = playing;
-          });
-        }
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _playerSub?.cancel();
-
-    if (_state == _SummaryStepState.recording) {
-      _recorder.stop().ignore();
-    }
-    _recorder.dispose();
-    _player.dispose();
-
-    // Dọn file tạm nếu chưa gửi thành công
-    if (_state != _SummaryStepState.sent && _recordedPath != null) {
-      try {
-        final file = File(_recordedPath!);
-        if (file.existsSync()) {
-          file.deleteSync();
-        }
-      } catch (_) {}
-    }
-    super.dispose();
-  }
-
-  String _formatDuration(int seconds) {
-    final m = seconds ~/ 60;
-    final s = seconds % 60;
-    return '$m:${s.toString().padLeft(2, '0')}';
-  }
-
-  Future<void> _startRecording() async {
-    if (kIsWeb) {
-      showTtToast(
-        context,
-        'Thiết bị này chưa ghi âm được.',
-        type: TtToastType.error,
-      );
-      return;
-    }
-
-    try {
-      final isSupported = await _recorder.isEncoderSupported(AudioEncoder.wav);
-      if (!isSupported) {
-        if (mounted) {
-          showTtToast(
-            context,
-            'Thiết bị này chưa ghi âm được.',
-            type: TtToastType.error,
-          );
-        }
-        return;
-      }
-
-      final hasPermission = await _recorder.hasPermission();
-      if (!hasPermission) {
-        if (mounted) {
-          showTtToast(
-            context,
-            'Em cần cho phép dùng micro để kể lại nhé.',
-            type: TtToastType.error,
-          );
-        }
-        return;
-      }
-
-      final tempDir = await getTemporaryDirectory();
-      final path =
-          '${tempDir.path}/summary_${DateTime.now().millisecondsSinceEpoch}.wav';
-
-      await _recorder.start(
-        const RecordConfig(
-          encoder: AudioEncoder.wav,
-          sampleRate: 16000,
-          numChannels: 1,
-        ),
-        path: path,
-      );
-
-      if (!mounted) return;
-      setState(() {
-        _recordedPath = path;
-        _state = _SummaryStepState.recording;
-        _elapsed = 0;
-      });
-
-      _timer?.cancel();
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (!mounted) {
-          timer.cancel();
-          return;
-        }
-        final next = _elapsed + 1;
-        if (next >= _maxDurationSeconds) {
-          timer.cancel();
-          _stopRecording(reachedLimit: true);
-        } else {
-          setState(() {
-            _elapsed = next;
-          });
-        }
-      });
-    } catch (_) {
-      if (mounted) {
-        showTtToast(
-          context,
-          'Có lỗi khi bật ghi âm. Em thử lại nhé.',
-          type: TtToastType.error,
-        );
-      }
-    }
-  }
-
-  Future<void> _stopRecording({bool reachedLimit = false}) async {
-    _timer?.cancel();
-    try {
-      final path = await _recorder.stop();
-      final effectivePath = path ?? _recordedPath;
-
-      if (!mounted) return;
-
-      if (effectivePath == null) {
-        setState(() {
-          _state = _SummaryStepState.idle;
-          _elapsed = 0;
-        });
-        showTtToast(
-          context,
-          'Không tìm thấy bản ghi. Em thử lại nhé.',
-          type: TtToastType.error,
-        );
-        return;
-      }
-
-      final file = File(effectivePath);
-      if (!await file.exists()) {
-        if (!mounted) return;
-        setState(() {
-          _state = _SummaryStepState.idle;
-          _elapsed = 0;
-        });
-        showTtToast(
-          context,
-          'Không tìm thấy bản ghi. Em thử lại nhé.',
-          type: TtToastType.error,
-        );
-        return;
-      }
-
-      final length = await file.length();
-      if (length > kSummaryMaxBytes) {
-        try {
-          await file.delete();
-        } catch (_) {}
-        if (!mounted) return;
-        setState(() {
-          _state = _SummaryStepState.idle;
-          _recordedPath = null;
-          _elapsed = 0;
-        });
-        showTtToast(
-          context,
-          'Bản ghi quá dài, em kể lại ngắn hơn nhé.',
-          type: TtToastType.error,
-        );
-        return;
-      }
-
-      setState(() {
-        _recordedPath = effectivePath;
-        _state = _SummaryStepState.recorded;
-      });
-
-      if (!mounted) return;
-      if (reachedLimit) {
-        showTtToast(
-          context,
-          'Đã đủ thời lượng kể, em nghe lại nhé.',
-          type: TtToastType.info,
-        );
-      }
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _state = _SummaryStepState.idle;
-        _elapsed = 0;
-      });
-      showTtToast(
-        context,
-        'Có lỗi khi dừng ghi âm. Em thử lại nhé.',
-        type: TtToastType.error,
-      );
-    }
-  }
-
-  Future<void> _togglePlay() async {
-    if (_recordedPath == null) return;
-    try {
-      if (_isPlaying) {
-        await _player.stop();
-        if (mounted) {
-          setState(() {
-            _isPlaying = false;
-          });
-        }
-      } else {
-        await _player.setFilePath(_recordedPath!);
-        await _player.play();
-      }
-    } catch (_) {
-      if (mounted) {
-        showTtToast(
-          context,
-          'Không thể phát lại bản ghi.',
-          type: TtToastType.error,
-        );
-      }
-    }
-  }
-
-  Future<void> _deleteRecording() async {
-    final confirmed = await showConfirmDialog(
-      context,
-      title: 'Bỏ bản kể?',
-      message: 'Em có muốn xoá bản ghi âm này để kể lại từ đầu không?',
-      confirmLabel: 'Xoá và kể lại',
-      cancelLabel: 'Giữ lại',
-      destructive: true,
-    );
-
-    if (!confirmed || !mounted) return;
-
-    try {
-      if (_isPlaying) {
-        await _player.stop();
-      }
-      if (_recordedPath != null) {
-        final file = File(_recordedPath!);
-        if (await file.exists()) {
-          await file.delete();
-        }
-      }
-    } catch (_) {}
-
-    if (!mounted) return;
-    setState(() {
-      _state = _SummaryStepState.idle;
-      _recordedPath = null;
-      _elapsed = 0;
-      _isPlaying = false;
-    });
-  }
 
   Future<void> _sendSummary() async {
-    if (_recordedPath == null || _isSending) return;
+    if (_audioPath == null || _sending || _sent) return;
 
     setState(() {
-      _state = _SummaryStepState.sending;
+      _sending = true;
     });
 
     try {
-      if (_isPlaying) {
-        await _player.stop();
-      }
-
       final repo = ref.read(kidReadingRepositoryProvider);
       final result = await repo.summaryRecording(
         widget.sessionId.toString(),
-        filePath: _recordedPath!,
+        filePath: _audioPath!,
       );
 
       if (!mounted) return;
       setState(() {
-        _state = _SummaryStepState.sent;
+        _sending = false;
+        _sent = true;
         _sentMessage = result.message;
       });
 
@@ -358,13 +51,13 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _state = _SummaryStepState.recorded;
+        _sending = false;
       });
       showTtToast(context, e.message, type: TtToastType.error);
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _state = _SummaryStepState.recorded;
+        _sending = false;
       });
       showTtToast(
         context,
@@ -374,32 +67,9 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
     }
   }
 
-  Future<void> _handleNext() async {
-    if (_state == _SummaryStepState.recording) {
-      _timer?.cancel();
-      try {
-        final path = await _recorder.stop();
-        final effectivePath = path ?? _recordedPath;
-        if (effectivePath != null) {
-          final file = File(effectivePath);
-          if (await file.exists()) {
-            await file.delete();
-          }
-        }
-      } catch (_) {}
-    }
-    if (_isPlaying) {
-      try {
-        await _player.stop();
-      } catch (_) {}
-    }
-    widget.onNext();
-  }
-
   @override
   Widget build(BuildContext context) {
     final tt = context.tt;
-    final isLocked = _state == _SummaryStepState.recording || _isSending;
 
     return Column(
       children: [
@@ -411,242 +81,84 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 12),
-                // Linh vật ếch nhún 1 lần khi chuyển trạng thái
-                TtFrog(
-                      mood: _state == _SummaryStepState.sent
-                          ? TtFrogMood.happy
-                          : (_state == _SummaryStepState.recording
-                                ? TtFrogMood.think
-                                : TtFrogMood.idle),
-                      size: 130,
-                    )
-                    .animate(key: ValueKey(_state))
-                    .scale(
-                      begin: const Offset(0.9, 0.9),
-                      end: const Offset(1, 1),
-                      duration: 350.ms,
-                      curve: Curves.easeOutBack,
-                    ),
-                const SizedBox(height: 20),
-
-                // Tiêu đề nổi bật
+                // Như web: chỉ tiêu đề + nút ghi âm (bỏ ếch và dòng hướng dẫn để vừa màn ngang).
                 Text(
-                  'Em kể lại cho bố mẹ nhé',
+                  'Em kể lại cho bố mẹ nghe nhé',
                   style: TextStyle(
                     fontFamily: 'Baloo2',
-                    fontSize: 28,
+                    fontSize: 26,
                     fontWeight: FontWeight.w800,
                     color: tt.text,
                   ),
                   textAlign: TextAlign.center,
                 ).animate().fadeIn(duration: 300.ms),
-                const SizedBox(height: 8),
+                const SizedBox(height: 20),
 
-                // Dòng hướng dẫn phụ
-                Text(
-                  'Bấm nút kể lại những điều em nhớ trong truyện nhé!',
-                  style: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    color: tt.muted,
-                  ),
-                  textAlign: TextAlign.center,
-                ).animate().fadeIn(duration: 300.ms, delay: 100.ms),
-                const SizedBox(height: 28),
-
-                // Khu vực thao tác ghi âm
-                _buildActionArea(context)
+                // Widget ghi âm
+                KidVoiceRecorder(
+                      audioPath: _audioPath,
+                      onChanged: (p) => setState(() => _audioPath = p),
+                      enabled: !_sent,
+                      sending: _sending,
+                    )
                     .animate()
                     .fadeIn(duration: 350.ms)
                     .slideY(begin: 0.08, end: 0, duration: 350.ms),
+                const SizedBox(height: 20),
+
+                // Dòng ✓ sau khi gửi thành công
+                if (_sent) ...[
+                  KidPanel(
+                    borderColor: tt.primary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 20,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.check_circle_rounded,
+                          color: tt.primary,
+                          size: 32,
+                        ),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            _sentMessage ?? '',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: tt.primaryStrong,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ).animate().fadeIn(duration: 350.ms),
+                ] else if (_audioPath != null) ...[
+                  // Nút Gửi bố mẹ (chỉ hiện khi có bản ghi và chưa gửi)
+                  SizedBox(
+                    width: double.infinity,
+                    child: KidBtn3D(
+                      label: 'Gửi bố mẹ',
+                      icon: Icons.send_rounded,
+                      color: tt.primary,
+                      expand: true,
+                      big: true,
+                      onPressed: _sending ? null : _sendSummary,
+                    ),
+                  ).animate().fadeIn(duration: 300.ms),
+                ],
+
+                const SizedBox(height: 24),
               ],
             ),
-          ),
-        ),
-
-        // Footer cố định dưới đáy
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: tt.bg,
-            border: Border(top: BorderSide(color: tt.line2, width: 1)),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: KidBtn3D(
-                  label: 'Bỏ qua',
-                  color: tt.muted,
-                  onPressed: isLocked ? null : _handleNext,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: KidBtn3D(
-                  label: widget.isLast ? 'Về trang chính' : 'Tiếp',
-                  icon: widget.isLast
-                      ? Icons.home_rounded
-                      : Icons.arrow_forward_rounded,
-                  color: tt.primary,
-                  onPressed: isLocked ? null : _handleNext,
-                ),
-              ),
-            ],
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildActionArea(BuildContext context) {
-    final tt = context.tt;
-
-    // Trạng thái đã gửi thành công
-    if (_state == _SummaryStepState.sent) {
-      return KidPanel(
-        borderColor: tt.primary,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.check_circle_rounded, color: tt.primary, size: 32),
-            const SizedBox(width: 12),
-            Flexible(
-              child: Text(
-                _sentMessage ?? 'Đã gửi bản kể cho bố mẹ thành công!',
-                style: TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: tt.primaryStrong,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Khung viền và đồng hồ có chút sắc vàng gold
-    return KidPanel(
-      borderColor: _state == _SummaryStepState.recording
-          ? tt.goldDeep
-          : tt.gold,
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Huy hiệu đồng hồ thời lượng với màu vàng gold
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: tt.gold.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: tt.goldDeep, width: 1.5),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.timer_rounded, size: 22, color: tt.goldDeep),
-                const SizedBox(width: 6),
-                Text(
-                  _formatDuration(_elapsed),
-                  style: TextStyle(
-                    fontFamily: 'Baloo2',
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: tt.warnInk,
-                  ),
-                ),
-                Text(
-                  ' / ${_formatDuration(_maxDurationSeconds)}',
-                  style: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: tt.muted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // Các nút hành động tùy trạng thái
-          if (_state == _SummaryStepState.idle) ...[
-            KidBtn3D(
-              label: 'Bấm để kể',
-              icon: Icons.mic_rounded,
-              color: tt.primary,
-              expand: true,
-              onPressed: _startRecording,
-            ),
-          ] else if (_state == _SummaryStepState.recording) ...[
-            KidBtn3D(
-              label: 'Dừng (${_formatDuration(_elapsed)})',
-              icon: Icons.stop_circle_rounded,
-              color: tt.danger,
-              expand: true,
-              onPressed: _stopRecording,
-            ),
-          ] else if (_state == _SummaryStepState.recorded ||
-              _state == _SummaryStepState.sending) ...[
-            Row(
-              children: [
-                // Nút nghe lại
-                Expanded(
-                  child: KidBtn3D(
-                    label: _isPlaying ? 'Dừng' : 'Nghe lại',
-                    icon: _isPlaying
-                        ? Icons.stop_rounded
-                        : Icons.play_arrow_rounded,
-                    color: tt.sky,
-                    onPressed: _isSending ? null : _togglePlay,
-                  ),
-                ),
-                const SizedBox(width: 10),
-
-                // Nút bỏ bản ghi
-                SizedBox(
-                  width: 64,
-                  height: 64,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: tt.panel,
-                      foregroundColor: tt.danger,
-                      disabledForegroundColor: tt.danger.withValues(alpha: 0.4),
-                      side: BorderSide(
-                        color: tt.danger.withValues(alpha: 0.4),
-                        width: 1.5,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: EdgeInsets.zero,
-                    ),
-                    onPressed: _isSending ? null : _deleteRecording,
-                    child: const Icon(Icons.delete_outline_rounded, size: 28),
-                  ),
-                ),
-                const SizedBox(width: 10),
-
-                // Nút gửi bố mẹ
-                Expanded(
-                  child: KidBtn3D(
-                    label: 'Gửi bố mẹ',
-                    icon: Icons.send_rounded,
-                    color: tt.primary,
-                    onPressed: _isSending ? null : _sendSummary,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
     );
   }
 }
