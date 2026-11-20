@@ -62,10 +62,6 @@ class KidRoadmapStrip extends StatelessWidget {
         roadmap.open == null &&
         roadmap.upcoming.isEmpty;
 
-    if (hasNoItems) {
-      return const SizedBox.shrink();
-    }
-
     final tt = context.tt;
 
     final items = <_RoadmapItemData>[
@@ -148,9 +144,12 @@ class KidRoadmapStrip extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16, bottom: 10),
             child: Align(
-              alignment: Alignment.centerRight,
+              alignment: hasNoItems ? Alignment.center : Alignment.centerRight,
               child: Text(
-                '${roadmap.completedCount}/${roadmap.totalCount}',
+                // Chưa có lộ trình vẫn hiện khung, kèm lời nhắn cho bé.
+                hasNoItems
+                    ? 'Bố mẹ chưa chọn truyện cho em'
+                    : '${roadmap.completedCount}/${roadmap.totalCount}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontFamily: 'Baloo2',
                       fontWeight: FontWeight.w600,

@@ -51,14 +51,6 @@ class KidJourneyScreen extends ConsumerWidget {
                 ),
                 data: (data) {
                   final r = data.roadmap;
-                  if (r.done.isEmpty && r.open == null && r.upcoming.isEmpty) {
-                    return const Center(
-                      child: TtEmptyState(
-                        icon: Icons.map_rounded,
-                        title: 'Bố mẹ chưa chọn truyện cho em',
-                      ),
-                    );
-                  }
                   return SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
                     child: Center(

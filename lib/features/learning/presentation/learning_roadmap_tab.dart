@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/tt_colors.dart';
+import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_frog.dart';
 import '../../../models/child_profile_dto.dart';
 import '../../../models/child_roadmap_dto.dart';
@@ -21,13 +24,13 @@ const _skipReason = {
 /// Lộ trình chia nhóm như splitRoadmap của web: đang đọc / tiếp theo / đã đọc / đã gỡ-bỏ qua.
 class RoadmapGroups {
   RoadmapGroups(ChildRoadmapDto? r)
-      : open = r?.open,
-        queued = [...?r?.waiting]
-          ..sort((a, b) => a.position.compareTo(b.position)),
-        done = [...?r?.history.where((i) => i.status == 'Completed')],
-        off = [...?r?.history.where((i) => i.status != 'Completed')],
-        completedCount = r?.completedCount ?? 0,
-        totalCount = r?.totalCount ?? 0;
+    : open = r?.open,
+      queued = [...?r?.waiting]
+        ..sort((a, b) => a.position.compareTo(b.position)),
+      done = [...?r?.history.where((i) => i.status == 'Completed')],
+      off = [...?r?.history.where((i) => i.status != 'Completed')],
+      completedCount = r?.completedCount ?? 0,
+      totalCount = r?.totalCount ?? 0;
 
   final ChildRoadmapItemDto? open;
   final List<ChildRoadmapItemDto> queued;
@@ -71,15 +74,41 @@ class LearningRoadmapTab extends ConsumerWidget {
       body = learningSkeleton();
     } else {
       final g = RoadmapGroups(async.value);
-      if (g.open == null && g.queued.isEmpty && g.done.isEmpty && g.off.isEmpty) {
-        body = [const LearningEmpty(title: 'Lộ trình đang trống')];
-      } else {
+      final empty = g.open == null && g.queued.isEmpty;
+      {
         body = [
-          if (g.totalCount > 0) _ProgressCard(groups: g),
+          // Lộ trình trống vẫn hiện khung (0/0) và lối thêm truyện.
+          _ProgressCard(groups: g),
           if (g.open != null)
             LearningSection(
               title: 'Đang đọc',
-              child: _Step(item: g.open!, label: 'Đang đọc', color: tt.goldDeep),
+              child: _Step(
+                item: g.open!,
+                label: 'Đang đọc',
+                color: tt.goldDeep,
+              ),
+            )
+          else if (empty)
+            LearningSection(
+              title: 'Tiếp theo',
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Chưa có truyện nào chờ ${child.nickname} đọc.',
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(color: tt.muted),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  TtButton(
+                    label: 'Thêm truyện',
+                    icon: Icons.add_rounded,
+                    variant: TtButtonVariant.secondary,
+                    onPressed: () => context.go(AppRoutes.home),
+                  ),
+                ],
+              ),
             ),
           if (g.queued.isNotEmpty)
             LearningSection(
@@ -186,7 +215,8 @@ class _Step extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = context.tt;
     final due = item.expectedCompletionAt;
-    final overdue = due != null &&
+    final overdue =
+        due != null &&
         item.status != 'Completed' &&
         due.isBefore(DateTime.now());
     return Row(
