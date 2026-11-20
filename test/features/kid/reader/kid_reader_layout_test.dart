@@ -105,11 +105,11 @@ void main() {
     });
   });
 
-  group('Test 4: Top distance from KidReaderPage to TtNetworkImage', () {
+  group('Test 4: Top distance from KidReaderPage to TtWholeImage', () {
     testWidgets('layout sideBySide (740x360) distance is less than 40 px', (tester) async {
       await pumpAt(tester, const Size(740, 360));
       final pageTop = tester.getTopLeft(find.byType(KidReaderPage)).dy;
-      final imageTop = tester.getTopLeft(find.byType(TtNetworkImage)).dy;
+      final imageTop = tester.getTopLeft(find.byType(TtWholeImage)).dy;
       final distance = imageTop - pageTop;
       expect(distance, lessThan(40));
     });
@@ -117,7 +117,7 @@ void main() {
     testWidgets('layout book (1280x800) distance is less than 48 px (padding 24 + border)', (tester) async {
       await pumpAt(tester, const Size(1280, 800));
       final pageTop = tester.getTopLeft(find.byType(KidReaderPage)).dy;
-      final imageTop = tester.getTopLeft(find.byType(TtNetworkImage)).dy;
+      final imageTop = tester.getTopLeft(find.byType(TtWholeImage)).dy;
       final distance = imageTop - pageTop;
       // Ghi chú: Layout book có Padding 24 kèm viền trang trí nên nới ngưỡng tối đa lên 48 px
       expect(distance, lessThan(48));
