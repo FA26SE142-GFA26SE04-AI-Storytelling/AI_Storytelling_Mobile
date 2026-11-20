@@ -14,6 +14,7 @@ import '../../../models/library_story_dto.dart';
 import '../../kid/reader/kid_reader_audio.dart';
 import '../data/library_logic.dart';
 import 'library_providers.dart';
+import 'story_preview_actions.dart';
 
 /// Mở màn xem trước toàn màn hình (che cả thanh điều hướng dưới).
 Future<void> openStoryPreview(BuildContext context, LibraryStoryDto story) =>
@@ -271,6 +272,7 @@ class _StoryPreviewScreenState extends ConsumerState<StoryPreviewScreen> {
 
     return Scaffold(
       backgroundColor: tt.bg,
+      bottomNavigationBar: StoryPreviewActionBar(storyId: s.id),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

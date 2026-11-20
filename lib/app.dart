@@ -27,7 +27,16 @@ class TaleTaleApp extends ConsumerWidget {
       // Mỗi lần chạm màn hình tính là bé còn đang dùng (phiên bé hết hạn sau 20 phút không hoạt động).
       builder: (context, child) => Listener(
         onPointerDown: (_) => ref.read(kidSessionProvider.notifier).touch(),
-        child: child,
+        // Android 15 vẽ tràn dưới thanh điều hướng của máy: chừa đáy cho mọi màn.
+        child: ColoredBox(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: SafeArea(
+            top: false,
+            left: false,
+            right: false,
+            child: child ?? const SizedBox.shrink(),
+          ),
+        ),
       ),
     );
   }

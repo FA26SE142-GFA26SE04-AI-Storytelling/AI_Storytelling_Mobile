@@ -16,16 +16,15 @@ const double _railWidth = kKidLobbyButton + 28;
 /// Màn ngang: cụm sảnh rộng tối đa chừng này, không dạt ra mép màn.
 const double _maxWideWidth = 900;
 
-/// Màn ngang thấp hơn mức này thì đưa thẻ Hôm nay + hàng nút sang cột bên phải.
+/// Màn ngang thấp hơn mức này thì đưa hàng nút sang cột bên phải.
 const double _tallLandscape = 520;
 
-/// Bề rộng cột bên phải (thẻ Hôm nay + hàng nút) ở màn ngang thấp.
+/// Bề rộng cột bên phải (hàng nút) ở màn ngang thấp.
 const double _sideColumn = 340;
 
 /// Các khối của sảnh, dựng một lần rồi xếp theo khổ màn (dọc / ngang cao / ngang thấp).
 class KidLobbyParts {
   const KidLobbyParts({
-    required this.card,
     required this.frog,
     required this.journey,
     required this.notebook,
@@ -34,7 +33,6 @@ class KidLobbyParts {
     required this.bottom,
   });
 
-  final Widget card;
   final Widget Function(double size) frog;
   final Widget journey, notebook, wish, badges, bottom;
 }
@@ -47,22 +45,20 @@ Widget kidLobbyLayout(BoxConstraints c, KidLobbyParts p) {
       : _landscapeShort(c, p);
 }
 
-/// Màn dọc: thẻ Hôm nay trên, bốn nút ở bốn góc quanh ếch, hàng nút dưới.
+/// Màn dọc: bốn góc quanh ếch, hàng nút dưới.
 Widget _portrait(BoxConstraints c, KidLobbyParts p) {
   final width = math.min(c.maxWidth, _maxWidth) - 32;
-  // ~290: thẻ Hôm nay + hàng nút dưới + khoảng cách; sân khấu ếch cao ~1.22 lần bề rộng.
+  // ~170: hàng nút dưới + khoảng cách; sân khấu ếch cao ~1.22 lần bề rộng.
   final size = math
-      .min(width * 0.64, (c.maxHeight - 290) / 1.22)
+      .min(width * 0.64, (c.maxHeight - 170) / 1.22)
       .clamp(100.0, 260.0);
   return Center(
     child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: _maxWidth),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         child: Column(
           children: [
-            p.card,
-            const SizedBox(height: 12),
             Expanded(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(
@@ -110,11 +106,11 @@ Widget _stage(double size, KidLobbyParts p) {
   );
 }
 
-/// Ngang, đủ cao (tablet): thẻ Hôm nay hẹp ở trên, sân khấu giữa, hàng nút ngay dưới ếch.
+/// Ngang, đủ cao (tablet): sân khấu giữa, hàng nút ngay dưới ếch.
 Widget _landscapeTall(BoxConstraints c, KidLobbyParts p) {
   final width = math.min(c.maxWidth, _maxWideWidth) - 32;
   final size = math
-      .min((width - 2 * _railWidth) / 1.25, (c.maxHeight - 300) / 1.25)
+      .min((width - 2 * _railWidth) / 1.25, (c.maxHeight - 180) / 1.25)
       .clamp(120.0, 420.0);
   return Center(
     child: Padding(
@@ -122,10 +118,6 @@ Widget _landscapeTall(BoxConstraints c, KidLobbyParts p) {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: p.card,
-          ),
           // Chừa khoảng trên đầu ếch cho cú nhảy.
           SizedBox(height: size * 0.1 + 8),
           _stage(size, p),
@@ -141,7 +133,7 @@ Widget _landscapeTall(BoxConstraints c, KidLobbyParts p) {
 }
 
 /// Ngang, thấp (điện thoại xoay ngang): sân khấu bên trái,
-/// thẻ Hôm nay + hàng nút thành cột bên phải.
+/// hàng nút thành cột bên phải.
 Widget _landscapeShort(BoxConstraints c, KidLobbyParts p) {
   final width = math.min(c.maxWidth, _maxWideWidth) - 32;
   final stageWidth = width - _sideColumn - 24;
@@ -166,7 +158,7 @@ Widget _landscapeShort(BoxConstraints c, KidLobbyParts p) {
               width: _sideColumn,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [p.card, const SizedBox(height: 20), p.bottom],
+                children: [p.bottom],
               ),
             ),
           ],

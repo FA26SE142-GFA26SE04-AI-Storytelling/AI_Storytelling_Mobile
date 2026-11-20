@@ -7,6 +7,7 @@ import '../../../core/network/api_exception.dart';
 import '../../../models/child_interaction_dto.dart';
 import '../../../models/child_reading_dto.dart';
 import '../data/kid_reading_repository.dart';
+import 'kid_reader_pages.dart';
 
 // ─── Enum chế độ đọc ─────────────────────────────────────────────────────────
 
@@ -24,6 +25,7 @@ class KidReaderState {
     this.currentPage = 0,
     this.readingMode = KidReadingMode.readFirst,
     this.totalPages = 0,
+    this.pages = const <KidReaderPageItem>[],
     this.isCompleting = false,
     this.isFinished = false,
     this.completedResult,
@@ -42,13 +44,22 @@ class KidReaderState {
   /// sessionId kiểu int từ backend; lưu tham chiếu để gọi các API tiếp theo.
   final int? sessionId;
 
-  /// Trang hiện tại (0-based index vào content.scenes).
+  /// Trang hiện tại (0-based index vào [pages]); mỗi trang là một tranh.
   final int currentPage;
 
   final KidReadingMode readingMode;
 
-  /// Tổng số trang = số scenes.
+  /// Tổng số trang = tổng số tranh của cả truyện.
   final int totalPages;
+
+  /// Các trang theo tranh, tách từ content.scenes (xem [buildKidReaderPages]).
+  final List<KidReaderPageItem> pages;
+
+  /// Vị trí cảnh (trong content.scenes) chứa trang hiện tại; Backend tính trang theo cảnh.
+  int get currentSceneIndex => sceneIndexOfPage(currentPage);
+
+  int sceneIndexOfPage(int page) =>
+      page >= 0 && page < pages.length ? pages[page].sceneIndex : 0;
 
   /// Đang gọi API complete.
   final bool isCompleting;
@@ -83,6 +94,7 @@ class KidReaderState {
     int? currentPage,
     KidReadingMode? readingMode,
     int? totalPages,
+    List<KidReaderPageItem>? pages,
     bool? isCompleting,
     bool? isFinished,
     ReadingCompleted? completedResult,
@@ -102,6 +114,7 @@ class KidReaderState {
       currentPage: currentPage ?? this.currentPage,
       readingMode: readingMode ?? this.readingMode,
       totalPages: totalPages ?? this.totalPages,
+      pages: pages ?? this.pages,
       isCompleting: isCompleting ?? this.isCompleting,
       isFinished: isFinished ?? this.isFinished,
       completedResult: completedResult ?? this.completedResult,
@@ -186,7 +199,7 @@ class KidReaderController extends Notifier<KidReaderState> {
     // Riverpod cấm đọc `state` trong onDispose nên dùng bản sao [_last].
     final last = _last;
     final sid = last.sessionId;
-    final page = last.currentPage;
+    final page = last.currentSceneIndex;
     final mode = _readingModeString(last.readingMode);
     final seconds = _pendingSeconds;
     if (sid != null && seconds > 0 && !last.isFinished) {
@@ -251,13 +264,11 @@ class KidReaderController extends Notifier<KidReaderState> {
         return;
       }
 
-      final totalPages = loaded.scenes.length;
+      final pages = buildKidReaderPages(loaded.scenes);
+      final totalPages = pages.length;
 
-      // Trang bắt đầu: lastPage từ server (1-based) → 0-based index.
-      final lastPage0 = started.lastPage - 1;
-      final startPage = (lastPage0 >= 0 && lastPage0 < totalPages)
-          ? lastPage0
-          : 0;
+      // lastPage từ server là cảnh (1-based) → mở trang đầu của cảnh đó.
+      final startPage = firstPageOfScene(pages, started.lastPage - 1);
 
       // Chế độ đọc ban đầu từ lastReadingMode.
       final initialMode =
@@ -272,6 +283,7 @@ class KidReaderController extends Notifier<KidReaderState> {
         currentPage: startPage,
         readingMode: initialMode,
         totalPages: totalPages,
+        pages: pages,
         isBookmarked: started.isBookmarked,
         isFavorite: started.isFavorited,
         isFinished: false,
@@ -388,7 +400,7 @@ class KidReaderController extends Notifier<KidReaderState> {
     if (sid == null || state.isFinished || _disposed) return;
 
     final seconds = _pendingSeconds;
-    final page = state.currentPage;
+    final page = state.currentSceneIndex;
     final mode = _readingModeString(state.readingMode);
 
     try {
@@ -403,16 +415,18 @@ class KidReaderController extends Notifier<KidReaderState> {
       // Trừ phần giây đã gửi; server có thể trả về page/mode đã chuẩn hóa.
       _pendingSeconds = (_pendingSeconds - seconds).clamp(0, 600);
 
-      final serverPage = result.page - 1; // về 0-based
+      final serverScene = result.page - 1; // cảnh 0-based
       final serverMode = result.readingMode == 'ListenFirst'
           ? KidReadingMode.listenFirst
           : KidReadingMode.readFirst;
 
-      // Chỉ cập nhật nếu server trả về khác (tránh giật UI).
-      if (serverPage != state.currentPage ||
-          serverMode != state.readingMode) {
+      // Chỉ cập nhật nếu server trả về khác (tránh giật UI); khác cảnh thì về trang đầu cảnh đó.
+      final sceneChanged = serverScene != state.currentSceneIndex;
+      if (sceneChanged || serverMode != state.readingMode) {
         _safeSetState(state.copyWith(
-          currentPage: serverPage.clamp(0, state.totalPages - 1),
+          currentPage: sceneChanged
+              ? firstPageOfScene(state.pages, serverScene)
+              : state.currentPage,
           readingMode: serverMode,
         ));
       }

@@ -37,6 +37,13 @@ abstract class ChildRoadmapDto with _$ChildRoadmapDto {
     @Default(0) int totalCount,
   }) = _ChildRoadmapDto;
 
+  // Backend đổi `open` thành danh sách `openItems` (các truyện đang mở của chặng hiện tại).
+  // shortcut: chỉ lấy truyện đầu làm "Đang đọc"; chặng mở nhiều truyện thì cần hiện cả danh sách.
   factory ChildRoadmapDto.fromJson(Map<String, dynamic> json) =>
-      _$ChildRoadmapDtoFromJson(json);
+      _$ChildRoadmapDtoFromJson({
+        ...json,
+        if (json['open'] == null && json['openItems'] is List &&
+            (json['openItems'] as List).isNotEmpty)
+          'open': (json['openItems'] as List).first,
+      });
 }

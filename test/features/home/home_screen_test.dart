@@ -176,7 +176,7 @@ void main() {
   ) async {
     await _pump(tester);
 
-    expect(find.text('Kể chuyện thông minh'), findsOneWidget);
+    expect(find.text('TaleTale'), findsOneWidget);
     expect(find.byTooltip('Tìm truyện'), findsOneWidget);
     expect(find.bySemanticsLabel('Tài khoản'), findsOneWidget);
     expect(find.text('N'), findsOneWidget); // chữ cái đầu khi không có ảnh
@@ -340,7 +340,7 @@ void main() {
     final before = find.text('Truyện số 5').evaluate().length;
 
     await tester.fling(
-      find.text('Kể chuyện thông minh'),
+      find.text('TaleTale'),
       const Offset(0, 1200),
       1000,
     );

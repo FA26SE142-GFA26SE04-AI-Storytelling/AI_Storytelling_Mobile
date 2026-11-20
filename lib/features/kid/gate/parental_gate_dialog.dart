@@ -39,6 +39,8 @@ class _ParentalGateDialogState extends ConsumerState<ParentalGateDialog> {
   late final TextEditingController _passwordController;
   bool _isLoading = false;
 
+  bool get _hasEmail => widget.initialEmail.trim().isNotEmpty;
+
   @override
   void initState() {
     super.initState();
@@ -123,24 +125,30 @@ class _ParentalGateDialogState extends ConsumerState<ParentalGateDialog> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Bố mẹ nhập lại email và mật khẩu để thoát Chế độ của bé.',
+                _hasEmail
+                    ? 'Bố mẹ nhập mật khẩu để thoát Chế độ của bé.'
+                    : 'Bố mẹ nhập lại email và mật khẩu để thoát Chế độ của bé.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: tt.muted,
                     ),
               ),
               const SizedBox(height: 20),
-              TtTextField(
-                label: 'Email',
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                autofillHints: const [AutofillHints.email],
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: 16),
+              // Đã biết email phụ huynh đang đăng nhập thì chỉ hỏi mật khẩu.
+              if (!_hasEmail) ...[
+                TtTextField(
+                  label: 'Email',
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 16),
+              ],
               TtTextField(
                 label: 'Mật khẩu',
                 controller: _passwordController,
                 obscure: true,
+                autofocus: _hasEmail,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _handleSubmit(),
               ),

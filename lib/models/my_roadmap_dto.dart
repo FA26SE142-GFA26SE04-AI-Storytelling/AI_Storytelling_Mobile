@@ -56,6 +56,13 @@ abstract class MyRoadmapDto with _$MyRoadmapDto {
     @Default(false) bool isFinished,
   }) = _MyRoadmapDto;
 
+  // Backend đổi `open` thành danh sách `openStories`.
+  // shortcut: chỉ lấy truyện đầu; chặng mở nhiều truyện thì cần hiện cả danh sách.
   factory MyRoadmapDto.fromJson(Map<String, dynamic> json) =>
-      _$MyRoadmapDtoFromJson(json);
+      _$MyRoadmapDtoFromJson({
+        ...json,
+        if (json['open'] == null && json['openStories'] is List &&
+            (json['openStories'] as List).isNotEmpty)
+          'open': (json['openStories'] as List).first,
+      });
 }

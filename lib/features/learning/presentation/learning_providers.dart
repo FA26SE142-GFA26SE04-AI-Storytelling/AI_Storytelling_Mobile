@@ -5,6 +5,7 @@ import '../../../models/parent_reading_feedback_dto.dart';
 import '../../../models/parent_story_summary_dto.dart';
 import '../../../models/story_wish_dto.dart';
 import '../../home/data/home_repository.dart';
+import '../../library/presentation/library_providers.dart';
 import '../data/learning_repository.dart';
 
 const learningPageSize = 20;
@@ -132,6 +133,15 @@ final storyCoverProvider = FutureProvider.autoDispose.family<String?, int>((
 ) async {
   // Giữ lại để đổi bé / đổi tab không gọi lại /Story/{id}; kéo tải lại (LearningTabList) thì lấy mới.
   ref.keepAlive();
+  // Tra thư viện (gồm truyện cộng đồng) trước như web: truyện Creator gọi /Story/{id} luôn 404.
+  try {
+    final library = await ref.watch(libraryProvider.future);
+    for (final s in library.shelves.sorted) {
+      if (s.id == storyId && (s.coverImageUrl ?? '').trim().isNotEmpty) {
+        return s.coverImageUrl;
+      }
+    }
+  } catch (_) {}
   try {
     return await ref.watch(learningRepositoryProvider).fetchStoryCover(storyId);
   } catch (_) {

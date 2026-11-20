@@ -216,8 +216,9 @@ class _LibraryBodyState extends ConsumerState<LibraryBody> {
           title: 'Tất cả truyện',
           items: bySource,
           side: side,
-          grid: true,
-          maxRows: 2,
+          onAll: bySource.isEmpty
+              ? null
+              : () => _expand('Tất cả truyện', bySource),
           pills: librarySourcePills,
           selectedPill: _source,
           onPill: (id) => setState(() => _source = id),

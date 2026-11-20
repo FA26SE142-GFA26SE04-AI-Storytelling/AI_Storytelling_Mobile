@@ -53,7 +53,7 @@ class LibraryTopBar extends StatelessWidget {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                'Kể chuyện thông minh',
+                'TaleTale',
                 maxLines: 1,
                 style: Theme.of(
                   context,

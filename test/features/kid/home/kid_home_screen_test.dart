@@ -7,6 +7,7 @@ import 'package:ai_storytelling_mobile/core/network/api_exception.dart';
 import 'package:ai_storytelling_mobile/core/theme/app_theme.dart';
 import 'package:ai_storytelling_mobile/features/kid/home/kid_frog_cue.dart';
 import 'package:ai_storytelling_mobile/features/kid/home/kid_lobby_frog.dart';
+import 'package:ai_storytelling_mobile/features/kid/home/kid_stage_button.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/kid_repository.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/kid_rewards_repository.dart';
 import 'package:ai_storytelling_mobile/features/kid/data/kid_session_controller.dart';
@@ -164,24 +165,25 @@ Future<void> tapAndSettleRoute(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
-  testWidgets('Sảnh hiện thẻ Hôm nay, đủ nút và badge từ API', (tester) async {
+  testWidgets('Sảnh hiện đủ nút, cúp huy hiệu và badge từ API', (tester) async {
     await pumpHome(tester, openRoadmap);
 
     expect(find.text('Bé Na'), findsOneWidget);
-    expect(find.text('Hôm nay'), findsOneWidget);
-    expect(find.text('Chú ếch và hoa sen'), findsOneWidget);
+    // Đã bỏ thẻ "Hôm nay" và nút Kho truyện; Huy hiệu thành cúp chỉ để xem.
+    expect(find.text('Hôm nay'), findsNothing);
+    expect(find.text('Kho truyện'), findsNothing);
+    expect(find.text('Huy hiệu'), findsNothing);
+    expect(find.byType(KidTrophyMedal), findsOneWidget);
     for (final label in [
       'Hành trình',
       'Sổ tay',
       'Điều ước',
-      'Huy hiệu',
-      'Kho truyện',
       'Cây',
       'ĐỌC NGAY',
     ]) {
       expect(find.text(label), findsOneWidget, reason: label);
     }
-    expect(find.text('2'), findsOneWidget); // huy hiệu đã đạt
+    expect(find.text('2'), findsOneWidget); // huy hiệu đã đạt (dưới cúp)
     expect(find.text('5'), findsOneWidget); // giọt nước chờ tưới
   });
 
@@ -190,7 +192,7 @@ void main() {
   ) async {
     await pumpHome(tester, openRoadmap, rewardsFail: true);
 
-    expect(find.text('Huy hiệu'), findsOneWidget);
+    expect(find.text('–'), findsOneWidget); // cúp chưa có số
     expect(find.text('2'), findsNothing);
     expect(find.text('5'), findsNothing);
   });
@@ -198,12 +200,9 @@ void main() {
   group('Điều hướng', () {
     const cases = {
       'ĐỌC NGAY': '/kid/read/10',
-      'Chú ếch và hoa sen': '/kid/read/10',
       'Hành trình': '/kid/journey',
       'Sổ tay': '/kid/notebook',
       'Điều ước': '/kid/wish',
-      'Huy hiệu': '/kid/rewards',
-      'Kho truyện': '/kid/library',
       'Cây': '/kid/rewards',
     };
     cases.forEach((label, route) {
@@ -235,9 +234,14 @@ void main() {
   ) async {
     await pumpHome(tester, const MyRoadmapDto());
 
-    expect(find.text('Hôm nay em muốn đọc truyện gì?'), findsOneWidget);
     await tapAndSettleRoute(tester, find.text('CHỌN TRUYỆN'));
     expect(find.text('route:/kid/library'), findsOneWidget);
+  });
+
+  testWidgets('Cúp huy hiệu chỉ để xem: chạm không mở màn nào', (tester) async {
+    await pumpHome(tester, openRoadmap);
+    await tapAndSettleRoute(tester, find.byType(KidTrophyMedal));
+    expect(find.textContaining('route:'), findsNothing);
   });
 
   KidFrogCue cueOf(WidgetTester tester) =>
@@ -261,13 +265,11 @@ void main() {
 
   group('Chạm xuống nút thì ếch làm động tác của nút', () {
     const actions = {
-      'Kho truyện': KidFrogAction.wink,
       'ĐỌC NGAY': KidFrogAction.wave,
       'Cây': KidFrogAction.tongue,
       'Hành trình': KidFrogAction.wave,
       'Sổ tay': KidFrogAction.wink,
       'Điều ước': KidFrogAction.wave,
-      'Huy hiệu': KidFrogAction.tongue,
     };
     actions.forEach((label, action) {
       testWidgets('$label → ${action.name}', (tester) async {
@@ -303,15 +305,7 @@ void main() {
     },
   );
 
-  const labels = [
-    'Hành trình',
-    'Sổ tay',
-    'Điều ước',
-    'Huy hiệu',
-    'Kho truyện',
-    'ĐỌC NGAY',
-    'Cây',
-  ];
+  const labels = ['Hành trình', 'Sổ tay', 'Điều ước', 'ĐỌC NGAY', 'Cây'];
   for (final size in const [
     Size(360, 740),
     Size(390, 844),
@@ -322,13 +316,19 @@ void main() {
     Size(1366, 1024),
   ]) {
     testWidgets(
-      'Vừa một màn, đủ 7 nút và ếch ở ${size.width.toInt()}×${size.height.toInt()}',
+      'Vừa một màn, đủ 5 nút, cúp và ếch ở ${size.width.toInt()}×${size.height.toInt()}',
       (tester) async {
         await pumpHome(tester, openRoadmap, size: size);
 
         expect(tester.takeException(), isNull);
         expect(find.byType(KidLobbyFrog), findsOneWidget);
         final screen = Offset.zero & size;
+        final cup = tester.getRect(find.byType(KidTrophyMedal));
+        expect(
+          screen.contains(cup.topLeft) && screen.contains(cup.bottomRight),
+          isTrue,
+          reason: 'cúp $cup',
+        );
         for (final label in labels) {
           // Mọi nút nằm trọn trong màn hình: không phải cuộn.
           final r = tester.getRect(find.text(label));
@@ -368,29 +368,144 @@ void main() {
     expect(find.text('Phiên đọc đã kết thúc'), findsOneWidget);
   });
 
-  testWidgets('Màn Hành trình hiện dải lộ trình', (tester) async {
-    tester.view.physicalSize = const Size(390, 844);
+  Future<void> pumpJourney(
+    WidgetTester tester,
+    MyRoadmapDto roadmap, {
+    Size size = const Size(390, 844),
+  }) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
+    final router = GoRouter(
+      initialLocation: '/kid/journey',
+      routes: [
+        GoRoute(
+          path: '/kid/journey',
+          builder: (_, _) => const KidJourneyScreen(),
+        ),
+        GoRoute(
+          path: '/kid/:rest(.*)',
+          builder: (_, state) =>
+              Scaffold(body: Text('route:${state.uri.path}')),
+        ),
+      ],
+    );
     await tester.pumpWidget(
       ProviderScope(
         retry: (_, _) => null,
         overrides: [
-          kidRepositoryProvider.overrideWithValue(
-            FakeKidRepository(openRoadmap),
-          ),
+          kidRepositoryProvider.overrideWithValue(FakeKidRepository(roadmap)),
           kidSessionProvider.overrideWith(ActiveSession.new),
         ],
-        child: MaterialApp(
+        child: MaterialApp.router(
           theme: AppTheme.light(),
-          home: const KidJourneyScreen(),
+          routerConfig: router,
         ),
       ),
     );
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
+  }
+
+  testWidgets('Màn Hành trình: các chặng xếp dọc từ trên xuống', (
+    tester,
+  ) async {
+    await pumpJourney(tester, openRoadmap);
 
     expect(find.text('Hành trình của em'), findsOneWidget);
+    expect(find.text('1/3'), findsOneWidget);
+    final done = tester.getCenter(find.text('Truyện đã xong'));
+    final open = tester.getCenter(find.text('Chú ếch và hoa sen'));
+    final next = tester.getCenter(find.text('Sắp đọc'));
+    expect(done.dy, lessThan(open.dy));
+    expect(open.dy, lessThan(next.dy));
+    expect(find.byIcon(Icons.flag_rounded), findsOneWidget);
+    expect(
+      tester.getCenter(find.byIcon(Icons.flag_rounded)).dy,
+      greaterThan(next.dy),
+    );
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Màn Hành trình: bấm chặng đã đọc / đang mở thì đọc', (
+    tester,
+  ) async {
+    await pumpJourney(tester, openRoadmap);
+    await tapAndSettleRoute(tester, find.text('Truyện đã xong'));
+    expect(find.text('route:/kid/read/9'), findsOneWidget);
+  });
+
+  testWidgets('Màn Hành trình: bấm truyện sắp tới chỉ hiện toast', (
+    tester,
+  ) async {
+    await pumpJourney(tester, openRoadmap);
+    await tapAndSettleRoute(tester, find.text('Sắp đọc'));
+    expect(find.text('Đọc xong truyện trước để mở nhé!'), findsOneWidget);
+    expect(find.textContaining('route:'), findsNothing);
+  });
+
+  testWidgets('Màn Hành trình: truyện đang mở bị khoá thì hiện toast', (
+    tester,
+  ) async {
+    const locked = MyRoadmapDto(
+      open: MyRoadmapOpenStoryDto(
+        storyId: 10,
+        title: 'Truyện khoá',
+        isLocked: true,
+      ),
+    );
+    await pumpJourney(tester, locked);
+    await tapAndSettleRoute(tester, find.text('Truyện khoá'));
+    expect(find.text('Truyện này chưa mở, em chờ bố mẹ nhé.'), findsOneWidget);
+  });
+
+  testWidgets('Màn Hành trình trống: vẫn hiện khung, cờ đích và lời nhắn', (
+    tester,
+  ) async {
+    await pumpJourney(tester, const MyRoadmapDto());
+    expect(find.text('Hành trình của em'), findsOneWidget);
+    expect(find.byIcon(Icons.flag_rounded), findsOneWidget);
+    expect(find.text('Bố mẹ chưa chọn truyện cho em'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Màn Hành trình dài: cuộn được, tự cuộn tới truyện đang đọc', (
+    tester,
+  ) async {
+    final long = MyRoadmapDto(
+      open: const MyRoadmapOpenStoryDto(
+        storyId: 50,
+        title: 'Đang đọc nè',
+        isLocked: false,
+      ),
+      done: [
+        for (var i = 1; i <= 8; i++)
+          MyRoadmapDoneDto(storyId: i, title: 'Đã đọc $i'),
+      ],
+      upcoming: [
+        for (var i = 1; i <= 5; i++)
+          MyRoadmapUpcomingDto(
+            order: i,
+            storyId: 100 + i,
+            title: 'Sắp $i',
+            isLocked: false,
+          ),
+      ],
+      completedCount: 8,
+      totalCount: 14,
+    );
+    for (final size in const [Size(360, 640), Size(740, 360)]) {
+      await pumpJourney(tester, long, size: size);
+      // Chờ hoạt cảnh tự cuộn (500ms) chạy xong.
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(tester.takeException(), isNull);
+      final r = tester.getRect(find.text('Đang đọc nè'));
+      expect(
+        (Offset.zero & size).contains(r.center),
+        isTrue,
+        reason: '$size $r',
+      );
+    }
   });
 }

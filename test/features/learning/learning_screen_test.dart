@@ -28,6 +28,9 @@ class _FakeChildren implements ChildProfileRepository {
 
 /// Bé 1 có đủ dữ liệu; bé 2 có dữ liệu khác; bé 4 trống hết.
 class _FakeHome implements HomeRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
   final calls = <String>[];
   bool failFeedback = false;
   int feedbackTotal = 7;
@@ -612,7 +615,7 @@ void main() {
     expect(find.text('Lộ trình đang trống'), findsOneWidget);
     expect(find.text('Bé Trống chưa đọc xong truyện nào'), findsOneWidget);
     await _openTab(tester, 'Lộ trình');
-    expect(find.text('Lộ trình đang trống'), findsOneWidget);
+    expect(find.text('Chưa có truyện nào chờ Bé Trống đọc.'), findsOneWidget);
     await _openTab(tester, 'Kết quả đọc');
     expect(find.text('Bé Trống chưa đọc xong truyện nào'), findsOneWidget);
     await _openTab(tester, 'Điều ước');

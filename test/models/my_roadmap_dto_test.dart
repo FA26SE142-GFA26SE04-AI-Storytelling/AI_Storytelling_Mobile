@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:ai_storytelling_mobile/models/child_roadmap_dto.dart';
 import 'package:ai_storytelling_mobile/models/my_roadmap_dto.dart';
 
 void main() {
@@ -25,5 +26,25 @@ void main() {
     expect(dto.open?.storyId, 908);
     expect(dto.open?.isLocked, isFalse);
     expect(dto.done, hasLength(1));
+  });
+
+  test('Backend mới trả danh sách openStories / openItems: lấy truyện đầu làm open', () {
+    final kid = MyRoadmapDto.fromJson({
+      'openStories': [
+        {'storyId': 5, 'title': 'A', 'stage': 2},
+        {'storyId': 6, 'title': 'B', 'stage': 2},
+      ],
+    });
+    expect(kid.open?.storyId, 5);
+
+    final parent = ChildRoadmapDto.fromJson({
+      'childProfileId': 1,
+      'openItems': [
+        {'id': 9, 'storyId': 7, 'status': 'Open', 'position': 1},
+      ],
+      'currentStage': 1,
+    });
+    expect(parent.open?.storyId, 7);
+    expect(MyRoadmapDto.fromJson({'openStories': <dynamic>[]}).open, isNull);
   });
 }

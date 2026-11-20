@@ -187,3 +187,72 @@ class _Badge extends StatelessWidget {
         .scaleXY(begin: 0.4, end: 1, duration: 450.ms, curve: kKidBounceCurve);
   }
 }
+
+/// Cúp huy hiệu chỉ để xem (không bấm): huy chương vàng có cúp, bên dưới là số huy hiệu đã đạt.
+/// Cùng khổ với [KidStageButton] để đặt vào một góc sảnh. [count] null (chưa tải được) thì hiện "–".
+class KidTrophyMedal extends StatelessWidget {
+  const KidTrophyMedal({
+    super.key,
+    required this.count,
+    this.diameter = kKidMinTap,
+  });
+
+  final int? count;
+  final double diameter;
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = context.tt;
+    final d = diameter;
+    final n = count;
+    return Semantics(
+      label: n == null ? 'Huy hiệu' : 'Huy hiệu: em có $n huy hiệu',
+      excludeSemantics: true,
+      child: SizedBox(
+        width: d + 28,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: d,
+              height: d,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [Color.lerp(tt.gold, Colors.white, 0.55)!, tt.gold],
+                ),
+                border: Border.all(color: tt.goldDeep, width: 3),
+              ),
+              child: Icon(
+                Icons.emoji_events_rounded,
+                size: d * 0.56,
+                color: tt.goldDeep,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Container(
+              constraints: const BoxConstraints(minWidth: 36),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: tt.gold.withValues(alpha: 0.25),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: tt.goldDeep, width: 2),
+              ),
+              child: Text(
+                n == null ? '–' : (n > 99 ? '99+' : '$n'),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Baloo2',
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  height: 1.1,
+                  color: tt.text,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

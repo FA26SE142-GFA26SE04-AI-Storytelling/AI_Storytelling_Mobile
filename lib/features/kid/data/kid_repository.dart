@@ -6,6 +6,7 @@ import '../../../core/network/dio_client.dart';
 import '../../../models/child_session_dto.dart';
 import '../../../models/my_roadmap_dto.dart';
 import '../../../models/safety_policy_dto.dart';
+import '../../../models/story_handover_dto.dart';
 import 'kid_session_controller.dart';
 
 // ─── Abstract contract ───────────────────────────────────────────────────────
@@ -16,6 +17,15 @@ abstract class KidRepository {
   Future<MyRoadmapDto> getMyRoadmap(String childToken);
   Future<ChildSessionDto> startHandover({
     required int childId,
+    required String supervisorRefreshToken,
+  });
+  /// GET /ChildAccessCredential/story-handover?storyId=: bé nào đọc được truyện.
+  Future<StoryHandoverOptionsDto> getStoryHandoverOptions(int storyId);
+
+  /// POST /ChildAccessCredential/{childId}/handover-story: phiên bé mở thẳng truyện.
+  Future<ChildSessionDto> startStoryHandover({
+    required int childId,
+    required int storyId,
     required String supervisorRefreshToken,
   });
   Future<SafetyPolicyDto> getSafetyPolicy(int childId);
@@ -122,6 +132,35 @@ class ApiKidRepository implements KidRepository {
         final response = await dio.post<dynamic>(
           '/ChildAccessCredential/$childId/handover',
           data: {'supervisorRefreshToken': supervisorRefreshToken},
+        );
+        final data = _unwrap(response) as Map<String, dynamic>;
+        return ChildSessionDto.fromJson(data);
+      });
+
+  @override
+  Future<StoryHandoverOptionsDto> getStoryHandoverOptions(int storyId) =>
+      runApi(() async {
+        final response = await dio.get<dynamic>(
+          '/ChildAccessCredential/story-handover',
+          queryParameters: {'storyId': storyId},
+        );
+        final data = _unwrap(response) as Map<String, dynamic>;
+        return StoryHandoverOptionsDto.fromJson(data);
+      });
+
+  @override
+  Future<ChildSessionDto> startStoryHandover({
+    required int childId,
+    required int storyId,
+    required String supervisorRefreshToken,
+  }) =>
+      runApi(() async {
+        final response = await dio.post<dynamic>(
+          '/ChildAccessCredential/$childId/handover-story',
+          data: {
+            'storyId': storyId,
+            'supervisorRefreshToken': supervisorRefreshToken,
+          },
         );
         final data = _unwrap(response) as Map<String, dynamic>;
         return ChildSessionDto.fromJson(data);

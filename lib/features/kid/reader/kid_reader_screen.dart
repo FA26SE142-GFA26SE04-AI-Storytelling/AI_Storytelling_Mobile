@@ -20,6 +20,7 @@ import 'kid_reader_audio.dart';
 import 'kid_reader_bottom_bar.dart';
 import 'kid_reader_controller.dart';
 import 'kid_reader_page.dart';
+import 'kid_reader_pages.dart';
 import 'kid_vocab_sheet.dart';
 
 /// Màn đọc truyện của bé. Route: /kid/read/:storyId
@@ -143,12 +144,9 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     if (i < 0 || i >= totalPages) return;
 
     final cur = state.currentPage;
-    if (!skipGuard &&
-        i > cur &&
-        state.content != null &&
-        cur >= 0 &&
-        cur < state.content!.scenes.length) {
-      final curScene = state.content!.scenes[cur];
+    if (!skipGuard && i > cur && cur >= 0 && cur < state.pages.length) {
+      // Tương tác chỉ gắn ở trang cuối của cảnh nên chỉ chặn ở trang đó.
+      final curScene = state.pages[cur].scene;
       if (_notifier.isInteractionPending(curScene)) {
         final pc = _pageController;
         if (pc != null && pc.hasClients && pc.page?.round() != cur) {
@@ -179,9 +177,11 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     }
   }
 
-  void _replayScene(int idx) {
+  /// [sceneIndex]: vị trí cảnh cần nghe lại → mở trang đầu của cảnh đó.
+  void _replayScene(int sceneIndex) {
     final state = ref.read(kidReaderControllerProvider(widget.storyId));
-    if (idx < 0 || idx >= state.totalPages) return;
+    if (!state.pages.any((p) => p.sceneIndex == sceneIndex)) return;
+    final idx = firstPageOfScene(state.pages, sceneIndex);
 
     _cancelAloud();
     _audio.stop();
@@ -203,19 +203,14 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     _playPage(idx);
   }
 
-  Future<void> _askInteraction(int sceneIndex, {int? nextPage}) async {
+  Future<void> _askInteraction(int pageIndex, {int? nextPage}) async {
     if (_askingInteraction) return;
     _askingInteraction = true;
     try {
       final state = ref.read(kidReaderControllerProvider(widget.storyId));
-      final content = state.content;
-      if (content == null ||
-          sceneIndex < 0 ||
-          sceneIndex >= content.scenes.length) {
-        return;
-      }
+      if (pageIndex < 0 || pageIndex >= state.pages.length) return;
 
-      final scene = content.scenes[sceneIndex];
+      final scene = state.pages[pageIndex].scene;
       if (!_notifier.isInteractionPending(scene) || scene.interaction == null) {
         return;
       }
@@ -266,8 +261,8 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
             kidReaderControllerProvider(widget.storyId),
           );
           if (curState.readingMode == KidReadingMode.listenFirst &&
-              sceneIndex < curState.totalPages - 1) {
-            _goTo(sceneIndex + 1, skipGuard: true);
+              pageIndex < curState.totalPages - 1) {
+            _goTo(pageIndex + 1, skipGuard: true);
           }
         }
       }
@@ -278,11 +273,10 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
 
   void _playPage(int pageIndex) {
     final state = ref.read(kidReaderControllerProvider(widget.storyId));
-    final content = state.content;
-    if (content == null) return;
-    if (pageIndex < 0 || pageIndex >= content.scenes.length) return;
+    if (pageIndex < 0 || pageIndex >= state.pages.length) return;
 
-    final scene = content.scenes[pageIndex];
+    // Chỉ phát các đoạn thuộc chữ của tranh này.
+    final scene = state.pages[pageIndex].scene;
     final segments = [...scene.segments]
       ..sort((a, b) => a.segmentOrder.compareTo(b.segmentOrder));
     final urls = segments.map((s) => s.audioUrl).toList();
@@ -330,9 +324,9 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
         setState(() => _activeSegmentId = null);
 
         final curState = ref.read(kidReaderControllerProvider(widget.storyId));
-        final scenes = curState.content?.scenes;
-        if (scenes != null && pageIndex >= 0 && pageIndex < scenes.length) {
-          final sceneNow = scenes[pageIndex];
+        final pages = curState.pages;
+        if (pageIndex >= 0 && pageIndex < pages.length) {
+          final sceneNow = pages[pageIndex].scene;
           if (_notifier.isInteractionPending(sceneNow)) {
             _askInteraction(pageIndex);
             return;
@@ -562,7 +556,8 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
 
     final currentPage = state.currentPage;
     final totalPages = state.totalPages;
-    final scenes = content.scenes;
+    // Mỗi trang là một tranh: cảnh con chỉ gồm đoạn chữ của tranh đó.
+    final scenes = [for (final p in state.pages) p.scene];
 
     final currentScene = (currentPage >= 0 && currentPage < scenes.length)
         ? scenes[currentPage]
@@ -725,7 +720,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                 aloudResult:
                     i == currentPage &&
                         aloud.result != null &&
-                        content.scenes[i].segments.any(
+                        scenes[i].segments.any(
                           (s) => s.segmentId == aloud.result!.segmentId,
                         )
                     ? aloud.result
