@@ -221,6 +221,38 @@ void main() {
       expect(capturedAnswer, 'cây');
       expect(capturedOptionId, isNull);
       expect(capturedOrderedOptionIds, isNull);
+      // Không có audio câu thì không hiện nút "Nghe câu".
+      expect(find.text('Nghe câu'), findsNothing);
+    });
+
+    testWidgets('d) FillBlank: "Nghe câu" plays audioUrls[text]', (tester) async {
+      await _usePhoneSize(tester);
+      final played = <String>[];
+      const interaction = ReadingInteraction(
+        id: 105,
+        type: 'FillBlank',
+        prompt: 'Điền từ còn thiếu',
+        maskedSentence: 'Con chim hót trên ___ cao.',
+        audioUrls: {'text': 'https://cdn.test/sentence.mp3', 'hint': 'https://cdn.test/hint.mp3'},
+      );
+
+      await _pumpScreen(
+        tester,
+        KidInteractionScreen(
+          interaction: interaction,
+          onAttempt: ({optionId, answer, orderedOptionIds}) => Future.value(
+            const ListeningAttemptResult(interactionId: 105, type: 'FillBlank', matched: true),
+          ),
+          onPlayAudio: played.add,
+        ),
+      );
+
+      final listenFinder = find.text('Nghe câu');
+      await tester.ensureVisible(listenFinder);
+      await tester.tap(listenFinder);
+      await tester.pump();
+
+      expect(played, contains('https://cdn.test/sentence.mp3'));
     });
 
     testWidgets('e) EventOrdering: tap cards in order 3, 1, 2 and tap "Xong" calls onAttempt with orderedOptionIds == [3, 1, 2]', (tester) async {
