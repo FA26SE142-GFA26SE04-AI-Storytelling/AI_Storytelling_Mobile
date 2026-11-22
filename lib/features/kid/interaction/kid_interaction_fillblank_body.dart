@@ -13,12 +13,14 @@ class KidInteractionFillBlankBody extends StatefulWidget {
     required this.busy,
     required this.result,
     required this.onSubmit,
+    required this.onPlayAudio,
   });
 
   final ReadingInteraction interaction;
   final bool busy;
   final ListeningAttemptResult? result;
   final void Function(String text) onSubmit;
+  final void Function(String url) onPlayAudio;
 
   @override
   State<KidInteractionFillBlankBody> createState() =>
@@ -56,6 +58,8 @@ class _KidInteractionFillBlankBodyState
     final tt = context.tt;
     final maskedSentence = widget.interaction.maskedSentence?.trim() ?? '';
     final hint = widget.interaction.hint?.trim() ?? '';
+    // Backend đọc nguyên câu ngắn (audioUrls['text']) để bé nghe lại rồi điền.
+    final sentenceAudio = widget.interaction.audioUrls['text'];
     final canSubmit = _controller.text.trim().isNotEmpty &&
         !widget.busy &&
         widget.result == null;
@@ -105,6 +109,20 @@ class _KidInteractionFillBlankBodyState
                 .animate()
                 .fadeIn(duration: const Duration(milliseconds: 300))
                 .slideY(begin: 0.1, end: 0),
+            const SizedBox(height: 20),
+          ],
+          if (sentenceAudio != null && sentenceAudio.isNotEmpty) ...[
+            SizedBox(
+              height: 64,
+              width: double.infinity,
+              child: TtButton(
+                label: 'Nghe câu',
+                icon: Icons.volume_up_rounded,
+                variant: TtButtonVariant.secondary,
+                expanded: true,
+                onPressed: () => widget.onPlayAudio(sentenceAudio),
+              ),
+            ),
             const SizedBox(height: 20),
           ],
           if (hint.isNotEmpty) ...[

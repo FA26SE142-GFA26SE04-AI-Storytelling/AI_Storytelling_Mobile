@@ -172,6 +172,7 @@ class _KidInteractionScreenState extends State<KidInteractionScreen> {
           busy: _busy,
           result: _result,
           onSubmit: (text) => _submit(answer: text),
+          onPlayAudio: widget.onPlayAudio,
         );
       case 'EventOrdering':
         return KidInteractionOrderingBody(
