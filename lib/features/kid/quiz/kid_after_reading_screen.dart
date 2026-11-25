@@ -20,7 +20,7 @@ import './kid_quiz_step.dart';
 import './kid_scene_grid.dart';
 import './kid_summary_step.dart';
 
-/// Màn hình wizard "Sau khi đọc xong" dành cho bé — 7 trang.
+/// Màn hình wizard "Sau khi đọc xong" dành cho bé — 7 trang (6 khi truyện không có câu đố).
 ///
 /// Trang 0: KidFeelingStep    — "Em thấy truyện này thế nào?"
 /// Trang 1: KidEmotionStep    — "Truyện làm em cảm thấy gì?"
@@ -47,7 +47,9 @@ class KidAfterReadingScreen extends ConsumerStatefulWidget {
 }
 
 class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
-  static const int _totalPages = 7;
+  /// Truyện không có câu đố (API trả danh sách câu rỗng) thì bỏ trang câu đố ở cuối.
+  bool _hasQuiz = true;
+  int get _totalPages => _hasQuiz ? 7 : 6;
 
   int _pageIndex = 0;
   int _prevPageIndex = 0; // dùng để tính hướng animation
@@ -71,6 +73,7 @@ class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
     super.initState();
     _tiles = buildKidSceneTiles(widget.scenes);
     _loadReflection();
+    _checkQuiz();
     // Kết quả đọc chỉ có mã huy hiệu: lấy tên từ bảng phần thưởng (như web).
     if (widget.result.newBadges.isNotEmpty) {
       ref.read(kidRewardsRepositoryProvider).rewards().then((r) {
@@ -84,6 +87,19 @@ class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
   }
 
   Map<String, String> _badgeNames = const {};
+
+  Future<void> _checkQuiz() async {
+    try {
+      final quiz = await ref
+          .read(kidReadingRepositoryProvider)
+          .quiz(widget.sessionId.toString());
+      if (!mounted || quiz.questions.isNotEmpty) return;
+      setState(() {
+        _hasQuiz = false;
+        if (_pageIndex > 5) _pageIndex = 5;
+      });
+    } catch (_) {} // không tải được thì giữ trang câu đố, trang đó tự báo lỗi
+  }
 
   Future<void> _loadReflection() async {
     try {
@@ -446,7 +462,7 @@ class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
                   ),
           ),
 
-          // 7 chấm tiến độ — nằm trong Expanded, margin thu nhỏ khi hẹp
+          // Chấm tiến độ (7, hoặc 6 khi không có câu đố) — nằm trong Expanded, margin thu nhỏ khi hẹp
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
