@@ -57,7 +57,10 @@ final libraryProvider = FutureProvider.autoDispose<LibraryData>((ref) async {
     _ranked(repo, 'favorites', (s) => s.favoriteCount),
   ]);
   return LibraryData(
-    shelves: LibraryShelves(mergeLibrary(results[0], results[1])),
+    shelves: LibraryShelves(
+      mergeLibrary(results[0], results[1]),
+      ranked: results[3],
+    ),
     mostViewed: results[2],
     mostFavorited: results[3],
   );

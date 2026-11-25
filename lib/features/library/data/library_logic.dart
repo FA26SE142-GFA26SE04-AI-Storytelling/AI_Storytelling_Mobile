@@ -122,23 +122,45 @@ String foldVietnamese(String s) {
   return out.toString();
 }
 
+/// Banner đầu trang (giống web): tối đa 5 truyện có ảnh bìa, trước hết theo bảng
+/// xếp hạng yêu thích từ API ([ranked]), thiếu thì bù bằng truyện nhiều lượt yêu thích
+/// rồi nhiều lượt đọc; bằng nhau thì truyện mới hơn trước (thứ tự của [sorted]).
+List<LibraryStoryDto> bannerStories(
+  List<LibraryStoryDto> ranked,
+  List<LibraryStoryDto> sorted,
+) {
+  final order = {for (var i = 0; i < sorted.length; i++) sorted[i].id: i};
+  final byCount = [...sorted]
+    ..sort((a, b) {
+      final fav = (b.favoriteCount ?? 0).compareTo(a.favoriteCount ?? 0);
+      if (fav != 0) return fav;
+      final views = (b.viewCount ?? 0).compareTo(a.viewCount ?? 0);
+      return views != 0 ? views : order[a.id]!.compareTo(order[b.id]!);
+    });
+  final seen = <int>{};
+  final out = <LibraryStoryDto>[];
+  for (final s in [...ranked, ...byCount]) {
+    if (out.length >= 5) break;
+    if ((s.coverImageUrl ?? '').trim().isEmpty || !seen.add(s.id)) continue;
+    out.add(s);
+  }
+  return out;
+}
+
 /// Các kệ của thư viện, tính từ danh sách đã gộp ([sorted] mới trước).
 class LibraryShelves {
-  LibraryShelves(this.sorted)
+  LibraryShelves(this.sorted, {List<LibraryStoryDto> ranked = const []})
     : latest = sorted.take(10).toList(),
       inProgress = sorted.where((s) => s.statusGroup == 'media').toList(),
       topics = sorted.map((s) => s.topic).toSet().toList(),
-      banner = sorted
-          .where((s) => (s.coverImageUrl ?? '').trim().isNotEmpty)
-          .take(5)
-          .toList();
+      banner = bannerStories(ranked, sorted);
 
   final List<LibraryStoryDto> sorted;
   final List<LibraryStoryDto> latest;
   final List<LibraryStoryDto> inProgress;
   final List<String> topics;
 
-  /// Banner đầu trang: tối đa 5 truyện mới nhất có ảnh bìa.
+  /// Banner đầu trang: xem [bannerStories].
   final List<LibraryStoryDto> banner;
 
   List<LibraryStoryDto> byTopic(String? topic) =>

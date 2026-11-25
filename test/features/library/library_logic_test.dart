@@ -10,6 +10,7 @@ LibraryStoryDto _s(
   String genre = 'Phiêu lưu',
   String source = 'AiGenerated',
   int? views,
+  int? favs,
   String? cover,
 }) =>
     LibraryStoryDto(
@@ -21,6 +22,7 @@ LibraryStoryDto _s(
       isPublished: published,
       createdAt: DateTime(2026, 1, day),
       viewCount: views,
+      favoriteCount: favs,
       coverImageUrl: cover,
     );
 
@@ -119,11 +121,24 @@ void main() {
 }
 
 void bannerAndNewTests() {
-  test('banner: tối đa 5 truyện mới nhất có ảnh bìa, không có ảnh thì rỗng', () {
+  test('banner: tối đa 5 truyện có ảnh bìa, xếp hạng yêu thích trước, rồi nhiều yêu thích / lượt đọc, bằng nhau thì mới trước', () {
+    String cover(int i) => 'http://x/$i.png';
     final sorted = mergeLibrary([
-      for (var i = 1; i <= 8; i++) _s(i, day: i, cover: i == 2 ? '' : 'http://x/$i.png'),
-    ], const []);
-    expect(LibraryShelves(sorted).banner.map((s) => s.id), [8, 7, 6, 5, 4]);
+      for (var i = 1; i <= 8; i++) _s(i, day: i, cover: i == 2 ? '' : cover(i)),
+    ], [
+      _s(3, day: 3, favs: 5, cover: cover(3)),
+      _s(5, day: 5, views: 9, favs: 1, cover: cover(5)),
+      _s(6, day: 6, views: 2, favs: 1, cover: cover(6)),
+    ]);
+    // Chưa có lượt nào: giữ thứ tự mới trước như trước đây.
+    expect(LibraryShelves(mergeLibrary([
+      for (var i = 1; i <= 8; i++) _s(i, day: i, cover: i == 2 ? '' : cover(i)),
+    ], const [])).banner.map((s) => s.id), [8, 7, 6, 5, 4]);
+    expect(
+      LibraryShelves(sorted, ranked: [_s(1, cover: cover(1)), _s(2, favs: 9, cover: '')])
+          .banner.map((s) => s.id),
+      [1, 3, 5, 6, 8],
+    );
     expect(LibraryShelves(mergeLibrary([_s(1)], const [])).banner, isEmpty);
   });
 
