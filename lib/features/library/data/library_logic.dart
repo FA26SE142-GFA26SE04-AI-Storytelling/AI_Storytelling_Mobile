@@ -30,6 +30,11 @@ extension LibraryStoryX on LibraryStoryDto {
 
   String get by => (authorName ?? '').trim().isEmpty ? 'Bạn' : authorName!;
 
+  /// Tên tác giả trên thẻ; không có tên thì hiện nguồn truyện như web.
+  String get cardAuthor => (authorName ?? '').trim().isEmpty
+      ? sourceLabels[sourceKey]!
+      : authorName!.trim();
+
   /// Truyện tạo trong 7 ngày gần [now] (nhãn "MỚI" trên thẻ).
   bool isNewAt(DateTime now) =>
       createdAt != null && now.difference(createdAt!).inDays < 7;
@@ -63,6 +68,10 @@ extension LibraryStoryX on LibraryStoryDto {
   };
 }
 
+/// Số có dấu chấm ngăn hàng nghìn như web (toLocaleString vi-VN): 1234 → "1.234".
+String groupThousands(int n) =>
+    '$n'.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => '.');
+
 String ageLabel(String band) => switch (band) {
   'Age_6_8' => '6–8 tuổi',
   'Age_9_10' => '9–10 tuổi',
@@ -85,6 +94,7 @@ List<LibraryStoryDto> mergeLibrary(
           : s.copyWith(
               viewCount: byId[s.id]!.viewCount ?? 0,
               favoriteCount: byId[s.id]!.favoriteCount ?? 0,
+              hasQuiz: byId[s.id]!.hasQuiz ?? s.hasQuiz,
             ),
     for (final s in community)
       if (!ids.contains(s.id))

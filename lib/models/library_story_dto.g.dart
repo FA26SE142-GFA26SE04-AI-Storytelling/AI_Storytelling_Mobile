@@ -25,6 +25,7 @@ _LibraryStoryDto _$LibraryStoryDtoFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['createdAt'] as String),
       viewCount: (json['viewCount'] as num?)?.toInt(),
       favoriteCount: (json['favoriteCount'] as num?)?.toInt(),
+      hasQuiz: json['hasQuiz'] as bool?,
     );
 
 Map<String, dynamic> _$LibraryStoryDtoToJson(_LibraryStoryDto instance) =>
@@ -44,6 +45,7 @@ Map<String, dynamic> _$LibraryStoryDtoToJson(_LibraryStoryDto instance) =>
       'createdAt': instance.createdAt?.toIso8601String(),
       'viewCount': instance.viewCount,
       'favoriteCount': instance.favoriteCount,
+      'hasQuiz': instance.hasQuiz,
     };
 
 _LibraryStoryPageDto _$LibraryStoryPageDtoFromJson(Map<String, dynamic> json) =>

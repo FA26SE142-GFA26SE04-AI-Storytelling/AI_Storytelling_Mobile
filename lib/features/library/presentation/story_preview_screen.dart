@@ -131,7 +131,7 @@ class _StoryPreviewScreenState extends ConsumerState<StoryPreviewScreen> {
                     line('Chủ đề', s.topic),
                     if ((s.moralLesson ?? '').trim().isNotEmpty)
                       line('Bài học', s.moralLesson!.trim()),
-                    if (s.words > 0) line('Độ dài', '${s.words} tiếng'),
+                    if (s.words > 0) line('Độ dài', '${groupThousands(s.words)} chữ'),
                     line('Người tạo', s.by),
                   ],
                 ),

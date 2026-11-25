@@ -22,6 +22,8 @@ abstract class LibraryStoryDto with _$LibraryStoryDto {
     DateTime? createdAt,
     int? viewCount,
     int? favoriteCount,
+    // Chỉ GET /Story/community trả; thiếu trường (null) thì không hiện icon câu đố.
+    bool? hasQuiz,
   }) = _LibraryStoryDto;
 
   factory LibraryStoryDto.fromJson(Map<String, dynamic> json) =>

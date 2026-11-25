@@ -38,6 +38,35 @@ void main() {
       expect(merged.last.sourceKey, 'ai');
     });
 
+    test('giữ hasQuiz của bản community', () {
+      final merged = mergeLibrary(
+        [_s(1, day: 1), _s(2, day: 2)],
+        [
+          _s(1, day: 1, views: 1).copyWith(hasQuiz: true),
+          _s(3, day: 3, views: 0).copyWith(hasQuiz: false),
+        ],
+      );
+      expect({for (final s in merged) s.id: s.hasQuiz}, {
+        3: false,
+        2: null,
+        1: true,
+      });
+    });
+
+    test('DTO đọc hasQuiz true/false, thiếu trường thì null', () {
+      LibraryStoryDto parse(Map<String, dynamic> extra) =>
+          LibraryStoryDto.fromJson({'id': 1, ...extra});
+      expect(parse({'hasQuiz': true}).hasQuiz, isTrue);
+      expect(parse({'hasQuiz': false}).hasQuiz, isFalse);
+      expect(parse({}).hasQuiz, isNull);
+    });
+
+    test('groupThousands', () {
+      expect(groupThousands(7), '7');
+      expect(groupThousands(1234), '1.234');
+      expect(groupThousands(1234567), '1.234.567');
+    });
+
     test('gộp lại cùng dữ liệu không nhân đôi', () {
       final a = [_s(1), _s(2)];
       expect(mergeLibrary(a, a).length, 2);
