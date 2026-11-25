@@ -71,7 +71,27 @@ class StoryPreviewActionBar extends ConsumerWidget {
     );
   }
 
+  /// Kiểm tra trước khi mở popup: chưa có bé đang hoạt động thì chỉ báo toast.
+  /// Tải danh sách lỗi thì vẫn mở để popup hiện nút thử lại.
+  Future<bool> _hasActiveChild(BuildContext context, WidgetRef ref) async {
+    final List<ChildProfileDto> kids;
+    try {
+      kids = await ref.read(childrenListProvider.future);
+    } catch (_) {
+      return true;
+    }
+    if (!context.mounted) return false;
+    final reason = kids.isEmpty
+        ? 'Bạn chưa có hồ sơ bé. Hãy thêm hồ sơ bé trước nhé.'
+        : kids.any((k) => k.status == 'Active')
+            ? null
+            : 'Chưa có bé nào dùng được chức năng này. Hãy kiểm tra hồ sơ bé đang hoạt động.';
+    if (reason != null) showTtToast(context, reason);
+    return reason == null;
+  }
+
   Future<void> _readNow(BuildContext context, WidgetRef ref) async {
+    if (!await _hasActiveChild(context, ref) || !context.mounted) return;
     final childId = await showDialog<int>(
       context: context,
       builder: (_) => _HandoverDialog(storyId: storyId, rootContext: context),
@@ -81,11 +101,13 @@ class StoryPreviewActionBar extends ConsumerWidget {
     }
   }
 
-  Future<void> _addToRoadmap(BuildContext context, WidgetRef ref) =>
-      showDialog<void>(
-        context: context,
-        builder: (_) => _RoadmapDialog(storyId: storyId, rootContext: context),
-      );
+  Future<void> _addToRoadmap(BuildContext context, WidgetRef ref) async {
+    if (!await _hasActiveChild(context, ref) || !context.mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (_) => _RoadmapDialog(storyId: storyId, rootContext: context),
+    );
+  }
 }
 
 /// Khung popup chung của hai hộp thoại (cùng kiểu với showConfirmDialog).
