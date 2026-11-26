@@ -126,20 +126,26 @@ Future<void> _tapButton(WidgetTester tester, String label) async {
   await tester.pumpAndSettle();
 }
 
-/// Đi từ bước 1 tới bước Xác nhận; [consent] = tick ô đồng ý ở bước An toàn.
-Future<void> _goToSummary(WidgetTester tester, {required bool consent}) async {
+/// Đi từ bước 1 tới bước Xác nhận.
+Future<void> _goToSummary(WidgetTester tester) async {
   await tester.enterText(find.byType(TextFormField), 'Bé Na');
   await _tapButton(tester, 'Tiếp');
   await _tapButton(tester, 'Tiếp');
-  if (consent) {
-    final box = find.byType(CheckboxListTile);
-    await tester.ensureVisible(box);
-    await tester.pumpAndSettle();
-    await tester.tap(box);
-    await tester.pumpAndSettle();
-  }
   await _tapButton(tester, 'Tiếp');
   expect(find.text('Xác nhận'), findsOneWidget);
+}
+
+/// Bấm "Tạo hồ sơ" rồi trả lời popup đồng ý: [consent] = tick và Kích hoạt, ngược lại Lưu nháp.
+Future<void> _create(WidgetTester tester, {required bool consent}) async {
+  await _tapButton(tester, 'Tạo hồ sơ');
+  expect(find.text('Đồng ý của phụ huynh'), findsOneWidget);
+  if (consent) {
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pumpAndSettle();
+    await _tapButton(tester, 'Kích hoạt');
+  } else {
+    await _tapButton(tester, 'Lưu nháp');
+  }
 }
 
 void main() {
@@ -148,8 +154,8 @@ void main() {
     (tester) async {
       final repo = _FakeRepo();
       await _pump(tester, repo);
-      await _goToSummary(tester, consent: true);
-      await _tapButton(tester, 'Tạo hồ sơ');
+      await _goToSummary(tester);
+      await _create(tester, consent: true);
 
       expect(repo.calls, ['create', 'setLearning', 'setSafety', 'activate']);
       final body = repo.safetyBody!;
@@ -173,8 +179,8 @@ void main() {
   ) async {
     final repo = _FakeRepo();
     await _pump(tester, repo);
-    await _goToSummary(tester, consent: false);
-    await _tapButton(tester, 'Tạo hồ sơ');
+    await _goToSummary(tester);
+    await _create(tester, consent: false);
 
     expect(repo.calls, ['create', 'setLearning']);
     expect(find.text('Mở wizard'), findsOneWidget);
@@ -185,17 +191,35 @@ void main() {
   ) async {
     final repo = _FakeRepo()..learningFailures = 1;
     await _pump(tester, repo);
-    await _goToSummary(tester, consent: false);
-    await _tapButton(tester, 'Tạo hồ sơ');
+    await _goToSummary(tester);
+    await _create(tester, consent: false);
     expect(repo.calls, ['create', 'setLearning']);
     expect(find.text('Xác nhận'), findsOneWidget);
 
     // Đợi toast lỗi tự ẩn (nó nằm đè lên thanh nút đáy).
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
-    await _tapButton(tester, 'Tạo hồ sơ');
+    await _create(tester, consent: false);
     expect(repo.calls, ['create', 'setLearning', 'setLearning']);
     expect(find.text('Mở wizard'), findsOneWidget);
+  });
+
+  testWidgets('Đóng popup đồng ý thì chưa tạo gì, vẫn ở bước Xác nhận', (
+    tester,
+  ) async {
+    final repo = _FakeRepo();
+    await _pump(tester, repo);
+    await _goToSummary(tester);
+    await _tapButton(tester, 'Tạo hồ sơ');
+    // Nút Kích hoạt khoá cho tới khi tick đồng ý.
+    await tester.tap(find.text('Kích hoạt'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(find.text('Đồng ý của phụ huynh'), findsOneWidget);
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+    expect(find.text('Đồng ý của phụ huynh'), findsNothing);
+    expect(find.text('Xác nhận'), findsOneWidget);
+    expect(repo.calls, isEmpty);
   });
 
   testWidgets('Chưa nhập biệt danh thì không qua bước 1', (tester) async {
@@ -227,7 +251,8 @@ void main() {
       addTearDown(tester.view.reset);
       final repo = _FakeRepo();
       await _pump(tester, repo);
-      await _goToSummary(tester, consent: true);
+      await _goToSummary(tester);
+      await _tapButton(tester, 'Tạo hồ sơ');
       expect(tester.takeException(), isNull);
     });
   }
@@ -241,7 +266,8 @@ void main() {
         addTearDown(tester.view.resetDevicePixelRatio);
         final repo = _FakeRepo();
         await _pump(tester, repo);
-        await _goToSummary(tester, consent: true);
+        await _goToSummary(tester);
+        await _tapButton(tester, 'Tạo hồ sơ');
         expect(tester.takeException(), isNull);
       });
     }

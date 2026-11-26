@@ -25,7 +25,7 @@ const _stepLabels = ['Bé', 'Học tập', 'An toàn', 'Xong'];
 const _stepTitles = [
   'Thông tin bé',
   'Hồ sơ học tập',
-  'An toàn và đồng ý',
+  'An toàn',
   'Xác nhận',
 ];
 
@@ -52,7 +52,6 @@ class _CreateChildWizardScreenState
   // Chỉ dùng phần `categories` cho SafetyRulesForm; các trường khác gửi theo web khi lưu.
   SafetyPolicyDto _policy = const SafetyPolicyDto(childProfileId: 0);
   bool _gate = true;
-  bool _consent = false;
   bool _busy = false;
   // Giữ id hồ sơ đã tạo để bấm lại không tạo trùng khi một bước sau bị lỗi.
   int? _createdId;
@@ -163,7 +162,15 @@ class _CreateChildWizardScreenState
     _leave();
   }
 
-  Future<void> _finish() async {
+  /// Bấm "Tạo hồ sơ": hỏi đồng ý của phụ huynh trong popup (như web), rồi tạo.
+  Future<void> _askConsentAndFinish() async {
+    if (_busy) return;
+    final agreed = await _showConsentDialog(context);
+    if (agreed == null || !mounted) return;
+    await _finish(agreed);
+  }
+
+  Future<void> _finish(bool agreed) async {
     if (_busy) return;
     setState(() => _busy = true);
     final repo = ref.read(childProfileRepositoryProvider);
@@ -194,7 +201,7 @@ class _CreateChildWizardScreenState
       );
 
       // Backend chỉ nhận cài đặt an toàn đầu tiên khi đã đồng ý; chưa đồng ý thì hồ sơ ở trạng thái Nháp.
-      if (_consent) {
+      if (agreed) {
         failMsg = 'Đã tạo hồ sơ nhưng chưa lưu được cài đặt an toàn.';
         final catIds = _categories.map((c) => c.id).toSet();
         // PUT ghi đè mọi trường: gửi đủ giá trị mặc định như web (keptPolicyFields(null)).
@@ -331,7 +338,7 @@ class _CreateChildWizardScreenState
                                 ? Icons.check_rounded
                                 : Icons.arrow_forward_rounded,
                             isLoading: _busy,
-                            onPressed: isLast ? _finish : _next,
+                            onPressed: isLast ? _askConsentAndFinish : _next,
                           ),
                         ),
                       ],
@@ -446,47 +453,6 @@ class _CreateChildWizardScreenState
           showReadingSettings: false,
           onChanged: (p) => setState(() => _policy = p),
         ),
-        const SizedBox(height: 16),
-        TtCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Trước khi bé dùng Taletale, bạn cần biết:',
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: tt.text,
-                ),
-              ),
-              const SizedBox(height: 8),
-              for (var i = 0; i < kConsentItems.length; i++)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Text(
-                    '${i + 1}. ${kConsentItems[i]}',
-                    style: textTheme.bodySmall?.copyWith(color: tt.text),
-                  ),
-                ),
-              const SizedBox(height: 4),
-              CheckboxListTile(
-                value: _consent,
-                onChanged: (v) => setState(() => _consent = v ?? false),
-                controlAffinity: ListTileControlAffinity.leading,
-                contentPadding: EdgeInsets.zero,
-                activeColor: tt.primaryStrong,
-                title: Text(
-                  'Tôi đã đọc và đồng ý cho bé sử dụng nền tảng theo các điều trên.',
-                  style: textTheme.bodyMedium?.copyWith(color: tt.text),
-                ),
-              ),
-              if (!_consent)
-                Text(
-                  'Chưa đồng ý vẫn tạo được, nhưng hồ sơ sẽ ở trạng thái Nháp.',
-                  style: textTheme.bodySmall?.copyWith(color: tt.warnInk),
-                ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -503,7 +469,6 @@ class _CreateChildWizardScreenState
         _learning.readingMode == 'ReadFirst' ? 'Tự đọc' : 'Nghe là chính',
       ),
       ('Chủ đề bị chặn', '$_blockedCount'),
-      ('Điều khoản', _consent ? 'Đã đồng ý' : 'Chưa đồng ý'),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -542,37 +507,94 @@ class _CreateChildWizardScreenState
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: (_consent ? tt.gold : tt.warnInk).withValues(alpha: 0.14),
-            borderRadius: BorderRadius.circular(TtRadius.md),
-            border: Border.all(
-              color: (_consent ? tt.goldDeep : tt.warnInk).withValues(
-                alpha: 0.5,
-              ),
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                _consent ? Icons.verified_rounded : Icons.edit_note_rounded,
-                color: _consent ? tt.goldDeep : tt.warnInk,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  _consent ? 'Hồ sơ sẽ được kích hoạt ngay để bé bắt đầu đọc.' : 'Hồ sơ sẽ lưu ở trạng thái Nháp. Hãy đồng ý trong Cài đặt an toàn để bé bắt đầu dùng.',
-                  style: textTheme.bodyMedium?.copyWith(color: tt.text),
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
+}
+
+/// Popup đồng ý của phụ huynh khi bấm "Tạo hồ sơ" (như web).
+/// true: đồng ý và kích hoạt; false: lưu bản nháp; null: đóng popup, chưa tạo.
+Future<bool?> _showConsentDialog(BuildContext context) {
+  return showDialog<bool>(
+    context: context,
+    builder: (dialogContext) {
+      final tt = dialogContext.tt;
+      final textTheme = Theme.of(dialogContext).textTheme;
+      var checked = false;
+      return StatefulBuilder(
+        builder: (context, setLocal) => Dialog(
+          backgroundColor: tt.panel,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(TtRadius.xl),
+            side: BorderSide(color: tt.line2, width: 1.5),
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Đồng ý của phụ huynh',
+                  style: textTheme.titleMedium?.copyWith(color: tt.text),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Trước khi bé dùng Taletale, bạn cần biết:',
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: tt.text,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                for (var i = 0; i < kConsentItems.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      '${i + 1}. ${kConsentItems[i]}',
+                      style: textTheme.bodySmall?.copyWith(color: tt.text),
+                    ),
+                  ),
+                CheckboxListTile(
+                  value: checked,
+                  onChanged: (v) => setLocal(() => checked = v ?? false),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  activeColor: tt.primaryStrong,
+                  title: Text(
+                    'Tôi đã đọc và đồng ý cho bé sử dụng nền tảng theo các điều trên.',
+                    style: textTheme.bodyMedium?.copyWith(color: tt.text),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TtButton(
+                        label: 'Lưu nháp',
+                        variant: TtButtonVariant.secondary,
+                        onPressed: () => Navigator.of(dialogContext).pop(false),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TtButton(
+                        label: 'Kích hoạt',
+                        icon: Icons.check_rounded,
+                        onPressed: checked
+                            ? () => Navigator.of(dialogContext).pop(true)
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }
 
 /// Thanh tiến độ 4 bước: đã qua có ✓, bước hiện tại màu primary, vạch nối vàng.
