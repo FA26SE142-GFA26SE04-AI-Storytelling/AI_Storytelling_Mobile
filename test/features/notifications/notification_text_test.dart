@@ -13,6 +13,31 @@ NotificationDto _n(String type, {String? payload, String group = ''}) =>
     );
 
 void main() {
+  test('đủ câu tiếng Việt cho mọi loại thông báo của Backend (như web)', () {
+    for (final type in [
+      'EventAwardApproved',
+      'CreatorApplicationApproved',
+      'CreatorApplicationRejected',
+      'CreatorTierChanged',
+      'CreatorPayoutPaid',
+      'CreatorPayoutCancelled',
+      'StoryCreditReleased',
+    ]) {
+      expect(notificationText(_n(type)), isNot('Bạn có thông báo mới'), reason: type);
+    }
+  });
+
+  test('câu chi tiết theo payload', () {
+    expect(
+      notificationText(_n('CreatorPayoutPaid', payload: '{"amountVnd":1500000}')),
+      'Bạn vừa được chi trả 1.500.000 đ',
+    );
+    expect(
+      notificationText(_n('StoryRatingPublished', payload: '{"rating":5}')),
+      'Truyện của bạn vừa nhận đánh giá 5 sao từ phụ huynh',
+    );
+  });
+
   test('notificationKey đổi PascalCase sang snake_case', () {
     expect(notificationKey('StoryWishSubmitted'), 'story_wish_submitted');
     expect(notificationKey('RoadmapCompleted'), 'roadmap_completed');

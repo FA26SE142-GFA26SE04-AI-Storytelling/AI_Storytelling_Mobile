@@ -43,7 +43,63 @@ const _texts = <String, String>{
       'Gói của bạn sắp hết hạn, hãy gia hạn để không gián đoạn',
   'story_rating_published': 'Truyện của bạn vừa có đánh giá mới',
   'story_rating_moderated': 'Đánh giá truyện của bạn đã được xem xét',
+  'event_award_approved': 'Bạn đã trúng giải sự kiện',
+  'creator_application_approved': 'Đơn nhà sáng tạo đã được duyệt',
+  'creator_application_rejected': 'Đơn nhà sáng tạo bị từ chối',
+  'creator_tier_changed': 'Cấp nhà sáng tạo của bạn vừa thay đổi',
+  'creator_payout_paid': 'Bạn vừa được chi trả thu nhập',
+  'creator_payout_cancelled': 'Một lần chi trả đã bị huỷ, số dư được cộng lại',
+  'story_credit_released': 'Lượt AI giữ cho một truyện bỏ dở đã được trả lại',
 };
+
+String _vnd(Object? v) {
+  if (v is! num) return '';
+  final s = v.round().toString().replaceAllMapped(
+        RegExp(r'\B(?=(\d{3})+(?!\d))'),
+        (_) => '.',
+      );
+  return '$s đ';
+}
+
+String _quoted(Object? v) =>
+    v is String && v.trim().isNotEmpty ? ' “${v.trim()}”' : '';
+
+/// Câu chi tiết theo payload (giống `detailedText` của web lib/notifications.ts); null thì dùng câu chung.
+String? _detailedText(String key, Map p) {
+  switch (key) {
+    case 'creator_tier_changed':
+      if (p['tier'] == 'Partner') return 'Chúc mừng! Bạn đã lên nhà sáng tạo đối tác';
+      if (p['reason'] == 'revoked_by_admin') {
+        return 'Quản trị viên đã thu hồi cấp nhà sáng tạo đối tác của bạn';
+      }
+      if (p['reason'] == 'story_removed_for_violation') {
+        return 'Bạn mất cấp nhà sáng tạo đối tác vì có truyện bị gỡ do vi phạm';
+      }
+      return 'Bạn đã về cấp nhà sáng tạo thường vì chưa đạt tiêu chí đối tác 2 tháng liên tiếp';
+    case 'creator_payout_paid':
+      return p['amountVnd'] != null ? 'Bạn vừa được chi trả ${_vnd(p['amountVnd'])}' : null;
+    case 'creator_payout_cancelled':
+      return p['amountVnd'] != null
+          ? 'Lần chi ${_vnd(p['amountVnd'])} đã bị huỷ, số dư được cộng lại'
+          : null;
+    case 'story_credit_released':
+      final credits = p['credits'] is num ? p['credits'] : 1;
+      return 'Đã trả lại $credits lượt AI của truyện${_quoted(p['title'])} vì bị bỏ dở; làm tiếp truyện sẽ giữ lại lượt';
+    case 'story_rating_published':
+      return p['rating'] is num
+          ? 'Truyện của bạn vừa nhận đánh giá ${p['rating']} sao từ phụ huynh'
+          : null;
+    case 'story_rating_moderated':
+      if (p['decision'] == 'Hidden') {
+        final reason = p['reason'];
+        return 'Đánh giá của bạn đã bị ẩn${reason is String && reason.trim().isNotEmpty ? '. Lý do: ${reason.trim()}' : ''}';
+      }
+      return p['decision'] == 'Approved'
+          ? 'Đánh giá của bạn đã được duyệt và đang hiển thị'
+          : null;
+  }
+  return null;
+}
 
 /// Câu dễ hiểu cho một thông báo. Không bao giờ trả JSON/payload thô.
 String notificationText(NotificationDto n) {
@@ -64,6 +120,17 @@ String notificationText(NotificationDto n) {
       }
     } catch (_) {
       // Payload cũ hoặc hỏng: giữ câu chung.
+    }
+  }
+  if (n.payload != null) {
+    try {
+      final p = jsonDecode(n.payload!);
+      if (p is Map) {
+        final text = _detailedText(key, p);
+        if (text != null) return text;
+      }
+    } catch (_) {
+      // Payload cũ hoặc sai định dạng: dùng câu chung.
     }
   }
   return _texts[key] ?? 'Bạn có thông báo mới';
