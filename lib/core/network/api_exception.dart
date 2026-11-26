@@ -79,10 +79,17 @@ class ApiException implements Exception {
         }
       }
 
-      if (extractedErrors.isNotEmpty) {
-        backendMessage = extractedErrors.first;
+      // Giống web (apiClient.ts): phản hồi chuẩn {success, message, errors} thì `message` là câu cho người dùng,
+      // còn `errors` có thể chỉ là mã (vd. READING_TIME_OUTSIDE) — trước đây lấy errors[0] nên toast hiện mã tiếng Anh.
+      if (data['success'] is bool && msg != null) {
+        backendMessage = msg;
       } else {
-        backendMessage = detail ?? title ?? msg;
+        backendMessage = extractedErrors
+                .where((e) => !_isTechnicalOrJson(e))
+                .firstOrNull ??
+            detail ??
+            title ??
+            msg;
       }
     } else if (data is String) {
       final trimmed = data.trim();
@@ -148,6 +155,8 @@ class ApiException implements Exception {
     if (trimmed.startsWith('{') || trimmed.startsWith('[') || trimmed.startsWith('<')) {
       return true;
     }
+    // Mã lỗi máy (READING_TIME_OUTSIDE, CHILD_FEATURE_DISABLED…) không phải câu cho người dùng.
+    if (RegExp(r'^[A-Z][A-Z0-9_.]+$').hasMatch(trimmed)) return true;
     if (trimmed.contains('Traceback') ||
         trimmed.contains('stack trace') ||
         trimmed.contains('Exception:') ||

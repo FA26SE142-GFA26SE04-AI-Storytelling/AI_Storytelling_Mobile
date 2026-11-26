@@ -3,6 +3,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ai_storytelling_mobile/core/network/api_exception.dart';
 
 void main() {
+  group('ApiException: câu tiếng Việt thay vì mã lỗi', () {
+    test('403 hết giờ đọc: dùng message tiếng Việt, giữ mã trong errors', () {
+      final e = ApiException.fromResponse(
+        statusCode: 403,
+        data: {
+          'success': false,
+          'message': 'Giờ đọc hôm nay hết rồi, hẹn bé lần sau nhé!',
+          'errors': ['READING_TIME_OUTSIDE'],
+        },
+      );
+      expect(e.message, 'Giờ đọc hôm nay hết rồi, hẹn bé lần sau nhé!');
+      expect(e.errors, contains('READING_TIME_OUTSIDE'));
+    });
+
+    test('chỉ có mã lỗi, không có câu: dùng câu chung theo mã HTTP', () {
+      final e = ApiException.fromResponse(
+        statusCode: 403,
+        data: {'errors': ['READING_TIME_BEDTIME']},
+      );
+      expect(e.message, isNot(contains('READING_TIME')));
+    });
+  });
+
   group('ApiException', () {
     test('status 401, không có data -> message chứa "Phiên đăng nhập"', () {
       final exception = ApiException.fromResponse(statusCode: 401);
