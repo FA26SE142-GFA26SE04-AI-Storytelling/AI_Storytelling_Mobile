@@ -31,6 +31,7 @@ import 'package:ai_storytelling_mobile/features/children/presentation/child_prof
 import 'package:ai_storytelling_mobile/features/children/presentation/child_learning_screen.dart';
 import 'package:ai_storytelling_mobile/features/children/presentation/create_child_wizard_screen.dart';
 import 'package:ai_storytelling_mobile/features/safety/presentation/child_safety_screen.dart';
+import 'package:ai_storytelling_mobile/features/time_habits/presentation/child_time_habits_screen.dart';
 import 'package:ai_storytelling_mobile/features/access/presentation/child_access_screen.dart';
 import 'package:ai_storytelling_mobile/features/notifications/presentation/notifications_screen.dart';
 import 'package:ai_storytelling_mobile/features/library/presentation/search_screen.dart';
@@ -264,6 +265,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: ':childId/safety',
             builder: (context, state) => ChildSafetyScreen(
+              childId: int.parse(state.pathParameters['childId']!),
+            ),
+          ),
+          GoRoute(
+            path: ':childId/time',
+            builder: (context, state) => ChildTimeHabitsScreen(
               childId: int.parse(state.pathParameters['childId']!),
             ),
           ),

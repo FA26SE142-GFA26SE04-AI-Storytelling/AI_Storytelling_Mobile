@@ -450,6 +450,7 @@ class ChildGroupGrid extends StatelessWidget {
     final learning = overview?.learning;
     final safety = overview?.safety;
     final access = overview?.access;
+    final schedule = overview?.schedule;
 
     // Giá trị ô học tập
     String learningValue;
@@ -476,6 +477,29 @@ class ChildGroupGrid extends StatelessWidget {
           : 'Cổng phụ huynh: Tắt';
     } else {
       safetyValue = 'Chưa thiết lập';
+    }
+
+    // Giá trị ô thời gian
+    String timeValue;
+    if (loading) {
+      timeValue = '';
+    } else if (schedule == null || schedule.isSuggested) {
+      timeValue = 'Chưa thiết lập';
+    } else if (!schedule.enabled &&
+        !schedule.screenLimitEnabled &&
+        !schedule.breakEnabled &&
+        !schedule.habitEnabled) {
+      timeValue = 'Đang tắt';
+    } else {
+      final parts = <String>[];
+      final bedtime = schedule.bedtimeWeekday?.trim();
+      if (schedule.enabled && bedtime != null && bedtime.isNotEmpty) {
+        parts.add('Ngủ $bedtime');
+      }
+      if (schedule.screenLimitEnabled) {
+        parts.add('Màn hình ${schedule.screenLimitWeekdayMinutes} phút');
+      }
+      timeValue = parts.isEmpty ? 'Đang bật' : parts.take(2).join(' · ');
     }
 
     // Giá trị ô mã QR
@@ -511,6 +535,14 @@ class ChildGroupGrid extends StatelessWidget {
         value: safetyValue,
         showSkeleton: loading,
         showWarning: !loading && safety == null,
+      ),
+      _GridTileData(
+        key: 'time',
+        icon: Icons.schedule_rounded,
+        title: 'Thời gian',
+        value: timeValue,
+        showSkeleton: loading,
+        showWarning: false,
       ),
       _GridTileData(
         key: 'access',

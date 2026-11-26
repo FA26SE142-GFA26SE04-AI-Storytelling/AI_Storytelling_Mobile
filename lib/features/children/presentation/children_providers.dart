@@ -4,8 +4,10 @@ import '../../../core/network/api_exception.dart';
 import '../../../models/child_access_credential_dto.dart';
 import '../../../models/child_profile_dto.dart';
 import '../../../models/learning_profile_dto.dart';
+import '../../../models/reading_schedule_dto.dart';
 import '../../../models/safety_policy_dto.dart';
 import '../../access/data/child_access_repository.dart';
+import '../../time_habits/data/reading_schedule_repository.dart';
 import '../data/child_profile_repository.dart';
 
 class SelectedChildIdNotifier extends Notifier<int?> {
@@ -40,11 +42,13 @@ class ChildOverview {
   final LearningProfileDto? learning;
   final SafetyPolicyDto? safety;
   final ChildAccessCredentialDto? access;
+  final ReadingScheduleDto? schedule;
 
   const ChildOverview({
     this.learning,
     this.safety,
     this.access,
+    this.schedule,
   });
 }
 
@@ -59,20 +63,31 @@ Future<T?> _optional<T>(Future<T> Function() f) async {
   }
 }
 
+Future<T?> _orNull<T>(Future<T> Function() f) async {
+  try {
+    return await f();
+  } catch (_) {
+    return null;
+  }
+}
+
 final childOverviewProvider =
     FutureProvider.autoDispose.family<ChildOverview, int>((ref, id) async {
   final childRepo = ref.watch(childProfileRepositoryProvider);
   final accessRepo = ref.watch(childAccessRepositoryProvider);
+  final scheduleRepo = ref.watch(readingScheduleRepositoryProvider);
 
   final results = await Future.wait([
     _optional(() => childRepo.fetchLearning(id)),
     _optional(() => childRepo.fetchSafety(id)),
     _optional(() => accessRepo.fetchCredential(id)),
+    _orNull(() => scheduleRepo.fetch(id)),
   ]);
 
   return ChildOverview(
     learning: results[0] as LearningProfileDto?,
     safety: results[1] as SafetyPolicyDto?,
     access: results[2] as ChildAccessCredentialDto?,
+    schedule: results[3] as ReadingScheduleDto?,
   );
 });
