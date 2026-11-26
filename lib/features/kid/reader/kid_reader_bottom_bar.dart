@@ -161,7 +161,7 @@ class KidReaderBottomBar extends StatelessWidget {
                             )
                           : _ReaderCircleButton(
                               icon: Icons.mic_rounded,
-                              tooltip: 'Đọc to cho truyện nghe',
+                              tooltip: 'Đọc cả đoạn',
                               isEnabled: true,
                               onTap: onMicTap,
                               opacity: 1.0,

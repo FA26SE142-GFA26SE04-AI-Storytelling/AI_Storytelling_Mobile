@@ -13,6 +13,7 @@ import '../../../core/widgets/tt_toast.dart';
 import '../../../models/child_reading_dto.dart';
 import '../data/kid_reading_repository.dart';
 import '../data/kid_session_controller.dart';
+import '../gate/kid_exit.dart';
 import '../interaction/kid_interaction_screen.dart';
 import '../quiz/kid_after_reading_screen.dart';
 import '../time/kid_status_provider.dart';
@@ -575,6 +576,10 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
         onDone: () => ref
             .read(kidReaderControllerProvider(widget.storyId).notifier)
             .recheckSignal(),
+        onExit: () {
+          _audio.stop();
+          exitKidMode(context, ref);
+        },
         child: SafeArea(
           child: switch (state.status) {
             KidReaderStatus.loading => Padding(

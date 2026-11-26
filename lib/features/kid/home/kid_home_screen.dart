@@ -10,10 +10,8 @@ import '../../../core/theme/tt_radius.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_frog.dart';
 import '../../../core/widgets/tt_state_views.dart';
-import '../../auth/application/auth_controller.dart';
 import '../data/kid_session_controller.dart';
-import '../data/stored_kid_session.dart';
-import '../gate/parental_gate_dialog.dart';
+import '../gate/kid_exit.dart';
 import '../time/kid_habit_widgets.dart';
 import '../time/kid_status_provider.dart';
 import '../time/kid_time_layer.dart';
@@ -24,28 +22,8 @@ import 'kid_lobby.dart';
 class KidHomeScreen extends ConsumerWidget {
   const KidHomeScreen({super.key});
 
-  Future<void> _exit(BuildContext context, WidgetRef ref) async {
-    final state = ref.read(kidSessionProvider);
-    if (state is! KidActive) {
-      ref.read(kidSessionProvider.notifier).end();
-      return;
-    }
-
-    // Bé vào bằng mã QR tự thoát, không cần cổng phụ huynh (Luồng 3 Bước 3.0b, như web).
-    if (!state.session.parentalGateEnabled ||
-        state.session.via == KidSessionVia.easyLogin) {
-      ref.read(kidSessionProvider.notifier).end();
-      return;
-    }
-
-    final authState = ref.read(authControllerProvider);
-    final email = authState is AuthSignedIn ? authState.user.email : '';
-    final ok = await showParentalGateDialog(context, initialEmail: email);
-    if (!context.mounted) return;
-    if (ok) {
-      ref.read(kidSessionProvider.notifier).end();
-    }
-  }
+  Future<void> _exit(BuildContext context, WidgetRef ref) =>
+      exitKidMode(context, ref);
 
   void _refresh(WidgetRef ref) {
     ref.invalidate(kidHomeDataProvider);
