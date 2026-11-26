@@ -32,6 +32,28 @@ void main() {
     },
   );
 
+  testWidgets('Giải mã ảnh theo cạnh dài của khung × mật độ điểm ảnh', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+    await _pump(tester, 'https://example.com/a.png');
+    final img = tester.widget<Image>(find.byType(Image).first);
+    expect(img.image, isA<ResizeImage>());
+    expect((img.image as ResizeImage).width, 400); // khung 200×150, dpr 2
+    // Có sẵn width/height (không cần LayoutBuilder) thì vẫn giải mã nhỏ.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: IntrinsicHeight(
+          child: TtNetworkImage(url: 'https://e.com/b.png', width: 48, height: 64),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    final small = tester.widget<Image>(find.byType(Image).first);
+    expect((small.image as ResizeImage).width, 128);
+  });
+
   _cropTests();
 }
 

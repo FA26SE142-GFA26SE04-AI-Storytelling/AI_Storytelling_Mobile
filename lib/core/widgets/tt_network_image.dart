@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -106,78 +107,101 @@ class TtNetworkImage extends StatelessWidget {
     );
   }
 
-  /// Ảnh có vùng cắt: phóng ảnh để đúng vùng [crop] phủ kín khung (như `coverFor` của web).
-  Widget _buildCropped(BuildContext context, String src, CoverCrop crop) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final w = width ?? constraints.maxWidth;
-        final h = height ?? constraints.maxHeight;
-        // Khung không có kích thước cố định thì không cắt được: hiện cả ảnh.
-        if (!w.isFinite || !h.isFinite) {
-          return Image.network(
-            src,
-            fit: fit,
-            errorBuilder: (context, error, stackTrace) =>
-                _buildPlaceholder(context),
-          );
-        }
-        return SizedBox(
-          width: w,
-          height: h,
-          child: Stack(
-            clipBehavior: Clip.hardEdge,
-            children: [
-              // Lớp dưới: ảnh mặc định, thấy được khi ảnh thật đang tải hoặc lỗi.
-              Positioned.fill(child: _buildPlaceholder(context)),
-              Positioned(
-                left: -crop.x * w / crop.w,
-                top: -crop.y * h / crop.h,
-                width: w / crop.w,
-                height: h / crop.h,
-                child: Image.network(
-                  src,
-                  fit: BoxFit.fill,
-                  loadingBuilder: (context, child, progress) =>
-                      progress == null ? child : const SizedBox.shrink(),
-                  errorBuilder: (context, error, stackTrace) =>
-                      const SizedBox.shrink(),
-                ),
-              ),
-            ],
+  /// Ảnh có vùng cắt: phóng ảnh để đúng vùng [crop] phủ kín khung [w]×[h] (như `coverFor` của web).
+  Widget _buildCropped(
+    BuildContext context,
+    String src,
+    CoverCrop crop,
+    double w,
+    double h,
+  ) {
+    // Khung không có kích thước cố định thì không cắt được: hiện cả ảnh.
+    if (!w.isFinite || !h.isFinite) {
+      return Image.network(
+        src,
+        fit: fit,
+        cacheWidth: decodeWidth(context, w, h),
+        errorBuilder: (context, error, stackTrace) =>
+            _buildPlaceholder(context),
+      );
+    }
+    return SizedBox(
+      width: w,
+      height: h,
+      child: Stack(
+        clipBehavior: Clip.hardEdge,
+        children: [
+          // Lớp dưới: ảnh mặc định, thấy được khi ảnh thật đang tải hoặc lỗi.
+          Positioned.fill(child: _buildPlaceholder(context)),
+          Positioned(
+            left: -crop.x * w / crop.w,
+            top: -crop.y * h / crop.h,
+            width: w / crop.w,
+            height: h / crop.h,
+            child: Image.network(
+              src,
+              fit: BoxFit.fill,
+              cacheWidth: decodeWidth(context, w / crop.w, h / crop.h),
+              loadingBuilder: (context, child, progress) =>
+                  progress == null ? child : const SizedBox.shrink(),
+              errorBuilder: (context, error, stackTrace) =>
+                  const SizedBox.shrink(),
+            ),
           ),
-        );
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlain(BuildContext context, String src, double w, double h) {
+    return Image.network(
+      src,
+      fit: fit,
+      width: width,
+      height: height,
+      cacheWidth: decodeWidth(context, w, h),
+      // Đang tải thì hiện ảnh mặc định: ảnh treo không tải xong (mạng chậm,
+      // bị chặn) vẫn có hình, không để khung trống.
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return _buildPlaceholder(context);
       },
+      errorBuilder: (context, error, stackTrace) => _buildPlaceholder(context),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final cover = splitCover(url);
-    final trimmedUrl = cover.src;
+    final src = cover.src;
     final crop = cover.crop;
-    Widget imageWidget;
+    Widget sized(Widget Function(double w, double h) child) =>
+        width != null && height != null
+        ? child(width!, height!)
+        // Chỉ đo khung khi thiếu kích thước: LayoutBuilder lỗi khi nằm dưới IntrinsicHeight.
+        : LayoutBuilder(
+            builder: (context, c) =>
+                child(width ?? c.maxWidth, height ?? c.maxHeight),
+          );
 
-    if (trimmedUrl.isEmpty) {
-      imageWidget = _buildPlaceholder(context);
-    } else if (crop != null) {
-      imageWidget = _buildCropped(context, trimmedUrl, crop);
-    } else {
-      imageWidget = Image.network(
-        trimmedUrl,
-        fit: fit,
-        width: width,
-        height: height,
-        // Đang tải thì hiện ảnh mặc định: ảnh treo không tải xong (mạng chậm,
-        // bị chặn) vẫn có hình, không để khung trống.
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return _buildPlaceholder(context);
-        },
-        errorBuilder: (context, error, stackTrace) =>
-            _buildPlaceholder(context),
-      );
-    }
+    final Widget imageWidget = src.isEmpty
+        ? _buildPlaceholder(context)
+        : sized(
+            (w, h) => crop == null
+                ? _buildPlain(context, src, w, h)
+                : _buildCropped(context, src, crop, w, h),
+          );
 
     return ClipRRect(borderRadius: radius, child: imageWidget);
   }
+}
+
+/// Bề ngang (px thật) cần giải mã cho khung [w]×[h]. Giải mã ảnh gốc (ảnh AI ~1000px+)
+/// cho thẻ ~100px làm giật khi cuộn và tốn RAM. Lấy cạnh dài để ảnh dọc/vuông `cover` vẫn nét.
+/// shortcut: ảnh ngang hiện `cover` trong khung dọc sẽ hơi mờ; nếu Backend trả nhiều ảnh ngang
+/// thì giải mã theo tỉ lệ ảnh thật.
+int? decodeWidth(BuildContext context, double w, double h) {
+  final side = math.max(w.isFinite ? w : 0.0, h.isFinite ? h : 0.0);
+  if (side <= 0) return null;
+  return (side * MediaQuery.devicePixelRatioOf(context)).ceil();
 }
