@@ -34,6 +34,8 @@ import 'package:ai_storytelling_mobile/features/safety/presentation/child_safety
 import 'package:ai_storytelling_mobile/features/access/presentation/child_access_screen.dart';
 import 'package:ai_storytelling_mobile/features/notifications/presentation/notifications_screen.dart';
 import 'package:ai_storytelling_mobile/features/library/presentation/search_screen.dart';
+import 'package:ai_storytelling_mobile/features/events/presentation/events_screen.dart';
+import 'package:ai_storytelling_mobile/features/events/presentation/event_detail_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Hằng số đường dẫn tập trung — dùng chung toàn app
@@ -48,6 +50,9 @@ abstract final class AppRoutes {
   static const String blocked = '/blocked';
   static const String home = '/home';
   static const String search = '/search';
+  static const String events = '/events';
+  static const String eventDetail = '/events/:id';
+  static String eventPath(int id) => '/events/$id';
   static const String kids = '/kids';
   static const String kidsNew = '/kids/new';
   static const String learning = '/learning';
@@ -108,16 +113,13 @@ String? authRedirect(
 
   return switch (state) {
     // Đang kiểm tra phiên: giữ splash, mọi nơi khác về splash
-    AuthChecking() =>
-      location == AppRoutes.splash ? null : AppRoutes.splash,
+    AuthChecking() => location == AppRoutes.splash ? null : AppRoutes.splash,
 
     // Chưa đăng nhập: cho ở lại nhóm auth, còn lại về login
-    AuthSignedOut() =>
-      _authRoutes.contains(location) ? null : AppRoutes.login,
+    AuthSignedOut() => _authRoutes.contains(location) ? null : AppRoutes.login,
 
     // Bị khoá: chỉ ở lại blocked
-    AuthBlocked() =>
-      location == AppRoutes.blocked ? null : AppRoutes.blocked,
+    AuthBlocked() => location == AppRoutes.blocked ? null : AppRoutes.blocked,
 
     // Đã đăng nhập: đẩy khỏi splash / blocked / nhóm auth về home
     AuthSignedIn() =>
@@ -195,6 +197,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.notifications,
         builder: (context, state) => const NotificationsScreen(),
       ),
+      // Tìm truyện: mở chồng lên (context.push) từ nút 🔍 ở Trang chủ.
+      GoRoute(
+        path: AppRoutes.search,
+        builder: (context, state) => const SearchScreen(),
+      ),
 
       // --- Chế độ bé (toàn màn hình, không thuộc bottom nav) ---
       GoRoute(
@@ -203,9 +210,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.kidRead,
-        builder: (context, state) => KidReaderScreen(
-          storyId: state.pathParameters['storyId']!,
-        ),
+        builder: (context, state) =>
+            KidReaderScreen(storyId: state.pathParameters['storyId']!),
       ),
       GoRoute(
         path: AppRoutes.kidLibrary,
@@ -229,9 +235,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.kidSoon,
-        builder: (context, state) => KidComingSoonScreen(
-          title: (state.extra as String?) ?? 'Sắp có',
-        ),
+        builder: (context, state) =>
+            KidComingSoonScreen(title: (state.extra as String?) ?? 'Sắp có'),
       ),
 
       // --- Quản lý bé (mở từ tab Học tập): màn đẩy lên trên thanh đáy, có nút quay lại.
@@ -242,8 +247,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: 'new',
-            builder: (context, state) =>
-                const CreateChildWizardScreen(),
+            builder: (context, state) => const CreateChildWizardScreen(),
           ),
           GoRoute(
             path: ':childId/profile',
@@ -287,12 +291,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
-          // Tab 1: Tìm kiếm
+          // Tab 1: Sự kiện (chi tiết là route con để vẫn thấy thanh tab dưới)
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.search,
-                builder: (context, state) => const SearchScreen(),
+                path: AppRoutes.events,
+                builder: (context, state) => const EventsScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    builder: (context, state) => EventDetailScreen(
+                      eventId:
+                          int.tryParse(state.pathParameters['id'] ?? '') ?? 0,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

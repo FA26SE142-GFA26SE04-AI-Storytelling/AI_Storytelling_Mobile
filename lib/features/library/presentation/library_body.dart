@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,6 +10,8 @@ import '../../../core/theme/tt_radius.dart';
 import '../../../core/widgets/tt_state_views.dart';
 import '../../../core/widgets/tt_toast.dart';
 import '../../../models/library_story_dto.dart';
+import '../../events/presentation/event_home_banner.dart';
+import '../data/library_logic.dart';
 import 'library_banner.dart';
 import 'library_providers.dart';
 import 'library_shelf.dart';
@@ -80,7 +83,8 @@ List<Widget>? libraryStatusSlivers(
 }
 
 /// Thư viện truyện ở Trang chủ phụ huynh (trả về sliver): thanh trên dính đầu
-/// (tên app, nút tìm → tab Tìm kiếm, [trailing]), chip chủ đề, banner, các kệ;
+/// (tên app, nút tìm → màn Tìm kiếm, [trailing]), chip chủ đề, banner sự kiện,
+/// banner truyện, các kệ;
 /// "Xem thêm" mở lưới đầy đủ; bấm thẻ để xem trước. [side] là lề ngang của trang.
 class LibraryBody extends ConsumerStatefulWidget {
   const LibraryBody({super.key, this.side = 16, this.trailing = const []});
@@ -103,7 +107,7 @@ class _LibraryBodyState extends ConsumerState<LibraryBody> {
 
   void _openSearch() {
     ref.read(searchFocusRequestProvider.notifier).request();
-    context.go(AppRoutes.search);
+    context.push(AppRoutes.search);
   }
 
   Widget _topicChips(
@@ -126,9 +130,8 @@ class _LibraryBodyState extends ConsumerState<LibraryBody> {
           visualDensity: VisualDensity.compact,
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           backgroundColor: tt.panel,
-          labelStyle: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontSize: 13),
+          labelStyle: Theme.of(context).textTheme.titleSmall
+              ?.copyWith(fontSize: 13),
           side: BorderSide(color: tt.line2, width: 1.2),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(TtRadius.full),
@@ -136,6 +139,128 @@ class _LibraryBodyState extends ConsumerState<LibraryBody> {
         ),
       ),
     );
+  }
+
+  /// Hàng "Tác giả nổi bật" (như LibraryTopAuthors của web): tối đa 6 tác giả,
+  /// bấm ô mở lưới truyện của tác giả đó.
+  Widget _topAuthors(BuildContext context, LibraryShelves s) {
+    final tt = context.tt;
+    final textTheme = Theme.of(context).textTheme;
+    final side = widget.side;
+    final authors = s.authors.take(6).toList();
+    final radius = BorderRadius.circular(TtRadius.md);
+    Widget tile(LibraryAuthor a) => Semantics(
+      button: true,
+      label: 'Xem truyện của tác giả ${a.name}',
+      excludeSemantics: true,
+      onTap: () => _expand('Tác giả: ${a.name}', s.byAuthor(a.id)),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: radius,
+          onTap: () => _expand('Tác giả: ${a.name}', s.byAuthor(a.id)),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 180),
+            padding: const EdgeInsets.fromLTRB(8, 8, 14, 8),
+            decoration: BoxDecoration(
+              color: tt.panel.withValues(alpha: 0.9),
+              borderRadius: radius,
+              border: Border.all(color: tt.line2, width: 1.2),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: tt.gold,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: tt.goldDeep, width: 1.2),
+                  ),
+                  child: Text(
+                    a.name.characters.first.toUpperCase(),
+                    maxLines: 1,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      // Nền vàng giống nhau ở hai theme nên chữ luôn tối.
+                      color: TtColors.light.inkWarm,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        a.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.titleSmall?.copyWith(fontSize: 13),
+                      ),
+                      Text(
+                        '${a.count} truyện',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodySmall?.copyWith(
+                          fontSize: 11.5,
+                          color: tt.muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: side),
+          child: Row(
+            children: [
+              Icon(
+                Icons.workspace_premium_rounded,
+                color: tt.goldDeep,
+                size: 20,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'Tác giả nổi bật',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.titleMedium?.copyWith(fontSize: 18),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          // 60 ở cỡ chữ thường; giãn theo cỡ chữ để hai dòng chữ không tràn.
+          height: 16 + MediaQuery.textScalerOf(context).scale(44),
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context)
+                .copyWith(scrollbars: false),
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: side),
+              itemCount: authors.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 10),
+              itemBuilder: (context, i) => tile(authors[i]),
+            ),
+          ),
+        ),
+      ],
+    ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.04, end: 0);
   }
 
   @override
@@ -169,12 +294,17 @@ class _LibraryBodyState extends ConsumerState<LibraryBody> {
                 _topicChips(context, s.topics, s.byTopic),
                 const SizedBox(height: 10),
               ],
+              EventHomeBanner(side: side),
               if (s.banner.isNotEmpty) ...[
                 Padding(
                   // Banner rộng hơn lề trang một chút để lộ mép banner kế bên.
                   padding: EdgeInsets.symmetric(horizontal: side - 16),
                   child: LibraryBanner(items: s.banner),
                 ),
+                const SizedBox(height: 14),
+              ],
+              if (s.authors.isNotEmpty) ...[
+                _topAuthors(context, s),
                 const SizedBox(height: 14),
               ],
             ],

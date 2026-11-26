@@ -9,6 +9,7 @@ import 'package:ai_storytelling_mobile/core/network/api_exception.dart';
 import 'package:ai_storytelling_mobile/core/theme/app_theme.dart';
 import 'package:ai_storytelling_mobile/features/auth/application/auth_controller.dart';
 import 'package:ai_storytelling_mobile/features/auth/data/auth_models.dart';
+import 'package:ai_storytelling_mobile/features/events/data/event_repository.dart';
 import 'package:ai_storytelling_mobile/features/home/presentation/home_screen.dart';
 import 'package:ai_storytelling_mobile/features/library/data/library_repository.dart';
 import 'package:ai_storytelling_mobile/features/library/presentation/library_story_card.dart';
@@ -122,6 +123,7 @@ Future<_FakeLibrary> _pump(
       libraryRepositoryProvider.overrideWithValue(library),
       authControllerProvider.overrideWith(_SignedIn.new),
       unreadNotificationCountProvider.overrideWith((_) async => unread),
+      eventListProvider.overrideWith((_) async => const []),
     ],
   );
   addTearDown(container.dispose);
@@ -129,6 +131,8 @@ Future<_FakeLibrary> _pump(
   final router = GoRouter(
     initialLocation: '/home',
     routes: [
+      // Như app: Tìm kiếm mở chồng lên ngoài shell.
+      GoRoute(path: '/search', builder: (_, _) => const SearchScreen()),
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => shell,
         branches: [
@@ -137,11 +141,7 @@ Future<_FakeLibrary> _pump(
               GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
             ],
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(path: '/search', builder: (_, _) => const SearchScreen()),
-            ],
-          ),
+
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -222,7 +222,7 @@ void main() {
     expect(find.text('Mới nhất'), findsOneWidget);
   });
 
-  testWidgets('🔍 chuyển sang tab Tìm kiếm và focus sẵn ô tìm (cả lần sau)', (
+  testWidgets('🔍 mở màn Tìm kiếm và focus sẵn ô tìm (cả lần sau)', (
     tester,
   ) async {
     await _pump(tester);
@@ -235,9 +235,9 @@ void main() {
         tester.widget<TextField>(find.byType(TextField)).focusNode!;
     expect(focus().hasFocus, isTrue);
 
-    // Quay về Trang chủ rồi bấm 🔍 lần nữa: màn Tìm kiếm còn giữ, vẫn focus lại.
+    // Quay lại Trang chủ rồi bấm 🔍 lần nữa: mở màn mới, vẫn focus sẵn.
     focus().unfocus();
-    GoRouter.of(tester.element(find.byType(SearchScreen))).go('/home');
+    await tester.tap(find.byTooltip('Quay lại'));
     await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsNothing);
     await tester.tap(find.byTooltip('Tìm truyện'));
@@ -339,11 +339,7 @@ void main() {
     final library = await _pump(tester);
     final before = find.text('Truyện số 5').evaluate().length;
 
-    await tester.fling(
-      find.text('TaleTale'),
-      const Offset(0, 1200),
-      1000,
-    );
+    await tester.fling(find.text('TaleTale'), const Offset(0, 1200), 1000);
     await tester.pumpAndSettle();
     expect(library.storyCalls, 2);
     expect(find.text('Truyện số 5').evaluate().length, before);

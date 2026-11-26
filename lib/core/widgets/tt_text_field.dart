@@ -21,6 +21,7 @@ class TtTextField extends StatefulWidget {
     this.prefixIcon,
     this.hideLabel = false,
     this.focusNode,
+    this.onChanged,
   });
 
   /// Nhãn hiển thị phía trên ô nhập.
@@ -64,6 +65,9 @@ class TtTextField extends StatefulWidget {
 
   /// Điều khiển tiêu điểm từ bên ngoài (vd. mở màn Tìm kiếm thì focus sẵn).
   final FocusNode? focusNode;
+
+  /// Gọi mỗi khi nội dung đổi (dùng khi không cần controller).
+  final ValueChanged<String>? onChanged;
 
   @override
   State<TtTextField> createState() => _TtTextFieldState();
@@ -149,6 +153,7 @@ class _TtTextFieldState extends State<TtTextField> {
               keyboardType: widget.keyboardType,
               textInputAction: widget.textInputAction,
               onFieldSubmitted: widget.onSubmitted,
+              onChanged: widget.onChanged,
               enabled: widget.enabled,
               autofocus: widget.autofocus,
               autofillHints: widget.autofillHints,

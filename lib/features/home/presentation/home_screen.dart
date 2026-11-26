@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/tt_colors.dart';
+import '../../events/data/event_repository.dart';
 import '../../library/presentation/library_body.dart';
 import '../../notifications/data/notification_repository.dart';
 import '../../notifications/presentation/notification_bell.dart';
@@ -15,6 +16,7 @@ class HomeScreen extends ConsumerWidget {
 
   Future<void> _refresh(BuildContext context, WidgetRef ref) {
     ref.invalidate(unreadNotificationCountProvider);
+    ref.invalidate(eventListProvider);
     return refreshLibrary(context, ref);
   }
 

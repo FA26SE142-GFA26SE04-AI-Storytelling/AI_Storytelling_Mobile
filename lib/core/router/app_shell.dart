@@ -100,9 +100,9 @@ const _destinations = [
     selectedIcon: Icons.home_rounded,
   ),
   _NavItem(
-    label: 'Tìm kiếm',
-    icon: Icons.search_outlined,
-    selectedIcon: Icons.search_rounded,
+    label: 'Sự kiện',
+    icon: Icons.emoji_events_outlined,
+    selectedIcon: Icons.emoji_events_rounded,
   ),
   _NavItem(
     label: 'Học tập',

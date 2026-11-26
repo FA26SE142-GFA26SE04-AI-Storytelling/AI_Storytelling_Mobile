@@ -3,7 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_state_views.dart';
@@ -13,7 +15,7 @@ import 'library_providers.dart';
 import 'library_shelf.dart';
 import 'library_top_bar.dart';
 
-/// Cờ "mở tab Tìm kiếm thì focus sẵn ô tìm" (bật từ nút 🔍 ở Trang chủ).
+/// Cờ "mở màn Tìm kiếm thì focus sẵn ô tìm" (bật từ nút 🔍 ở Trang chủ).
 class SearchFocusRequest extends Notifier<bool> {
   @override
   bool build() => false;
@@ -23,10 +25,11 @@ class SearchFocusRequest extends Notifier<bool> {
   void consume() => state = false;
 }
 
-final searchFocusRequestProvider =
-    NotifierProvider<SearchFocusRequest, bool>(SearchFocusRequest.new);
+final searchFocusRequestProvider = NotifierProvider<SearchFocusRequest, bool>(
+  SearchFocusRequest.new,
+);
 
-/// Tab Tìm kiếm: ô tìm theo tên, chip chủ đề (bấm lại để bỏ lọc), lưới kết quả.
+/// Màn Tìm kiếm (mở chồng từ Trang chủ, có nút quay lại): ô tìm theo tên, chip chủ đề (bấm lại để bỏ lọc), lưới kết quả.
 /// Chưa gõ và chưa chọn chủ đề thì hiện "Tất cả truyện" có chip nguồn.
 /// Dữ liệu dùng chung [libraryProvider] với Trang chủ.
 class SearchScreen extends ConsumerStatefulWidget {
@@ -105,7 +108,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   child: TtEmptyState(
                     icon: Icons.search_off_rounded,
                     title: 'Không tìm thấy truyện phù hợp',
-                    message: 'Bạn thử gõ tên ngắn hơn hoặc chọn chủ đề khác nhé.',
+                    message:
+                        'Bạn thử gõ tên ngắn hơn hoặc chọn chủ đề khác nhé.',
                     actionLabel: 'Xoá tìm kiếm',
                     onAction: _clear,
                   ),
@@ -167,6 +171,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             side: side,
                             child: Row(
                               children: [
+                                TtIconButton(
+                                  icon: Icons.arrow_back_rounded,
+                                  tooltip: 'Quay lại',
+                                  size: 40,
+                                  onPressed: () => context.canPop()
+                                      ? context.pop()
+                                      : context.go(AppRoutes.home),
+                                ),
+                                const SizedBox(width: 8),
                                 Expanded(
                                   child: TtTextField(
                                     label: 'Tìm truyện',
