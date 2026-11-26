@@ -25,15 +25,54 @@ class _VocabCandidate {
   final bool isWholeWord;
 }
 
-/// Bố cục màn đọc: dọc, ngang điện thoại (tranh trái chữ phải), sách mở (máy tính bảng ngang).
-enum KidReaderLayout { stacked, sideBySide, book }
+/// Bố cục màn đọc: dọc, ngang điện thoại, sách mở (máy tính bảng ngang), phụ đề toàn màn hình.
+enum KidReaderLayout {
+  stacked,
+  sideBySide,
+  book,
 
-KidReaderLayout kidReaderLayoutFor(Size size) {
+  /// Chế độ phụ đề: tranh phủ toàn màn hình, chữ hiện ở đáy.
+  caption,
+}
+
+/// Xác định bố cục màn đọc dựa vào kích thước màn hình và tùy chọn phụ đề.
+KidReaderLayout kidReaderLayoutFor(Size size, {bool preferCaption = true}) {
   final landscape = size.width > size.height;
   if (!landscape) return KidReaderLayout.stacked;
+  if (preferCaption) return KidReaderLayout.caption;
   return size.shortestSide >= 600
       ? KidReaderLayout.book
       : KidReaderLayout.sideBySide;
+}
+
+/// Trả về URL hình ảnh phù hợp cho cảnh [scene].
+/// Nếu truyền [activeSegmentId], sẽ cố chọn illustration khớp với offset của đoạn đang phát;
+/// khi không khớp hoặc không có, dùng illustration đầu tiên rồi fallback sang illustrationUrl.
+String? kidSceneImageUrl(ReadingScene scene, {int? activeSegmentId}) {
+  final illustrations = scene.illustrations;
+  if (illustrations != null && illustrations.isNotEmpty) {
+    if (activeSegmentId != null) {
+      final seg = scene.segments
+          .where((s) => s.segmentId == activeSegmentId)
+          .firstOrNull;
+      if (seg != null && seg.startOffset != null) {
+        final offset = seg.startOffset!;
+        final matched = illustrations.where((ill) {
+          return ill.startOffset <= offset && offset < ill.endOffset;
+        }).firstOrNull;
+        if (matched != null &&
+            matched.url != null &&
+            matched.url!.isNotEmpty) {
+          return matched.url;
+        }
+      }
+    }
+    final firstUrl = illustrations.first.url;
+    if (firstUrl != null && firstUrl.isNotEmpty) {
+      return firstUrl;
+    }
+  }
+  return scene.illustrationUrl;
 }
 
 /// Widget hiển thị MỘT trang (= một cảnh/scene) của truyện dành cho chế độ đọc của bé.
@@ -106,34 +145,9 @@ class _KidReaderPageState extends State<KidReaderPage> {
     _recognizers.clear();
   }
 
-  /// Xác định URL tranh vẽ phù hợp cho đoạn đang đọc
-  String? _resolveImageUrl() {
-    final illustrations = widget.scene.illustrations;
-    if (illustrations != null && illustrations.isNotEmpty) {
-      if (widget.activeSegmentId != null) {
-        final seg = widget.scene.segments
-            .where((s) => s.segmentId == widget.activeSegmentId)
-            .firstOrNull;
-        if (seg != null && seg.startOffset != null) {
-          final offset = seg.startOffset!;
-          final matched = illustrations.where((ill) {
-            return ill.startOffset <= offset && offset < ill.endOffset;
-          }).firstOrNull;
-          if (matched != null &&
-              matched.url != null &&
-              matched.url!.isNotEmpty) {
-            return matched.url;
-          }
-        }
-      }
-      // Nếu không khớp hoặc không có activeSegmentId thì dùng illustration đầu tiên
-      final firstUrl = illustrations.first.url;
-      if (firstUrl != null && firstUrl.isNotEmpty) {
-        return firstUrl;
-      }
-    }
-    return widget.scene.illustrationUrl;
-  }
+  /// Xác định URL tranh vẽ phù hợp cho đoạn đang đọc – delegate sang hàm top-level.
+  String? _resolveImageUrl() =>
+      kidSceneImageUrl(widget.scene, activeSegmentId: widget.activeSegmentId);
 
   /// Tìm khoảng offset [start, end) của một đoạn [segmentId] trong [text]
   ({int start, int end})? _segmentRange(String text, int? segmentId) {
@@ -683,6 +697,7 @@ class _KidReaderPageState extends State<KidReaderPage> {
     switch (widget.layout) {
       case KidReaderLayout.stacked:
         return _buildStacked(context, imageUrl, spans);
+      case KidReaderLayout.caption:
       case KidReaderLayout.sideBySide:
         return _buildSideBySide(context, imageUrl, spans);
       case KidReaderLayout.book:

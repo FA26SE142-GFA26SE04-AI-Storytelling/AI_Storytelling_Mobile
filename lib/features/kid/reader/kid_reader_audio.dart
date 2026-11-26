@@ -19,6 +19,17 @@ class KidReaderAudio {
   Stream<bool> get playingStream =>
       _isDisposed ? const Stream<bool>.empty() : _player.playingStream;
 
+  /// Stream tiến trình vị trí phát hiện tại.
+  Stream<Duration> get positionStream =>
+      _isDisposed ? const Stream<Duration>.empty() : _player.positionStream;
+
+  /// Stream tổng thời lượng của bài đang phát.
+  Stream<Duration?> get durationStream =>
+      _isDisposed ? const Stream<Duration?>.empty() : _player.durationStream;
+
+  /// Vị trí phát hiện tại của player.
+  Duration get position => _isDisposed ? Duration.zero : _player.position;
+
   /// Trạng thái đang phát hay không tại thời điểm hiện tại.
   bool get isPlaying => !_isDisposed && _player.playing;
 

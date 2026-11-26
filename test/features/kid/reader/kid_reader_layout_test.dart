@@ -45,7 +45,7 @@ void main() {
           body: KidReaderPage(
             scene: testScene,
             vocabulary: const [],
-            layout: kidReaderLayoutFor(size),
+            layout: kidReaderLayoutFor(size, preferCaption: false),
             onVocabTap: (_) {},
           ),
         ),
@@ -62,15 +62,30 @@ void main() {
         KidReaderLayout.stacked,
       );
       expect(
-        kidReaderLayoutFor(const Size(740, 360)),
+        kidReaderLayoutFor(const Size(740, 360), preferCaption: false),
         KidReaderLayout.sideBySide,
       );
       expect(
-        kidReaderLayoutFor(const Size(1280, 800)),
+        kidReaderLayoutFor(const Size(1280, 800), preferCaption: false),
         KidReaderLayout.book,
       );
       expect(
         kidReaderLayoutFor(const Size(800, 1280)),
+        KidReaderLayout.stacked,
+      );
+    });
+
+    test('resolves caption layout when preferCaption is default (true)', () {
+      expect(
+        kidReaderLayoutFor(const Size(740, 360)),
+        KidReaderLayout.caption,
+      );
+      expect(
+        kidReaderLayoutFor(const Size(1280, 800)),
+        KidReaderLayout.caption,
+      );
+      expect(
+        kidReaderLayoutFor(const Size(360, 740)),
         KidReaderLayout.stacked,
       );
     });

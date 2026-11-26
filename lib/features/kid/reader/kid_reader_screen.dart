@@ -17,11 +17,13 @@ import '../interaction/kid_interaction_screen.dart';
 import '../quiz/kid_after_reading_screen.dart';
 import '../time/kid_status_provider.dart';
 import '../time/kid_time_layer.dart';
+import 'kid_caption_logic.dart';
 import 'kid_read_aloud_controller.dart';
 import 'kid_read_aloud_practice_page.dart';
 import 'kid_reader_audio.dart';
 import 'kid_reader_bottom_bar.dart';
 import 'kid_reader_controller.dart';
+import 'kid_caption_view.dart';
 import 'kid_reader_page.dart';
 import 'kid_reader_pages.dart';
 import 'kid_vocab_sheet.dart';
@@ -44,6 +46,9 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
 
   bool _isAudioPlaying = false;
   int? _activeSegmentId;
+
+  /// Bật/tắt chế độ phụ đề khi màn hình ngang.
+  bool _captionOn = true;
 
   /// Đoạn đang đọc có mốc thời gian từng chữ thì mới tô sáng.
   bool _highlightActive = true;
@@ -603,6 +608,170 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     );
   }
 
+  Widget _buildHeader(
+    BuildContext context,
+    KidReaderState state,
+    TtColors tt,
+    ReadingContent content,
+    int currentPage,
+    int totalPages,
+    bool hasPractice,
+  ) {
+    final isLandscape =
+        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
+    final captionAllowed = storyHasWordTimings(
+      content.scenes.expand((s) => s.segments).map((s) => s.wordTimingsJson),
+    );
+
+    Widget captionButton = IconButton(
+      onPressed: () {
+        if (!captionAllowed) {
+          _toast(
+            'Truyện này chưa có chữ chạy theo giọng đọc nên chưa xem phụ đề được.',
+            type: TtToastType.info,
+          );
+          return;
+        }
+        setState(() => _captionOn = !_captionOn);
+      },
+      icon: Icon(
+        _captionOn && captionAllowed
+            ? Icons.menu_book_rounded
+            : Icons.subtitles_rounded,
+      ),
+      tooltip: _captionOn && captionAllowed ? 'Cả trang' : 'Phụ đề',
+      style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
+      iconSize: 22,
+    );
+    if (!captionAllowed) {
+      captionButton = Opacity(opacity: 0.45, child: captionButton);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      child: Row(
+        children: [
+          // Nút thoát
+          IconButton(
+            onPressed: _confirmExit,
+            icon: const Icon(Icons.close_rounded),
+            tooltip: 'Thoát truyện',
+            style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
+          ),
+          const SizedBox(width: 4),
+
+          // Tiêu đề
+          Expanded(
+            child: Text(
+              content.title,
+              style: TextStyle(
+                fontFamily: 'Baloo2',
+                fontWeight: FontWeight.w800,
+                fontSize: 20,
+                color: tt.text,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // Chỉ số trang
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 4,
+            ),
+            decoration: BoxDecoration(
+              color: tt.gold.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              _onPractice
+                  ? '${totalPages + 1} / ${totalPages + 1}'
+                  : '${currentPage + 1} / ${totalPages + (hasPractice ? 1 : 0)}',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+                color: tt.goldDeep,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+
+          // Đổi chế độ phụ đề (chỉ hiện khi màn hình ngang)
+          if (isLandscape) captionButton,
+
+          // Chế độ đọc
+          IconButton(
+            onPressed: () {
+              final newMode =
+                  state.readingMode == KidReadingMode.listenFirst
+                  ? KidReadingMode.readFirst
+                  : KidReadingMode.listenFirst;
+              _notifier.setReadingMode(newMode);
+              if (newMode == KidReadingMode.listenFirst && !_onPractice) {
+                _playPage(currentPage);
+              } else {
+                _audio.stop();
+              }
+            },
+            icon: Icon(
+              state.readingMode == KidReadingMode.listenFirst
+                  ? Icons.headphones_rounded
+                  : Icons.menu_book_rounded,
+            ),
+            tooltip: state.readingMode == KidReadingMode.listenFirst
+                ? 'Nghe truyện'
+                : 'Đọc cùng truyện',
+            iconSize: 22,
+          ),
+
+          // Dấu trang
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            transitionBuilder: (child, animation) =>
+                ScaleTransition(scale: animation, child: child),
+            child: IconButton(
+              key: ValueKey(state.isBookmarked),
+              onPressed: _notifier.toggleBookmark,
+              icon: Icon(
+                state.isBookmarked
+                    ? Icons.bookmark_rounded
+                    : Icons.bookmark_border_rounded,
+                color: state.isBookmarked ? tt.goldDeep : tt.muted,
+              ),
+              tooltip: state.isBookmarked
+                  ? 'Bỏ dấu trang'
+                  : 'Đánh dấu trang',
+              iconSize: 22,
+            ),
+          ),
+
+          // Yêu thích
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            transitionBuilder: (child, animation) =>
+                ScaleTransition(scale: animation, child: child),
+            child: IconButton(
+              key: ValueKey(state.isFavorite),
+              onPressed: _notifier.toggleFavorite,
+              icon: Icon(
+                state.isFavorite
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
+                color: state.isFavorite ? tt.danger : tt.muted,
+              ),
+              tooltip: state.isFavorite ? 'Bỏ yêu thích' : 'Thêm yêu thích',
+              iconSize: 22,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildReadyBody(
     BuildContext context,
     KidReaderState state,
@@ -621,7 +790,13 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     // Khởi tạo PageController lazy (chỉ một lần khi ready)
     _pageController ??= PageController(initialPage: state.currentPage);
 
-    final layout = kidReaderLayoutFor(MediaQuery.sizeOf(context));
+    final captionAllowed = storyHasWordTimings(
+      content.scenes.expand((s) => s.segments).map((s) => s.wordTimingsJson),
+    );
+    final layout = kidReaderLayoutFor(
+      MediaQuery.sizeOf(context),
+      preferCaption: _captionOn && captionAllowed,
+    );
 
     final currentPage = state.currentPage;
     final totalPages = state.totalPages;
@@ -658,128 +833,32 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
       );
     }
 
+    // ── Nhánh caption (ngang + phụ đề bật + đang đọc trang truyện) ──
+    if (layout == KidReaderLayout.caption && !_onPractice && totalPages > 0) {
+      return _buildCaptionBody(
+        context: context,
+        state: state,
+        tt: tt,
+        aloud: aloud,
+        content: content,
+        scenes: scenes,
+        currentPage: currentPage,
+        totalPages: totalPages,
+        hasPractice: hasPractice,
+        togglePractice: togglePractice,
+      );
+    }
+
     return Column(
       children: [
-        // ── Header ──
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-          child: Row(
-            children: [
-              // Nút thoát
-              IconButton(
-                onPressed: _confirmExit,
-                icon: const Icon(Icons.close_rounded),
-                tooltip: 'Thoát truyện',
-                style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
-              ),
-              const SizedBox(width: 4),
-
-              // Tiêu đề
-              Expanded(
-                child: Text(
-                  content.title,
-                  style: TextStyle(
-                    fontFamily: 'Baloo2',
-                    fontWeight: FontWeight.w800,
-                    fontSize: 20,
-                    color: tt.text,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              // Chỉ số trang
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: tt.gold.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  _onPractice
-                      ? '${totalPages + 1} / ${totalPages + 1}'
-                      : '${currentPage + 1} / ${totalPages + (hasPractice ? 1 : 0)}',
-                  style: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                    color: tt.goldDeep,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
-
-              // Chế độ đọc
-              IconButton(
-                onPressed: () {
-                  final newMode =
-                      state.readingMode == KidReadingMode.listenFirst
-                      ? KidReadingMode.readFirst
-                      : KidReadingMode.listenFirst;
-                  _notifier.setReadingMode(newMode);
-                  if (newMode == KidReadingMode.listenFirst && !_onPractice) {
-                    _playPage(currentPage);
-                  } else {
-                    _audio.stop();
-                  }
-                },
-                icon: Icon(
-                  state.readingMode == KidReadingMode.listenFirst
-                      ? Icons.headphones_rounded
-                      : Icons.menu_book_rounded,
-                ),
-                tooltip: state.readingMode == KidReadingMode.listenFirst
-                    ? 'Nghe truyện'
-                    : 'Đọc cùng truyện',
-                iconSize: 22,
-              ),
-
-              // Dấu trang
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, animation) =>
-                    ScaleTransition(scale: animation, child: child),
-                child: IconButton(
-                  key: ValueKey(state.isBookmarked),
-                  onPressed: _notifier.toggleBookmark,
-                  icon: Icon(
-                    state.isBookmarked
-                        ? Icons.bookmark_rounded
-                        : Icons.bookmark_border_rounded,
-                    color: state.isBookmarked ? tt.goldDeep : tt.muted,
-                  ),
-                  tooltip: state.isBookmarked
-                      ? 'Bỏ dấu trang'
-                      : 'Đánh dấu trang',
-                  iconSize: 22,
-                ),
-              ),
-
-              // Yêu thích
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, animation) =>
-                    ScaleTransition(scale: animation, child: child),
-                child: IconButton(
-                  key: ValueKey(state.isFavorite),
-                  onPressed: _notifier.toggleFavorite,
-                  icon: Icon(
-                    state.isFavorite
-                        ? Icons.favorite_rounded
-                        : Icons.favorite_border_rounded,
-                    color: state.isFavorite ? tt.danger : tt.muted,
-                  ),
-                  tooltip: state.isFavorite ? 'Bỏ yêu thích' : 'Thêm yêu thích',
-                  iconSize: 22,
-                ),
-              ),
-            ],
-          ),
+        _buildHeader(
+          context,
+          state,
+          tt,
+          content,
+          currentPage,
+          totalPages,
+          hasPractice,
         ),
 
         // ── PageView ──
@@ -899,6 +978,124 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
             },
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _buildCaptionBody({
+    required BuildContext context,
+    required KidReaderState state,
+    required TtColors tt,
+    required KidReadAloudState aloud,
+    required ReadingContent content,
+    required List<ReadingScene> scenes,
+    required int currentPage,
+    required int totalPages,
+    required bool hasPractice,
+    required void Function() togglePractice,
+  }) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        PageView.builder(
+          controller: _pageController,
+          itemCount: totalPages,
+          onPageChanged: (i) {
+            if (i != state.currentPage) _goTo(i);
+          },
+          itemBuilder: (context, i) {
+            if (i < 0 || i >= scenes.length) {
+              return const SizedBox.shrink();
+            }
+            return KidCaptionView(
+              imageUrl: kidSceneImageUrl(scenes[i], activeSegmentId: i == currentPage ? _activeSegmentId : null),
+              segments: scenes[i].segments,
+              vocabulary: content.vocabulary,
+              onVocabTap: _openVocab,
+              activeSegmentId: i == currentPage ? _activeSegmentId : null,
+              isPlaying: _isAudioPlaying,
+              positionStream: _audio.positionStream,
+              durationStream: _audio.durationStream,
+              hasAudio: _isAudioAvailable(scenes[i]),
+              topBar: _buildHeader(
+                context,
+                state,
+                tt,
+                content,
+                currentPage,
+                totalPages,
+                hasPractice,
+              ),
+              bottomBarBuilder: (onAdvance) {
+                final showFinish =
+                    i == totalPages - 1 &&
+                    !hasPractice &&
+                    !state.isFinished;
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (showFinish) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                        child: KidBtn3D(
+                          label: 'Em đọc xong rồi',
+                          icon: Icons.check_circle_rounded,
+                          color: tt.primary,
+                          expand: true,
+                          onPressed:
+                              state.isCompleting ? null : _confirmComplete,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    KidReaderBottomBar(
+                      canGoPrev: currentPage > 0,
+                      canGoNext:
+                          currentPage < totalPages - 1 || hasPractice,
+                      isAudioPlaying: _isAudioPlaying,
+                      isAudioAvailable: _isAudioAvailable(scenes[i]),
+                      isRecording: aloud.recording,
+                      isSending: aloud.sending,
+                      onPrev: () => _goTo(currentPage - 1),
+                      onNext: onAdvance,
+                      onToggleAudio: () =>
+                          _onToggleAudio(currentPage, content),
+                      onMicTap: () {
+                        final scene = (currentPage >= 0 &&
+                                currentPage < scenes.length)
+                            ? scenes[currentPage]
+                            : null;
+                        final target =
+                            scene == null ? null : _aloudTarget(scene);
+                        if (target == null) {
+                          _toast(
+                            'Trang này chưa có chữ để đọc',
+                            type: TtToastType.info,
+                          );
+                          return;
+                        }
+                        ref
+                            .read(
+                              kidReadAloudControllerProvider(
+                                widget.storyId,
+                              ).notifier,
+                            )
+                            .toggle(
+                              target.segmentId,
+                              onStart: () {
+                                _audio.stop();
+                                setState(() => _activeSegmentId = null);
+                              },
+                            );
+                      },
+                    ),
+                  ],
+                );
+              },
+              onAdvancePage: () => _goTo(currentPage + 1),
+            );
+          },
+        ),
       ],
     );
   }
