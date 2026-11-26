@@ -6,6 +6,7 @@ import '../../../core/theme/tt_colors.dart';
 import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_network_image.dart';
 import '../../../core/widgets/tt_toast.dart';
+import '../../../models/child_reading_dto.dart';
 import '../data/kid_reading_repository.dart';
 import 'kid_scene_grid.dart';
 import 'kid_voice_recorder.dart';
@@ -17,6 +18,7 @@ class KidFavoriteStep extends ConsumerStatefulWidget {
     required this.sessionId,
     this.pickedTile,
     this.canRecord = true,
+    this.reflection,
     required this.onBackToPick,
     required this.onSent,
   });
@@ -29,6 +31,9 @@ class KidFavoriteStep extends ConsumerStatefulWidget {
 
   /// Cờ cho phép ghi âm lấy từ thông tin suy ngẫm truyện.
   final bool canRecord;
+
+  /// Suy ngẫm đã lưu trên server (có thể tải xong sau khi trang đã mở).
+  final ChildStoryReflection? reflection;
 
   /// Quay lại trang 2 để chọn lại tranh.
   final VoidCallback onBackToPick;
@@ -46,11 +51,18 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
   String? _audioPath;
   bool _sending = false;
 
+  /// Lời đã gửi bố mẹ gần nhất (từ server hoặc lần gửi trong phiên này).
+  ChildStoryReflection? _saved;
+
+  /// Bản ghi đã gửi trong phiên này (vẫn hiện để nghe lại, không tính là thay đổi).
+  String? _sentAudioPath;
+
   @override
   void initState() {
     super.initState();
     _canRecord = widget.canRecord;
     _textController = TextEditingController();
+    _applySaved(widget.reflection);
     _textController.addListener(_onTextChanged);
   }
 
@@ -60,6 +72,16 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
     if (oldWidget.canRecord != widget.canRecord) {
       _canRecord = widget.canRecord;
     }
+    // Suy ngẫm tải xong sau khi trang đã dựng: chỉ lấy khi bé chưa gửi trong phiên này.
+    if (oldWidget.reflection == null && _saved == null) {
+      _applySaved(widget.reflection);
+    }
+  }
+
+  void _applySaved(ChildStoryReflection? r) {
+    if (r == null) return;
+    _saved = r;
+    _textController.text = r.noteText ?? '';
   }
 
   void _onTextChanged() {
@@ -88,13 +110,18 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
 
     try {
       final repo = ref.read(kidReadingRepositoryProvider);
-      await repo.reflectionNote(
+      final saved = await repo.reflectionNote(
         widget.sessionId,
         text: hasText ? trimmed : null,
         audioPath: _audioPath,
       );
 
       if (!mounted) return;
+      // Giữ bản ghi vừa gửi để bé nghe lại; quay lại trang thấy "Đã gửi".
+      setState(() {
+        _sentAudioPath = _audioPath;
+        _applySaved(saved);
+      });
       showTtToast(context, 'Đã gửi cho bố mẹ', type: TtToastType.success);
       widget.onSent();
     } on ApiException catch (e) {
@@ -168,6 +195,12 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
   Widget _buildContent(TtColors tt, KidSceneTile tile) {
     final trimmed = _textController.text.trim();
     final canSubmit = (trimmed.isNotEmpty || _audioPath != null) && !_sending;
+    final savedText = (_saved?.noteText ?? '').trim();
+    final noteSent = savedText.isNotEmpty || (_saved?.hasNoteRecording ?? false);
+    // Nút gửi chỉ hiện lại (thành "Gửi lại") khi bé sửa chữ hoặc ghi âm mới.
+    final noteChanged =
+        trimmed != savedText ||
+        (_audioPath != null && _audioPath != _sentAudioPath);
     final size = MediaQuery.sizeOf(context);
     // Màn ngang: tranh trái, ô viết + nút gửi phải để không phải cuộn.
     final wide = size.width >= 600 && size.width > size.height;
@@ -303,15 +336,21 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
                     ),
                   ],
                   const SizedBox(height: 18),
-                  // Nút gửi bố mẹ
-                  KidBtn3D(
-                    label: 'Gửi bố mẹ',
-                    icon: Icons.favorite_rounded,
-                    color: tt.primary,
-                    expand: true,
-                    big: true,
-                    onPressed: canSubmit ? _handleSend : null,
-                  ),
+                  if (noteSent && !noteChanged)
+                    _SentBadge(
+                      text: _saved!.hasNoteRecording
+                          ? 'Đã gửi lời kể cho bố mẹ'
+                          : 'Đã gửi cho bố mẹ',
+                    )
+                  else
+                    KidBtn3D(
+                      label: noteSent ? 'Gửi lại' : 'Gửi bố mẹ',
+                      icon: Icons.favorite_rounded,
+                      color: tt.primary,
+                      expand: true,
+                      big: true,
+                      onPressed: canSubmit ? _handleSend : null,
+                    ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -355,5 +394,40 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
     }
 
     return _buildContent(tt, tile);
+  }
+}
+
+/// Dấu ✓ "đã gửi" thay chỗ nút gửi (cùng kiểu với bước Kể lại).
+class _SentBadge extends StatelessWidget {
+  const _SentBadge({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = context.tt;
+    return KidPanel(
+      borderColor: tt.primary,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.check_circle_rounded, color: tt.primary, size: 30),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: tt.primaryStrong,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

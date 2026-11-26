@@ -232,6 +232,7 @@ class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
           sessionId: widget.sessionId,
           pickedTile: _favoriteTile,
           canRecord: _reflection?.canRecord ?? true,
+          reflection: _reflection,
           onBackToPick: () => _goToPage(2),
           onSent: () => _goToPage(4),
         );

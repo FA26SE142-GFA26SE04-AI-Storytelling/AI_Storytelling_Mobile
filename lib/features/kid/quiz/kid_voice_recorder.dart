@@ -21,6 +21,7 @@ class KidVoiceRecorder extends ConsumerStatefulWidget {
     required this.onChanged,
     this.enabled = true,
     this.sending = false,
+    this.canDelete = true,
   });
 
   /// Đường dẫn file wav đã ghi (null nếu chưa có bản ghi).
@@ -34,6 +35,9 @@ class KidVoiceRecorder extends ConsumerStatefulWidget {
 
   /// Đang gửi dữ liệu hay không (true: khóa tất cả các nút).
   final bool sending;
+
+  /// Hiện nút xóa bản ghi (false: bản ghi đã gửi xong, chỉ còn nghe lại).
+  final bool canDelete;
 
   @override
   ConsumerState<KidVoiceRecorder> createState() => _KidVoiceRecorderState();
@@ -408,28 +412,32 @@ class _KidVoiceRecorderState extends ConsumerState<KidVoiceRecorder> {
                     onPressed: widget.sending ? null : _togglePlay,
                   ),
                 ),
-                const SizedBox(width: 12),
-                SizedBox(
-                  width: 64,
-                  height: 64,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: tt.panel,
-                      foregroundColor: tt.danger,
-                      disabledForegroundColor: tt.danger.withValues(alpha: 0.4),
-                      side: BorderSide(
-                        color: tt.danger.withValues(alpha: 0.4),
-                        width: 1.5,
+                if (widget.canDelete) ...[
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 64,
+                    height: 64,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: tt.panel,
+                        foregroundColor: tt.danger,
+                        disabledForegroundColor: tt.danger.withValues(
+                          alpha: 0.4,
+                        ),
+                        side: BorderSide(
+                          color: tt.danger.withValues(alpha: 0.4),
+                          width: 1.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: EdgeInsets.zero,
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: EdgeInsets.zero,
+                      onPressed: widget.sending ? null : _deleteRecording,
+                      child: const Icon(Icons.delete_outline_rounded, size: 28),
                     ),
-                    onPressed: widget.sending ? null : _deleteRecording,
-                    child: const Icon(Icons.delete_outline_rounded, size: 28),
                   ),
-                ),
+                ],
               ],
             ),
           ] else ...[

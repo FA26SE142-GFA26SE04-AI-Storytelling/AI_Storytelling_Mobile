@@ -100,6 +100,8 @@ class _KidSummaryStepState extends ConsumerState<KidSummaryStep> {
                       onChanged: (p) => setState(() => _audioPath = p),
                       enabled: !_sent,
                       sending: _sending,
+                      // Mỗi phiên chỉ gửi bản kể một lần nên gửi rồi thì không xóa nữa.
+                      canDelete: !_sent,
                     )
                     .animate()
                     .fadeIn(duration: 350.ms)
