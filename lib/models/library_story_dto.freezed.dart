@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$LibraryStoryDto {
 
- int get id; String get title; String? get description; String? get content; String? get coverImageUrl; String? get genre; String? get moralLesson; String get ageBand; String get source; String get status; bool get isPublished; String? get authorName; DateTime? get createdAt; int? get viewCount; int? get favoriteCount; bool? get hasQuiz;
+ int get id; String get title; String? get description; String? get content; String? get coverImageUrl; String? get genre; String? get moralLesson; String get ageBand; String get source; String get status; bool get isPublished; int? get authorUserId; String? get authorName; DateTime? get createdAt; int? get viewCount; int? get favoriteCount; bool? get hasQuiz;
 /// Create a copy of LibraryStoryDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $LibraryStoryDtoCopyWith<LibraryStoryDto> get copyWith => _$LibraryStoryDtoCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as LibraryStoryDto;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LibraryStoryDto&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.content, _this.content) || other.content == _this.content)&&(identical(other.coverImageUrl, _this.coverImageUrl) || other.coverImageUrl == _this.coverImageUrl)&&(identical(other.genre, _this.genre) || other.genre == _this.genre)&&(identical(other.moralLesson, _this.moralLesson) || other.moralLesson == _this.moralLesson)&&(identical(other.ageBand, _this.ageBand) || other.ageBand == _this.ageBand)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.isPublished, _this.isPublished) || other.isPublished == _this.isPublished)&&(identical(other.authorName, _this.authorName) || other.authorName == _this.authorName)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.viewCount, _this.viewCount) || other.viewCount == _this.viewCount)&&(identical(other.favoriteCount, _this.favoriteCount) || other.favoriteCount == _this.favoriteCount)&&(identical(other.hasQuiz, _this.hasQuiz) || other.hasQuiz == _this.hasQuiz));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LibraryStoryDto&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.content, _this.content) || other.content == _this.content)&&(identical(other.coverImageUrl, _this.coverImageUrl) || other.coverImageUrl == _this.coverImageUrl)&&(identical(other.genre, _this.genre) || other.genre == _this.genre)&&(identical(other.moralLesson, _this.moralLesson) || other.moralLesson == _this.moralLesson)&&(identical(other.ageBand, _this.ageBand) || other.ageBand == _this.ageBand)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.isPublished, _this.isPublished) || other.isPublished == _this.isPublished)&&(identical(other.authorUserId, _this.authorUserId) || other.authorUserId == _this.authorUserId)&&(identical(other.authorName, _this.authorName) || other.authorName == _this.authorName)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.viewCount, _this.viewCount) || other.viewCount == _this.viewCount)&&(identical(other.favoriteCount, _this.favoriteCount) || other.favoriteCount == _this.favoriteCount)&&(identical(other.hasQuiz, _this.hasQuiz) || other.hasQuiz == _this.hasQuiz));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as LibraryStoryDto;
-  return Object.hash(runtimeType,_this.id,_this.title,_this.description,_this.content,_this.coverImageUrl,_this.genre,_this.moralLesson,_this.ageBand,_this.source,_this.status,_this.isPublished,_this.authorName,_this.createdAt,_this.viewCount,_this.favoriteCount,_this.hasQuiz);
+  return Object.hash(runtimeType,_this.id,_this.title,_this.description,_this.content,_this.coverImageUrl,_this.genre,_this.moralLesson,_this.ageBand,_this.source,_this.status,_this.isPublished,_this.authorUserId,_this.authorName,_this.createdAt,_this.viewCount,_this.favoriteCount,_this.hasQuiz);
 }
 
 @override
 String toString() {
   final _this = this as LibraryStoryDto;
-  return 'LibraryStoryDto(id: ${_this.id}, title: ${_this.title}, description: ${_this.description}, content: ${_this.content}, coverImageUrl: ${_this.coverImageUrl}, genre: ${_this.genre}, moralLesson: ${_this.moralLesson}, ageBand: ${_this.ageBand}, source: ${_this.source}, status: ${_this.status}, isPublished: ${_this.isPublished}, authorName: ${_this.authorName}, createdAt: ${_this.createdAt}, viewCount: ${_this.viewCount}, favoriteCount: ${_this.favoriteCount}, hasQuiz: ${_this.hasQuiz})';
+  return 'LibraryStoryDto(id: ${_this.id}, title: ${_this.title}, description: ${_this.description}, content: ${_this.content}, coverImageUrl: ${_this.coverImageUrl}, genre: ${_this.genre}, moralLesson: ${_this.moralLesson}, ageBand: ${_this.ageBand}, source: ${_this.source}, status: ${_this.status}, isPublished: ${_this.isPublished}, authorUserId: ${_this.authorUserId}, authorName: ${_this.authorName}, createdAt: ${_this.createdAt}, viewCount: ${_this.viewCount}, favoriteCount: ${_this.favoriteCount}, hasQuiz: ${_this.hasQuiz})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $LibraryStoryDtoCopyWith<$Res>  {
   factory $LibraryStoryDtoCopyWith(LibraryStoryDto value, $Res Function(LibraryStoryDto) _then) = _$LibraryStoryDtoCopyWithImpl;
 @useResult
 $Res call({
- int id, String title, String? description, String? content, String? coverImageUrl, String? genre, String? moralLesson, String ageBand, String source, String status, bool isPublished, String? authorName, DateTime? createdAt, int? viewCount, int? favoriteCount, bool? hasQuiz
+ int id, String title, String? description, String? content, String? coverImageUrl, String? genre, String? moralLesson, String ageBand, String source, String status, bool isPublished, int? authorUserId, String? authorName, DateTime? createdAt, int? viewCount, int? favoriteCount, bool? hasQuiz
 });
 
 
@@ -71,7 +71,7 @@ class _$LibraryStoryDtoCopyWithImpl<$Res>
 
 /// Create a copy of LibraryStoryDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? content = freezed,Object? coverImageUrl = freezed,Object? genre = freezed,Object? moralLesson = freezed,Object? ageBand = null,Object? source = null,Object? status = null,Object? isPublished = null,Object? authorName = freezed,Object? createdAt = freezed,Object? viewCount = freezed,Object? favoriteCount = freezed,Object? hasQuiz = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? content = freezed,Object? coverImageUrl = freezed,Object? genre = freezed,Object? moralLesson = freezed,Object? ageBand = null,Object? source = null,Object? status = null,Object? isPublished = null,Object? authorUserId = freezed,Object? authorName = freezed,Object? createdAt = freezed,Object? viewCount = freezed,Object? favoriteCount = freezed,Object? hasQuiz = freezed,}) {
   return _then(LibraryStoryDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -84,7 +84,8 @@ as String?,ageBand: null == ageBand ? _self.ageBand : ageBand // ignore: cast_nu
 as String,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,isPublished: null == isPublished ? _self.isPublished : isPublished // ignore: cast_nullable_to_non_nullable
-as bool,authorName: freezed == authorName ? _self.authorName : authorName // ignore: cast_nullable_to_non_nullable
+as bool,authorUserId: freezed == authorUserId ? _self.authorUserId : authorUserId // ignore: cast_nullable_to_non_nullable
+as int?,authorName: freezed == authorName ? _self.authorName : authorName // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,viewCount: freezed == viewCount ? _self.viewCount : viewCount // ignore: cast_nullable_to_non_nullable
 as int?,favoriteCount: freezed == favoriteCount ? _self.favoriteCount : favoriteCount // ignore: cast_nullable_to_non_nullable
@@ -174,10 +175,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String title,  String? description,  String? content,  String? coverImageUrl,  String? genre,  String? moralLesson,  String ageBand,  String source,  String status,  bool isPublished,  String? authorName,  DateTime? createdAt,  int? viewCount,  int? favoriteCount,  bool? hasQuiz)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String title,  String? description,  String? content,  String? coverImageUrl,  String? genre,  String? moralLesson,  String ageBand,  String source,  String status,  bool isPublished,  int? authorUserId,  String? authorName,  DateTime? createdAt,  int? viewCount,  int? favoriteCount,  bool? hasQuiz)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LibraryStoryDto() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.content,_that.coverImageUrl,_that.genre,_that.moralLesson,_that.ageBand,_that.source,_that.status,_that.isPublished,_that.authorName,_that.createdAt,_that.viewCount,_that.favoriteCount,_that.hasQuiz);case _:
+return $default(_that.id,_that.title,_that.description,_that.content,_that.coverImageUrl,_that.genre,_that.moralLesson,_that.ageBand,_that.source,_that.status,_that.isPublished,_that.authorUserId,_that.authorName,_that.createdAt,_that.viewCount,_that.favoriteCount,_that.hasQuiz);case _:
   return orElse();
 
 }
@@ -195,10 +196,10 @@ return $default(_that.id,_that.title,_that.description,_that.content,_that.cover
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String title,  String? description,  String? content,  String? coverImageUrl,  String? genre,  String? moralLesson,  String ageBand,  String source,  String status,  bool isPublished,  String? authorName,  DateTime? createdAt,  int? viewCount,  int? favoriteCount,  bool? hasQuiz)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String title,  String? description,  String? content,  String? coverImageUrl,  String? genre,  String? moralLesson,  String ageBand,  String source,  String status,  bool isPublished,  int? authorUserId,  String? authorName,  DateTime? createdAt,  int? viewCount,  int? favoriteCount,  bool? hasQuiz)  $default,) {final _that = this;
 switch (_that) {
 case _LibraryStoryDto():
-return $default(_that.id,_that.title,_that.description,_that.content,_that.coverImageUrl,_that.genre,_that.moralLesson,_that.ageBand,_that.source,_that.status,_that.isPublished,_that.authorName,_that.createdAt,_that.viewCount,_that.favoriteCount,_that.hasQuiz);case _:
+return $default(_that.id,_that.title,_that.description,_that.content,_that.coverImageUrl,_that.genre,_that.moralLesson,_that.ageBand,_that.source,_that.status,_that.isPublished,_that.authorUserId,_that.authorName,_that.createdAt,_that.viewCount,_that.favoriteCount,_that.hasQuiz);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -215,10 +216,10 @@ return $default(_that.id,_that.title,_that.description,_that.content,_that.cover
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String title,  String? description,  String? content,  String? coverImageUrl,  String? genre,  String? moralLesson,  String ageBand,  String source,  String status,  bool isPublished,  String? authorName,  DateTime? createdAt,  int? viewCount,  int? favoriteCount,  bool? hasQuiz)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String title,  String? description,  String? content,  String? coverImageUrl,  String? genre,  String? moralLesson,  String ageBand,  String source,  String status,  bool isPublished,  int? authorUserId,  String? authorName,  DateTime? createdAt,  int? viewCount,  int? favoriteCount,  bool? hasQuiz)?  $default,) {final _that = this;
 switch (_that) {
 case _LibraryStoryDto() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.content,_that.coverImageUrl,_that.genre,_that.moralLesson,_that.ageBand,_that.source,_that.status,_that.isPublished,_that.authorName,_that.createdAt,_that.viewCount,_that.favoriteCount,_that.hasQuiz);case _:
+return $default(_that.id,_that.title,_that.description,_that.content,_that.coverImageUrl,_that.genre,_that.moralLesson,_that.ageBand,_that.source,_that.status,_that.isPublished,_that.authorUserId,_that.authorName,_that.createdAt,_that.viewCount,_that.favoriteCount,_that.hasQuiz);case _:
   return null;
 
 }
@@ -230,7 +231,7 @@ return $default(_that.id,_that.title,_that.description,_that.content,_that.cover
 @JsonSerializable()
 
 class _LibraryStoryDto implements LibraryStoryDto {
-  const _LibraryStoryDto({required this.id, this.title = '', this.description, this.content, this.coverImageUrl, this.genre, this.moralLesson, this.ageBand = '', this.source = '', this.status = '', this.isPublished = false, this.authorName, this.createdAt, this.viewCount, this.favoriteCount, this.hasQuiz});
+  const _LibraryStoryDto({required this.id, this.title = '', this.description, this.content, this.coverImageUrl, this.genre, this.moralLesson, this.ageBand = '', this.source = '', this.status = '', this.isPublished = false, this.authorUserId, this.authorName, this.createdAt, this.viewCount, this.favoriteCount, this.hasQuiz});
   factory _LibraryStoryDto.fromJson(Map<String, dynamic> json) => _$LibraryStoryDtoFromJson(json);
 
 @override final  int id;
@@ -244,6 +245,7 @@ class _LibraryStoryDto implements LibraryStoryDto {
 @override@JsonKey() final  String source;
 @override@JsonKey() final  String status;
 @override@JsonKey() final  bool isPublished;
+@override final  int? authorUserId;
 @override final  String? authorName;
 @override final  DateTime? createdAt;
 @override final  int? viewCount;
@@ -263,18 +265,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LibraryStoryDto&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.content, content) || other.content == content)&&(identical(other.coverImageUrl, coverImageUrl) || other.coverImageUrl == coverImageUrl)&&(identical(other.genre, genre) || other.genre == genre)&&(identical(other.moralLesson, moralLesson) || other.moralLesson == moralLesson)&&(identical(other.ageBand, ageBand) || other.ageBand == ageBand)&&(identical(other.source, source) || other.source == source)&&(identical(other.status, status) || other.status == status)&&(identical(other.isPublished, isPublished) || other.isPublished == isPublished)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.viewCount, viewCount) || other.viewCount == viewCount)&&(identical(other.favoriteCount, favoriteCount) || other.favoriteCount == favoriteCount)&&(identical(other.hasQuiz, hasQuiz) || other.hasQuiz == hasQuiz));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LibraryStoryDto&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.content, content) || other.content == content)&&(identical(other.coverImageUrl, coverImageUrl) || other.coverImageUrl == coverImageUrl)&&(identical(other.genre, genre) || other.genre == genre)&&(identical(other.moralLesson, moralLesson) || other.moralLesson == moralLesson)&&(identical(other.ageBand, ageBand) || other.ageBand == ageBand)&&(identical(other.source, source) || other.source == source)&&(identical(other.status, status) || other.status == status)&&(identical(other.isPublished, isPublished) || other.isPublished == isPublished)&&(identical(other.authorUserId, authorUserId) || other.authorUserId == authorUserId)&&(identical(other.authorName, authorName) || other.authorName == authorName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.viewCount, viewCount) || other.viewCount == viewCount)&&(identical(other.favoriteCount, favoriteCount) || other.favoriteCount == favoriteCount)&&(identical(other.hasQuiz, hasQuiz) || other.hasQuiz == hasQuiz));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,title,description,content,coverImageUrl,genre,moralLesson,ageBand,source,status,isPublished,authorName,createdAt,viewCount,favoriteCount,hasQuiz);
+    return Object.hash(runtimeType,id,title,description,content,coverImageUrl,genre,moralLesson,ageBand,source,status,isPublished,authorUserId,authorName,createdAt,viewCount,favoriteCount,hasQuiz);
 }
 
 @override
 String toString() {
-    return 'LibraryStoryDto(id: $id, title: $title, description: $description, content: $content, coverImageUrl: $coverImageUrl, genre: $genre, moralLesson: $moralLesson, ageBand: $ageBand, source: $source, status: $status, isPublished: $isPublished, authorName: $authorName, createdAt: $createdAt, viewCount: $viewCount, favoriteCount: $favoriteCount, hasQuiz: $hasQuiz)';
+    return 'LibraryStoryDto(id: $id, title: $title, description: $description, content: $content, coverImageUrl: $coverImageUrl, genre: $genre, moralLesson: $moralLesson, ageBand: $ageBand, source: $source, status: $status, isPublished: $isPublished, authorUserId: $authorUserId, authorName: $authorName, createdAt: $createdAt, viewCount: $viewCount, favoriteCount: $favoriteCount, hasQuiz: $hasQuiz)';
 }
 
 
@@ -285,7 +287,7 @@ abstract mixin class _$LibraryStoryDtoCopyWith<$Res> implements $LibraryStoryDto
   factory _$LibraryStoryDtoCopyWith(_LibraryStoryDto value, $Res Function(_LibraryStoryDto) _then) = __$LibraryStoryDtoCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String title, String? description, String? content, String? coverImageUrl, String? genre, String? moralLesson, String ageBand, String source, String status, bool isPublished, String? authorName, DateTime? createdAt, int? viewCount, int? favoriteCount, bool? hasQuiz
+ int id, String title, String? description, String? content, String? coverImageUrl, String? genre, String? moralLesson, String ageBand, String source, String status, bool isPublished, int? authorUserId, String? authorName, DateTime? createdAt, int? viewCount, int? favoriteCount, bool? hasQuiz
 });
 
 
@@ -302,7 +304,7 @@ class __$LibraryStoryDtoCopyWithImpl<$Res>
 
 /// Create a copy of LibraryStoryDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? content = freezed,Object? coverImageUrl = freezed,Object? genre = freezed,Object? moralLesson = freezed,Object? ageBand = null,Object? source = null,Object? status = null,Object? isPublished = null,Object? authorName = freezed,Object? createdAt = freezed,Object? viewCount = freezed,Object? favoriteCount = freezed,Object? hasQuiz = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? content = freezed,Object? coverImageUrl = freezed,Object? genre = freezed,Object? moralLesson = freezed,Object? ageBand = null,Object? source = null,Object? status = null,Object? isPublished = null,Object? authorUserId = freezed,Object? authorName = freezed,Object? createdAt = freezed,Object? viewCount = freezed,Object? favoriteCount = freezed,Object? hasQuiz = freezed,}) {
   return _then(_LibraryStoryDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -315,7 +317,8 @@ as String?,ageBand: null == ageBand ? _self.ageBand : ageBand // ignore: cast_nu
 as String,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,isPublished: null == isPublished ? _self.isPublished : isPublished // ignore: cast_nullable_to_non_nullable
-as bool,authorName: freezed == authorName ? _self.authorName : authorName // ignore: cast_nullable_to_non_nullable
+as bool,authorUserId: freezed == authorUserId ? _self.authorUserId : authorUserId // ignore: cast_nullable_to_non_nullable
+as int?,authorName: freezed == authorName ? _self.authorName : authorName // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,viewCount: freezed == viewCount ? _self.viewCount : viewCount // ignore: cast_nullable_to_non_nullable
 as int?,favoriteCount: freezed == favoriteCount ? _self.favoriteCount : favoriteCount // ignore: cast_nullable_to_non_nullable

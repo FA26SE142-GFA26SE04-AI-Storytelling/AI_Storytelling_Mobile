@@ -19,6 +19,7 @@ _LibraryStoryDto _$LibraryStoryDtoFromJson(Map<String, dynamic> json) =>
       source: json['source'] as String? ?? '',
       status: json['status'] as String? ?? '',
       isPublished: json['isPublished'] as bool? ?? false,
+      authorUserId: (json['authorUserId'] as num?)?.toInt(),
       authorName: json['authorName'] as String?,
       createdAt: json['createdAt'] == null
           ? null
@@ -41,6 +42,7 @@ Map<String, dynamic> _$LibraryStoryDtoToJson(_LibraryStoryDto instance) =>
       'source': instance.source,
       'status': instance.status,
       'isPublished': instance.isPublished,
+      'authorUserId': instance.authorUserId,
       'authorName': instance.authorName,
       'createdAt': instance.createdAt?.toIso8601String(),
       'viewCount': instance.viewCount,

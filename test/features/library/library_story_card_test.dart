@@ -60,7 +60,7 @@ Future<void> _pump(
 }
 
 void main() {
-  testWidgets('icon câu đố chỉ hiện khi hasQuiz == true; có tác giả và số chữ', (
+  testWidgets('icon câu đố chỉ hiện khi hasQuiz == true; không hiện tác giả, số chữ', (
     tester,
   ) async {
     await _pump(tester, [
@@ -70,16 +70,13 @@ void main() {
     ]);
     expect(find.byKey(const ValueKey('lib-card-quiz')), findsOneWidget);
     expect(find.byTooltip('Có câu đố sau khi đọc'), findsOneWidget);
-    expect(find.text('Cô Lan'), findsNWidgets(3));
-    expect(find.text('1.234 chữ'), findsNWidgets(3));
+    expect(find.text('Cô Lan'), findsNothing);
+    expect(find.text('1.234 chữ'), findsNothing);
     expect(find.text('9–10 tuổi'), findsNWidgets(3));
   });
 
-  testWidgets('không có tên tác giả thì hiện nguồn; có lượt thì hiện huy hiệu', (
-    tester,
-  ) async {
-    await _pump(tester, [_story(1, author: ' ', views: 1500)]);
-    expect(find.text('Của creator'), findsOneWidget);
+  testWidgets('có lượt thì hiện huy hiệu', (tester) async {
+    await _pump(tester, [_story(1, views: 1500)]);
     expect(find.text('1.500'), findsOneWidget);
     expect(find.byIcon(Icons.favorite_border_rounded), findsOneWidget);
   });
@@ -108,8 +105,6 @@ void main() {
             theme: AppTheme.dark(),
           );
           expect(tester.takeException(), isNull);
-          // Số chữ luôn hiện đủ dù tên tác giả bị cắt.
-          expect(find.text('1.234 chữ'), findsWidgets);
         },
       );
     }

@@ -30,11 +30,6 @@ extension LibraryStoryX on LibraryStoryDto {
 
   String get by => (authorName ?? '').trim().isEmpty ? 'Bạn' : authorName!;
 
-  /// Tên tác giả trên thẻ; không có tên thì hiện nguồn truyện như web.
-  String get cardAuthor => (authorName ?? '').trim().isEmpty
-      ? sourceLabels[sourceKey]!
-      : authorName!.trim();
-
   /// Truyện tạo trong 7 ngày gần [now] (nhãn "MỚI" trên thẻ).
   bool isNewAt(DateTime now) =>
       createdAt != null && now.difference(createdAt!).inDays < 7;
@@ -108,8 +103,10 @@ List<LibraryStoryDto> mergeLibrary(
     ..sort((a, b) => (b.createdAt ?? epoch).compareTo(a.createdAt ?? epoch));
 }
 
-const _vnFrom = 'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ';
-const _vnTo = 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyd';
+const _vnFrom =
+    'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ';
+const _vnTo =
+    'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyd';
 
 /// Chữ thường, bỏ dấu tiếng Việt để tìm "dem hoi" ra "Đêm Hội".
 String foldVietnamese(String s) {
@@ -147,13 +144,45 @@ List<LibraryStoryDto> bannerStories(
   return out;
 }
 
+/// Mã tác giả cộng đồng (như communityAuthorKey của web): truyện creator đã công
+/// khai có authorUserId > 0; còn lại null.
+int? communityAuthorId(LibraryStoryDto s) =>
+    s.isCreator && s.isPublished && (s.authorUserId ?? 0) > 0
+    ? s.authorUserId
+    : null;
+
+typedef LibraryAuthor = ({int id, String name, int count});
+
+/// Tác giả của truyện cộng đồng (như collectLibraryAuthors của web): bỏ tác giả
+/// không có tên, nhiều truyện trước, bằng nhau thì theo tên.
+List<LibraryAuthor> collectLibraryAuthors(List<LibraryStoryDto> stories) {
+  final names = <int, String>{};
+  final counts = <int, int>{};
+  for (final s in stories) {
+    final id = communityAuthorId(s);
+    if (id == null) continue;
+    if ((names[id] ?? '').isEmpty) names[id] = (s.authorName ?? '').trim();
+    counts[id] = (counts[id] ?? 0) + 1;
+  }
+  return [
+    for (final MapEntry(key: id, value: name) in names.entries)
+      if (name.isNotEmpty) (id: id, name: name, count: counts[id]!),
+  ]..sort((a, b) {
+    final byCount = b.count.compareTo(a.count);
+    if (byCount != 0) return byCount;
+    final byName = foldVietnamese(a.name).compareTo(foldVietnamese(b.name));
+    return byName != 0 ? byName : a.name.compareTo(b.name);
+  });
+}
+
 /// Các kệ của thư viện, tính từ danh sách đã gộp ([sorted] mới trước).
 class LibraryShelves {
   LibraryShelves(this.sorted, {List<LibraryStoryDto> ranked = const []})
     : latest = sorted.take(10).toList(),
       inProgress = sorted.where((s) => s.statusGroup == 'media').toList(),
       topics = sorted.map((s) => s.topic).toSet().toList(),
-      banner = bannerStories(ranked, sorted);
+      banner = bannerStories(ranked, sorted),
+      authors = collectLibraryAuthors(sorted);
 
   final List<LibraryStoryDto> sorted;
   final List<LibraryStoryDto> latest;
@@ -162,6 +191,13 @@ class LibraryShelves {
 
   /// Banner đầu trang: xem [bannerStories].
   final List<LibraryStoryDto> banner;
+
+  /// Tác giả nổi bật: xem [collectLibraryAuthors].
+  final List<LibraryAuthor> authors;
+
+  /// Truyện của một tác giả cộng đồng, mới trước.
+  List<LibraryStoryDto> byAuthor(int id) =>
+      sorted.where((s) => communityAuthorId(s) == id).toList();
 
   List<LibraryStoryDto> byTopic(String? topic) =>
       sorted.where((s) => s.topic == topic).toList();
@@ -172,13 +208,14 @@ class LibraryShelves {
 
   List<LibraryStoryDto> search(String query) {
     final needle = foldVietnamese(query.trim());
-    return sorted.where((s) => foldVietnamese(s.title).contains(needle)).toList();
+    return sorted
+        .where((s) => foldVietnamese(s.title).contains(needle))
+        .toList();
   }
 
   /// Tìm theo tên, thêm lọc theo chủ đề khi [topic] khác null.
-  List<LibraryStoryDto> filter(String query, String? topic) => search(query)
-      .where((s) => topic == null || s.topic == topic)
-      .toList();
+  List<LibraryStoryDto> filter(String query, String? topic) =>
+      search(query).where((s) => topic == null || s.topic == topic).toList();
 }
 
 /// Một trang khi xem trước: chữ, tranh và giọng đọc (đã sẵn sàng) của cảnh đó.

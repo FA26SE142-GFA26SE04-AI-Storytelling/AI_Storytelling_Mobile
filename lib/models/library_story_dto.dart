@@ -18,6 +18,7 @@ abstract class LibraryStoryDto with _$LibraryStoryDto {
     @Default('') String source,
     @Default('') String status,
     @Default(false) bool isPublished,
+    int? authorUserId,
     String? authorName,
     DateTime? createdAt,
     int? viewCount,

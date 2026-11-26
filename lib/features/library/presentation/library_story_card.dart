@@ -12,23 +12,23 @@ TextStyle libraryCardTitleStyle(BuildContext context) =>
     Theme.of(context).textTheme.titleSmall!
         .copyWith(fontSize: 13, height: 1.25);
 
-/// Kiểu chữ hai dòng thông tin dưới tên (chủ đề · tuổi, tác giả · số chữ).
+/// Kiểu chữ dòng thông tin dưới tên (chủ đề · tuổi).
 TextStyle libraryCardMetaStyle(BuildContext context) =>
     Theme.of(context).textTheme.bodySmall!
         .copyWith(fontSize: 11.5, height: 1.3, color: context.tt.muted);
 
-/// Chiều cao thẻ khi bìa rộng [width]: bìa 3:4 + 2 dòng tên + 2 dòng thông tin.
+/// Chiều cao thẻ khi bìa rộng [width]: bìa 3:4 + 2 dòng tên + 1 dòng thông tin.
 double libraryCardHeight(BuildContext context, double width) {
   final scale = MediaQuery.textScalerOf(context);
   return width * 4 / 3 +
       4 +
       scale.scale(13) * 1.25 * 2 +
       2 +
-      scale.scale(11.5) * 1.3 * 2;
+      scale.scale(11.5) * 1.3;
 }
 
-/// Thẻ truyện bìa dọc 3:4, tên tối đa 2 dòng, dòng "chủ đề · tuổi" (+ icon câu đố)
-/// và dòng "tác giả · N chữ". Góc bìa: [rank] (số hạng vàng), nhãn "MỚI" khi
+/// Thẻ truyện bìa dọc 3:4, tên tối đa 2 dòng, dòng "chủ đề · tuổi" (+ icon câu đố).
+/// Góc bìa: [rank] (số hạng vàng), nhãn "MỚI" khi
 /// truyện tạo trong 7 ngày, lượt đọc / yêu thích (truyện community) ở góc dưới;
 /// [showStatus] hiện trạng thái (chỉ dùng ở kệ "Đang chuẩn bị"). Nhấn thì thẻ thu nhỏ nhẹ.
 class LibraryStoryCard extends StatefulWidget {
@@ -63,7 +63,6 @@ class _LibraryStoryCardState extends State<LibraryStoryCard> {
     final metaHeight = MediaQuery.textScalerOf(context).scale(11.5) * 1.3;
     final age = ageLabel(story.ageBand);
     final quiz = story.hasQuiz == true;
-    final words = story.words > 0 ? '${groupThousands(story.words)} chữ' : null;
     final hasStats = !widget.showStatus &&
         (story.viewCount != null || story.favoriteCount != null);
     void open() => openStoryPreview(context, story);
@@ -106,8 +105,6 @@ class _LibraryStoryCardState extends State<LibraryStoryCard> {
         story.topic,
         if (age.isNotEmpty) age,
         if (quiz) 'có câu đố sau khi đọc',
-        story.cardAuthor,
-        ?words,
         if (story.viewCount != null) '${story.viewCount} lượt đọc',
         if (story.favoriteCount != null) '${story.favoriteCount} lượt yêu thích',
       ].join(', '),
@@ -222,9 +219,6 @@ class _LibraryStoryCardState extends State<LibraryStoryCard> {
                     ),
                   ),
                 ],
-              ]),
-              metaLine(story.cardAuthor, [
-                if (words != null) Text(words, maxLines: 1, style: meta),
               ]),
             ],
           ),
