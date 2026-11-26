@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ai_storytelling_mobile/core/theme/app_theme.dart';
 import 'package:ai_storytelling_mobile/core/router/app_router.dart';
@@ -19,6 +20,10 @@ class TaleTaleApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Taletale',
       debugShowCheckedModeBanner: false,
+      // App chỉ có tiếng Việt: hộp chọn giờ/ngày, menu sao chép/dán của Flutter cũng hiện tiếng Việt.
+      locale: const Locale('vi'),
+      supportedLocales: const [Locale('vi')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       // Luôn dùng theme sáng, không theo chế độ tối của máy.
       theme: AppTheme.light(),
       themeMode: ThemeMode.light,
