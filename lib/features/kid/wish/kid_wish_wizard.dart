@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ai_storytelling_mobile/features/kid/kid_responsive.dart';
 
 import '../../../core/theme/kid_metrics.dart';
 import '../../../core/theme/tt_colors.dart';
@@ -432,8 +433,8 @@ class _KidWishWizardState extends ConsumerState<KidWishWizard> {
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: kidGridColumns(MediaQuery.sizeOf(context).width, phone: 2),
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           childAspectRatio: 0.85,
@@ -455,8 +456,8 @@ class _KidWishWizardState extends ConsumerState<KidWishWizard> {
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: kidGridColumns(MediaQuery.sizeOf(context).width, phone: 2),
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           childAspectRatio: 0.85,

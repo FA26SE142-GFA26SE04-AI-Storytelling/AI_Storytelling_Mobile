@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:ai_storytelling_mobile/features/kid/kid_responsive.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/kid_metrics.dart';
 import '../../../core/theme/tt_colors.dart';
@@ -590,7 +591,10 @@ class _KidRewardsScreenState extends ConsumerState<KidRewardsScreen> {
                             ),
                           )
                         : GridView.count(
-                            crossAxisCount: 2,
+                            crossAxisCount: kidGridColumns(
+                              MediaQuery.sizeOf(context).width,
+                              phone: 2,
+                            ),
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             mainAxisSpacing: 12,

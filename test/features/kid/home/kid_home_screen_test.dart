@@ -17,6 +17,7 @@ import 'package:ai_storytelling_mobile/features/kid/home/kid_journey_screen.dart
 import 'package:ai_storytelling_mobile/models/child_rewards_dto.dart';
 import 'package:ai_storytelling_mobile/models/child_session_dto.dart';
 import 'package:ai_storytelling_mobile/models/my_roadmap_dto.dart';
+import '../../../support/ipad_sizes.dart';
 
 class FakeKidRepository implements KidRepository {
   FakeKidRepository(this.roadmap, {this.fail = false});
@@ -306,14 +307,15 @@ void main() {
   );
 
   const labels = ['Hành trình', 'Sổ tay', 'Điều ước', 'ĐỌC NGAY', 'Cây'];
-  for (final size in const [
-    Size(360, 740),
-    Size(390, 844),
-    Size(844, 390),
-    Size(740, 360),
-    Size(1024, 768),
-    Size(1180, 820),
-    Size(1366, 1024),
+  for (final size in [
+    const Size(360, 740),
+    const Size(390, 844),
+    const Size(844, 390),
+    const Size(740, 360),
+    const Size(1024, 768),
+    const Size(1180, 820),
+    const Size(1366, 1024),
+    ...kIpadSizes.values,
   ]) {
     testWidgets(
       'Vừa một màn, đủ 5 nút, cúp và ếch ở ${size.width.toInt()}×${size.height.toInt()}',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:ai_storytelling_mobile/features/kid/kid_responsive.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/widgets/tt_network_image.dart';
 import '../../../models/child_reading_dto.dart';
@@ -176,7 +177,8 @@ class KidSceneGrid extends StatelessWidget {
     final tt = context.tt;
 
     return GridView.count(
-      crossAxisCount: 3,
+      crossAxisCount:
+          kidGridColumns(MediaQuery.sizeOf(context).width, phone: 3),
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 10,

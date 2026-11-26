@@ -8,21 +8,29 @@ import 'package:ai_storytelling_mobile/features/kid/data/kid_rewards_repository.
 import 'package:ai_storytelling_mobile/features/kid/data/kid_wish_repository.dart';
 import 'package:ai_storytelling_mobile/features/kid/quiz/kid_after_reading_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/quiz/kid_emotion_step.dart';
+import 'package:ai_storytelling_mobile/features/kid/quiz/kid_favorite_step.dart';
 import 'package:ai_storytelling_mobile/features/kid/quiz/kid_feeling_step.dart';
+import 'package:ai_storytelling_mobile/features/kid/quiz/kid_questions_step.dart';
+import 'package:ai_storytelling_mobile/features/kid/quiz/kid_summary_step.dart';
 import 'package:ai_storytelling_mobile/features/kid/rewards/kid_notebook_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/rewards/kid_rewards_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/time/kid_status_provider.dart';
+import 'package:ai_storytelling_mobile/features/kid/time/kid_time_layer.dart';
 import 'package:ai_storytelling_mobile/features/kid/wish/kid_wish_screen.dart';
 import 'package:ai_storytelling_mobile/models/child_interaction_dto.dart';
 import 'package:ai_storytelling_mobile/models/child_read_aloud_dto.dart';
 import 'package:ai_storytelling_mobile/models/child_reading_dto.dart';
 import 'package:ai_storytelling_mobile/models/child_rewards_dto.dart';
+import 'package:ai_storytelling_mobile/models/reading_time_dto.dart';
 import 'package:ai_storytelling_mobile/models/story_wish_dto.dart';
+import '../../support/ipad_sizes.dart';
 
 // Bố cục các màn mới của bé ở điện thoại nhỏ và máy tính bảng nằm ngang:
 // Flutter báo lỗi khi chữ/khung tràn, nên test đạt nghĩa là không tràn.
 
 const _longName = 'Huy hiệu đọc truyện chăm chỉ suốt cả tuần liền';
+
+void _noop() {}
 
 class _Rewards implements KidRewardsRepository {
   @override
@@ -187,6 +195,7 @@ void main() {
     'điện thoại 390x844': Size(390, 844),
     'ngang 844x390': Size(844, 390),
     'desktop 1280x800': Size(1280, 800),
+    ...kIpadSizes,
   };
   final screens = <String, Widget Function()>{
     'Phần thưởng': () => const KidRewardsScreen(),
@@ -203,6 +212,12 @@ void main() {
       ),
       scenes: [],
     ),
+    'Tổng kết quiz': () => const KidSummaryStep(sessionId: 1),
+    'Cảm xúc': () => const KidFeelingStep(sessionId: 1, onNext: _noop),
+    'Chọn yêu thích': () => const KidFavoriteStep(sessionId: 1, onBackToPick: _noop, onSent: _noop),
+    'Câu hỏi': () => KidQuestionsStep(sessionId: 1, tiles: const [], askedKeys: const {}, onAsked: (_) {}),
+    'Chọn cảm xúc': () => const KidEmotionStep(sessionId: 1, initialCodes: [], onNext: _noop),
+    'Chip đồng hồ': () => const KidTimeChip(status: ReadingTimeStatusDto(state: 'Allowed')),
   };
 
   for (final size in sizes.entries) {

@@ -39,6 +39,30 @@ class KidLobbyParts {
 
 /// Xếp sảnh theo khung [c]: dọc, ngang đủ cao (tablet) hoặc ngang thấp (điện thoại xoay ngang).
 Widget kidLobbyLayout(BoxConstraints c, KidLobbyParts p) {
+  final shortest = math.min(c.maxWidth, c.maxHeight);
+  // Máy tính bảng: dựng trên khung ảo rồi scale vừa màn để giữ cân đối bố cục.
+  if (shortest >= 600) {
+    final s = (shortest / 430).clamp(1.0, 1.6);
+    final virtual = BoxConstraints(
+      maxWidth: c.maxWidth / s,
+      maxHeight: c.maxHeight / s,
+    );
+    final body = c.maxWidth <= c.maxHeight * 1.15
+        ? _portrait(virtual, p)
+        : (c.maxHeight >= _tallLandscape
+            ? _landscapeTall(virtual, p)
+            : _landscapeShort(virtual, p));
+    return SizedBox.expand(
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: SizedBox(
+          width: c.maxWidth / s,
+          height: c.maxHeight / s,
+          child: body,
+        ),
+      ),
+    );
+  }
   if (c.maxWidth <= c.maxHeight * 1.15) return _portrait(c, p);
   return c.maxHeight >= _tallLandscape
       ? _landscapeTall(c, p)

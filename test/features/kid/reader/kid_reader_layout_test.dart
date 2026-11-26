@@ -6,6 +6,7 @@ import 'package:ai_storytelling_mobile/core/widgets/tt_frog.dart';
 import 'package:ai_storytelling_mobile/core/widgets/tt_network_image.dart';
 import 'package:ai_storytelling_mobile/features/kid/reader/kid_reader_page.dart';
 import 'package:ai_storytelling_mobile/models/child_reading_dto.dart';
+import '../../../support/ipad_sizes.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -92,6 +93,13 @@ void main() {
   });
 
   group('Test 2: Layout rendering without overflow across 4 sizes', () {
+    testWidgets('renders without overflow across iPad sizes', (tester) async {
+      for (final size in kIpadSizes.values) {
+        await pumpAt(tester, size);
+        expect(tester.takeException(), isNull);
+      }
+    });
+
     testWidgets('renders without overflow at 360x740 (stacked)', (tester) async {
       await pumpAt(tester, const Size(360, 740));
       expect(tester.takeException(), isNull);

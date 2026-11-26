@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ai_storytelling_mobile/core/theme/app_theme.dart';
 import 'package:ai_storytelling_mobile/features/kid/interaction/kid_interaction_screen.dart';
 import 'package:ai_storytelling_mobile/models/child_interaction_dto.dart';
+import '../../../support/ipad_sizes.dart';
 
 Widget _buildApp({required Widget home}) {
   return ProviderScope(
@@ -855,10 +856,11 @@ void main() {
   });
 
   group('Nhóm 3 — không tràn màn hình', () {
-    const surfaceSizes = <String, Size>{
-      '320x640': Size(320, 640),
-      '390x844': Size(390, 844),
-      '1024x768': Size(1024, 768),
+    final surfaceSizes = <String, Size>{
+      ...kIpadSizes,
+      '320x640': const Size(320, 640),
+      '390x844': const Size(390, 844),
+      '1024x768': const Size(1024, 768),
     };
 
     final interactions = <String, ReadingInteraction>{

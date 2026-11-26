@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:ai_storytelling_mobile/core/theme/kid_metrics.dart';
+import 'package:ai_storytelling_mobile/features/kid/kid_responsive.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
@@ -389,8 +390,9 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: 6,
                     gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
+                        SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount:
+                          kidGridColumns(MediaQuery.sizeOf(context).width, phone: 2),
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                       childAspectRatio: 0.72,
@@ -490,8 +492,9 @@ class _KidLibraryScreenState extends ConsumerState<KidLibraryScreen> {
                       padding: const EdgeInsets.all(16),
                       sliver: SliverGrid(
                         gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount:
+                              kidGridColumns(MediaQuery.sizeOf(context).width, phone: 2),
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
                           childAspectRatio: 0.72,
