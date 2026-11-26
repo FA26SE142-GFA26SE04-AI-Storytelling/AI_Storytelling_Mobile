@@ -3780,7 +3780,7 @@ as List<String>,
 /// @nodoc
 mixin _$ReadingSignal {
 
- bool get shouldExit; String? get returnTo; String? get message; String get sessionStatus;
+ bool get shouldExit; String? get returnTo; String? get message; String get sessionStatus; ReadingTimeStatusDto? get readingTime;
 /// Create a copy of ReadingSignal
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3794,20 +3794,20 @@ $ReadingSignalCopyWith<ReadingSignal> get copyWith => _$ReadingSignalCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as ReadingSignal;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadingSignal&&(identical(other.shouldExit, _this.shouldExit) || other.shouldExit == _this.shouldExit)&&(identical(other.returnTo, _this.returnTo) || other.returnTo == _this.returnTo)&&(identical(other.message, _this.message) || other.message == _this.message)&&(identical(other.sessionStatus, _this.sessionStatus) || other.sessionStatus == _this.sessionStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadingSignal&&(identical(other.shouldExit, _this.shouldExit) || other.shouldExit == _this.shouldExit)&&(identical(other.returnTo, _this.returnTo) || other.returnTo == _this.returnTo)&&(identical(other.message, _this.message) || other.message == _this.message)&&(identical(other.sessionStatus, _this.sessionStatus) || other.sessionStatus == _this.sessionStatus)&&(identical(other.readingTime, _this.readingTime) || other.readingTime == _this.readingTime));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ReadingSignal;
-  return Object.hash(runtimeType,_this.shouldExit,_this.returnTo,_this.message,_this.sessionStatus);
+  return Object.hash(runtimeType,_this.shouldExit,_this.returnTo,_this.message,_this.sessionStatus,_this.readingTime);
 }
 
 @override
 String toString() {
   final _this = this as ReadingSignal;
-  return 'ReadingSignal(shouldExit: ${_this.shouldExit}, returnTo: ${_this.returnTo}, message: ${_this.message}, sessionStatus: ${_this.sessionStatus})';
+  return 'ReadingSignal(shouldExit: ${_this.shouldExit}, returnTo: ${_this.returnTo}, message: ${_this.message}, sessionStatus: ${_this.sessionStatus}, readingTime: ${_this.readingTime})';
 }
 
 
@@ -3818,11 +3818,11 @@ abstract mixin class $ReadingSignalCopyWith<$Res>  {
   factory $ReadingSignalCopyWith(ReadingSignal value, $Res Function(ReadingSignal) _then) = _$ReadingSignalCopyWithImpl;
 @useResult
 $Res call({
- bool shouldExit, String? returnTo, String? message, String sessionStatus
+ bool shouldExit, String? returnTo, String? message, String sessionStatus, ReadingTimeStatusDto? readingTime
 });
 
 
-
+$ReadingTimeStatusDtoCopyWith<$Res>? get readingTime;
 
 }
 /// @nodoc
@@ -3835,16 +3835,29 @@ class _$ReadingSignalCopyWithImpl<$Res>
 
 /// Create a copy of ReadingSignal
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? shouldExit = null,Object? returnTo = freezed,Object? message = freezed,Object? sessionStatus = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? shouldExit = null,Object? returnTo = freezed,Object? message = freezed,Object? sessionStatus = null,Object? readingTime = freezed,}) {
   return _then(ReadingSignal(
 shouldExit: null == shouldExit ? _self.shouldExit : shouldExit // ignore: cast_nullable_to_non_nullable
 as bool,returnTo: freezed == returnTo ? _self.returnTo : returnTo // ignore: cast_nullable_to_non_nullable
 as String?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String?,sessionStatus: null == sessionStatus ? _self.sessionStatus : sessionStatus // ignore: cast_nullable_to_non_nullable
-as String,
+as String,readingTime: freezed == readingTime ? _self.readingTime : readingTime // ignore: cast_nullable_to_non_nullable
+as ReadingTimeStatusDto?,
   ));
 }
+/// Create a copy of ReadingSignal
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ReadingTimeStatusDtoCopyWith<$Res>? get readingTime {
+    if (_self.readingTime == null) {
+    return null;
+  }
 
+  return $ReadingTimeStatusDtoCopyWith<$Res>(_self.readingTime!, (value) {
+    return _then(_self.copyWith(readingTime: value));
+  });
+}
 }
 
 
@@ -3926,10 +3939,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool shouldExit,  String? returnTo,  String? message,  String sessionStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool shouldExit,  String? returnTo,  String? message,  String sessionStatus,  ReadingTimeStatusDto? readingTime)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ReadingSignal() when $default != null:
-return $default(_that.shouldExit,_that.returnTo,_that.message,_that.sessionStatus);case _:
+return $default(_that.shouldExit,_that.returnTo,_that.message,_that.sessionStatus,_that.readingTime);case _:
   return orElse();
 
 }
@@ -3947,10 +3960,10 @@ return $default(_that.shouldExit,_that.returnTo,_that.message,_that.sessionStatu
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool shouldExit,  String? returnTo,  String? message,  String sessionStatus)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool shouldExit,  String? returnTo,  String? message,  String sessionStatus,  ReadingTimeStatusDto? readingTime)  $default,) {final _that = this;
 switch (_that) {
 case _ReadingSignal():
-return $default(_that.shouldExit,_that.returnTo,_that.message,_that.sessionStatus);case _:
+return $default(_that.shouldExit,_that.returnTo,_that.message,_that.sessionStatus,_that.readingTime);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3967,10 +3980,10 @@ return $default(_that.shouldExit,_that.returnTo,_that.message,_that.sessionStatu
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool shouldExit,  String? returnTo,  String? message,  String sessionStatus)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool shouldExit,  String? returnTo,  String? message,  String sessionStatus,  ReadingTimeStatusDto? readingTime)?  $default,) {final _that = this;
 switch (_that) {
 case _ReadingSignal() when $default != null:
-return $default(_that.shouldExit,_that.returnTo,_that.message,_that.sessionStatus);case _:
+return $default(_that.shouldExit,_that.returnTo,_that.message,_that.sessionStatus,_that.readingTime);case _:
   return null;
 
 }
@@ -3982,13 +3995,14 @@ return $default(_that.shouldExit,_that.returnTo,_that.message,_that.sessionStatu
 @JsonSerializable()
 
 class _ReadingSignal implements ReadingSignal {
-  const _ReadingSignal({this.shouldExit = false, this.returnTo, this.message, required this.sessionStatus});
+  const _ReadingSignal({this.shouldExit = false, this.returnTo, this.message, required this.sessionStatus, this.readingTime});
   factory _ReadingSignal.fromJson(Map<String, dynamic> json) => _$ReadingSignalFromJson(json);
 
 @override@JsonKey() final  bool shouldExit;
 @override final  String? returnTo;
 @override final  String? message;
 @override final  String sessionStatus;
+@override final  ReadingTimeStatusDto? readingTime;
 
 /// Create a copy of ReadingSignal
 /// with the given fields replaced by the non-null parameter values.
@@ -4003,18 +4017,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadingSignal&&(identical(other.shouldExit, shouldExit) || other.shouldExit == shouldExit)&&(identical(other.returnTo, returnTo) || other.returnTo == returnTo)&&(identical(other.message, message) || other.message == message)&&(identical(other.sessionStatus, sessionStatus) || other.sessionStatus == sessionStatus));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadingSignal&&(identical(other.shouldExit, shouldExit) || other.shouldExit == shouldExit)&&(identical(other.returnTo, returnTo) || other.returnTo == returnTo)&&(identical(other.message, message) || other.message == message)&&(identical(other.sessionStatus, sessionStatus) || other.sessionStatus == sessionStatus)&&(identical(other.readingTime, readingTime) || other.readingTime == readingTime));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,shouldExit,returnTo,message,sessionStatus);
+    return Object.hash(runtimeType,shouldExit,returnTo,message,sessionStatus,readingTime);
 }
 
 @override
 String toString() {
-    return 'ReadingSignal(shouldExit: $shouldExit, returnTo: $returnTo, message: $message, sessionStatus: $sessionStatus)';
+    return 'ReadingSignal(shouldExit: $shouldExit, returnTo: $returnTo, message: $message, sessionStatus: $sessionStatus, readingTime: $readingTime)';
 }
 
 
@@ -4025,11 +4039,11 @@ abstract mixin class _$ReadingSignalCopyWith<$Res> implements $ReadingSignalCopy
   factory _$ReadingSignalCopyWith(_ReadingSignal value, $Res Function(_ReadingSignal) _then) = __$ReadingSignalCopyWithImpl;
 @override @useResult
 $Res call({
- bool shouldExit, String? returnTo, String? message, String sessionStatus
+ bool shouldExit, String? returnTo, String? message, String sessionStatus, ReadingTimeStatusDto? readingTime
 });
 
 
-
+@override $ReadingTimeStatusDtoCopyWith<$Res>? get readingTime;
 
 }
 /// @nodoc
@@ -4042,17 +4056,30 @@ class __$ReadingSignalCopyWithImpl<$Res>
 
 /// Create a copy of ReadingSignal
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? shouldExit = null,Object? returnTo = freezed,Object? message = freezed,Object? sessionStatus = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? shouldExit = null,Object? returnTo = freezed,Object? message = freezed,Object? sessionStatus = null,Object? readingTime = freezed,}) {
   return _then(_ReadingSignal(
 shouldExit: null == shouldExit ? _self.shouldExit : shouldExit // ignore: cast_nullable_to_non_nullable
 as bool,returnTo: freezed == returnTo ? _self.returnTo : returnTo // ignore: cast_nullable_to_non_nullable
 as String?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String?,sessionStatus: null == sessionStatus ? _self.sessionStatus : sessionStatus // ignore: cast_nullable_to_non_nullable
-as String,
+as String,readingTime: freezed == readingTime ? _self.readingTime : readingTime // ignore: cast_nullable_to_non_nullable
+as ReadingTimeStatusDto?,
   ));
 }
 
+/// Create a copy of ReadingSignal
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ReadingTimeStatusDtoCopyWith<$Res>? get readingTime {
+    if (_self.readingTime == null) {
+    return null;
+  }
 
+  return $ReadingTimeStatusDtoCopyWith<$Res>(_self.readingTime!, (value) {
+    return _then(_self.copyWith(readingTime: value));
+  });
+}
 }
 
 

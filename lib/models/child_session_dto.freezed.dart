@@ -295,7 +295,7 @@ as int,
 /// @nodoc
 mixin _$ChildSessionProfileDto {
 
- int get childProfileId; String get nickname; String get ageBand;
+ int get childProfileId; String get nickname; String get ageBand; ReadingTimeStatusDto? get readingTime; ChildHabitDto? get habit; List<String> get disabledFeatures;
 /// Create a copy of ChildSessionProfileDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -309,20 +309,20 @@ $ChildSessionProfileDtoCopyWith<ChildSessionProfileDto> get copyWith => _$ChildS
 @override
 bool operator ==(Object other) {
   final _this = this as ChildSessionProfileDto;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChildSessionProfileDto&&(identical(other.childProfileId, _this.childProfileId) || other.childProfileId == _this.childProfileId)&&(identical(other.nickname, _this.nickname) || other.nickname == _this.nickname)&&(identical(other.ageBand, _this.ageBand) || other.ageBand == _this.ageBand));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChildSessionProfileDto&&(identical(other.childProfileId, _this.childProfileId) || other.childProfileId == _this.childProfileId)&&(identical(other.nickname, _this.nickname) || other.nickname == _this.nickname)&&(identical(other.ageBand, _this.ageBand) || other.ageBand == _this.ageBand)&&(identical(other.readingTime, _this.readingTime) || other.readingTime == _this.readingTime)&&(identical(other.habit, _this.habit) || other.habit == _this.habit)&&const DeepCollectionEquality().equals(other.disabledFeatures, _this.disabledFeatures));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ChildSessionProfileDto;
-  return Object.hash(runtimeType,_this.childProfileId,_this.nickname,_this.ageBand);
+  return Object.hash(runtimeType,_this.childProfileId,_this.nickname,_this.ageBand,_this.readingTime,_this.habit,const DeepCollectionEquality().hash(_this.disabledFeatures));
 }
 
 @override
 String toString() {
   final _this = this as ChildSessionProfileDto;
-  return 'ChildSessionProfileDto(childProfileId: ${_this.childProfileId}, nickname: ${_this.nickname}, ageBand: ${_this.ageBand})';
+  return 'ChildSessionProfileDto(childProfileId: ${_this.childProfileId}, nickname: ${_this.nickname}, ageBand: ${_this.ageBand}, readingTime: ${_this.readingTime}, habit: ${_this.habit}, disabledFeatures: ${_this.disabledFeatures})';
 }
 
 
@@ -333,11 +333,11 @@ abstract mixin class $ChildSessionProfileDtoCopyWith<$Res>  {
   factory $ChildSessionProfileDtoCopyWith(ChildSessionProfileDto value, $Res Function(ChildSessionProfileDto) _then) = _$ChildSessionProfileDtoCopyWithImpl;
 @useResult
 $Res call({
- int childProfileId, String nickname, String ageBand
+ int childProfileId, String nickname, String ageBand, ReadingTimeStatusDto? readingTime, ChildHabitDto? habit, List<String> disabledFeatures
 });
 
 
-
+$ReadingTimeStatusDtoCopyWith<$Res>? get readingTime;$ChildHabitDtoCopyWith<$Res>? get habit;
 
 }
 /// @nodoc
@@ -350,15 +350,42 @@ class _$ChildSessionProfileDtoCopyWithImpl<$Res>
 
 /// Create a copy of ChildSessionProfileDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? childProfileId = null,Object? nickname = null,Object? ageBand = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? childProfileId = null,Object? nickname = null,Object? ageBand = null,Object? readingTime = freezed,Object? habit = freezed,Object? disabledFeatures = null,}) {
   return _then(ChildSessionProfileDto(
 childProfileId: null == childProfileId ? _self.childProfileId : childProfileId // ignore: cast_nullable_to_non_nullable
 as int,nickname: null == nickname ? _self.nickname : nickname // ignore: cast_nullable_to_non_nullable
 as String,ageBand: null == ageBand ? _self.ageBand : ageBand // ignore: cast_nullable_to_non_nullable
-as String,
+as String,readingTime: freezed == readingTime ? _self.readingTime : readingTime // ignore: cast_nullable_to_non_nullable
+as ReadingTimeStatusDto?,habit: freezed == habit ? _self.habit : habit // ignore: cast_nullable_to_non_nullable
+as ChildHabitDto?,disabledFeatures: null == disabledFeatures ? _self.disabledFeatures : disabledFeatures // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
+/// Create a copy of ChildSessionProfileDto
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ReadingTimeStatusDtoCopyWith<$Res>? get readingTime {
+    if (_self.readingTime == null) {
+    return null;
+  }
 
+  return $ReadingTimeStatusDtoCopyWith<$Res>(_self.readingTime!, (value) {
+    return _then(_self.copyWith(readingTime: value));
+  });
+}/// Create a copy of ChildSessionProfileDto
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ChildHabitDtoCopyWith<$Res>? get habit {
+    if (_self.habit == null) {
+    return null;
+  }
+
+  return $ChildHabitDtoCopyWith<$Res>(_self.habit!, (value) {
+    return _then(_self.copyWith(habit: value));
+  });
+}
 }
 
 
@@ -440,10 +467,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int childProfileId,  String nickname,  String ageBand)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int childProfileId,  String nickname,  String ageBand,  ReadingTimeStatusDto? readingTime,  ChildHabitDto? habit,  List<String> disabledFeatures)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChildSessionProfileDto() when $default != null:
-return $default(_that.childProfileId,_that.nickname,_that.ageBand);case _:
+return $default(_that.childProfileId,_that.nickname,_that.ageBand,_that.readingTime,_that.habit,_that.disabledFeatures);case _:
   return orElse();
 
 }
@@ -461,10 +488,10 @@ return $default(_that.childProfileId,_that.nickname,_that.ageBand);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int childProfileId,  String nickname,  String ageBand)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int childProfileId,  String nickname,  String ageBand,  ReadingTimeStatusDto? readingTime,  ChildHabitDto? habit,  List<String> disabledFeatures)  $default,) {final _that = this;
 switch (_that) {
 case _ChildSessionProfileDto():
-return $default(_that.childProfileId,_that.nickname,_that.ageBand);case _:
+return $default(_that.childProfileId,_that.nickname,_that.ageBand,_that.readingTime,_that.habit,_that.disabledFeatures);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -481,10 +508,10 @@ return $default(_that.childProfileId,_that.nickname,_that.ageBand);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int childProfileId,  String nickname,  String ageBand)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int childProfileId,  String nickname,  String ageBand,  ReadingTimeStatusDto? readingTime,  ChildHabitDto? habit,  List<String> disabledFeatures)?  $default,) {final _that = this;
 switch (_that) {
 case _ChildSessionProfileDto() when $default != null:
-return $default(_that.childProfileId,_that.nickname,_that.ageBand);case _:
+return $default(_that.childProfileId,_that.nickname,_that.ageBand,_that.readingTime,_that.habit,_that.disabledFeatures);case _:
   return null;
 
 }
@@ -496,12 +523,21 @@ return $default(_that.childProfileId,_that.nickname,_that.ageBand);case _:
 @JsonSerializable()
 
 class _ChildSessionProfileDto implements ChildSessionProfileDto {
-  const _ChildSessionProfileDto({required this.childProfileId, required this.nickname, required this.ageBand});
+  const _ChildSessionProfileDto({required this.childProfileId, required this.nickname, required this.ageBand, this.readingTime, this.habit,  List<String> disabledFeatures = const <String>[]}): _disabledFeatures = disabledFeatures;
   factory _ChildSessionProfileDto.fromJson(Map<String, dynamic> json) => _$ChildSessionProfileDtoFromJson(json);
 
 @override final  int childProfileId;
 @override final  String nickname;
 @override final  String ageBand;
+@override final  ReadingTimeStatusDto? readingTime;
+@override final  ChildHabitDto? habit;
+ final  List<String> _disabledFeatures;
+@override@JsonKey() List<String> get disabledFeatures {
+  if (_disabledFeatures is EqualUnmodifiableListView) return _disabledFeatures;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_disabledFeatures);
+}
+
 
 /// Create a copy of ChildSessionProfileDto
 /// with the given fields replaced by the non-null parameter values.
@@ -516,18 +552,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChildSessionProfileDto&&(identical(other.childProfileId, childProfileId) || other.childProfileId == childProfileId)&&(identical(other.nickname, nickname) || other.nickname == nickname)&&(identical(other.ageBand, ageBand) || other.ageBand == ageBand));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChildSessionProfileDto&&(identical(other.childProfileId, childProfileId) || other.childProfileId == childProfileId)&&(identical(other.nickname, nickname) || other.nickname == nickname)&&(identical(other.ageBand, ageBand) || other.ageBand == ageBand)&&(identical(other.readingTime, readingTime) || other.readingTime == readingTime)&&(identical(other.habit, habit) || other.habit == habit)&&const DeepCollectionEquality().equals(other.disabledFeatures, _disabledFeatures));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,childProfileId,nickname,ageBand);
+    return Object.hash(runtimeType,childProfileId,nickname,ageBand,readingTime,habit,const DeepCollectionEquality().hash(_disabledFeatures));
 }
 
 @override
 String toString() {
-    return 'ChildSessionProfileDto(childProfileId: $childProfileId, nickname: $nickname, ageBand: $ageBand)';
+    return 'ChildSessionProfileDto(childProfileId: $childProfileId, nickname: $nickname, ageBand: $ageBand, readingTime: $readingTime, habit: $habit, disabledFeatures: $disabledFeatures)';
 }
 
 
@@ -538,11 +574,11 @@ abstract mixin class _$ChildSessionProfileDtoCopyWith<$Res> implements $ChildSes
   factory _$ChildSessionProfileDtoCopyWith(_ChildSessionProfileDto value, $Res Function(_ChildSessionProfileDto) _then) = __$ChildSessionProfileDtoCopyWithImpl;
 @override @useResult
 $Res call({
- int childProfileId, String nickname, String ageBand
+ int childProfileId, String nickname, String ageBand, ReadingTimeStatusDto? readingTime, ChildHabitDto? habit, List<String> disabledFeatures
 });
 
 
-
+@override $ReadingTimeStatusDtoCopyWith<$Res>? get readingTime;@override $ChildHabitDtoCopyWith<$Res>? get habit;
 
 }
 /// @nodoc
@@ -555,16 +591,43 @@ class __$ChildSessionProfileDtoCopyWithImpl<$Res>
 
 /// Create a copy of ChildSessionProfileDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? childProfileId = null,Object? nickname = null,Object? ageBand = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? childProfileId = null,Object? nickname = null,Object? ageBand = null,Object? readingTime = freezed,Object? habit = freezed,Object? disabledFeatures = null,}) {
   return _then(_ChildSessionProfileDto(
 childProfileId: null == childProfileId ? _self.childProfileId : childProfileId // ignore: cast_nullable_to_non_nullable
 as int,nickname: null == nickname ? _self.nickname : nickname // ignore: cast_nullable_to_non_nullable
 as String,ageBand: null == ageBand ? _self.ageBand : ageBand // ignore: cast_nullable_to_non_nullable
-as String,
+as String,readingTime: freezed == readingTime ? _self.readingTime : readingTime // ignore: cast_nullable_to_non_nullable
+as ReadingTimeStatusDto?,habit: freezed == habit ? _self.habit : habit // ignore: cast_nullable_to_non_nullable
+as ChildHabitDto?,disabledFeatures: null == disabledFeatures ? _self._disabledFeatures : disabledFeatures // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 
+/// Create a copy of ChildSessionProfileDto
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ReadingTimeStatusDtoCopyWith<$Res>? get readingTime {
+    if (_self.readingTime == null) {
+    return null;
+  }
 
+  return $ReadingTimeStatusDtoCopyWith<$Res>(_self.readingTime!, (value) {
+    return _then(_self.copyWith(readingTime: value));
+  });
+}/// Create a copy of ChildSessionProfileDto
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ChildHabitDtoCopyWith<$Res>? get habit {
+    if (_self.habit == null) {
+    return null;
+  }
+
+  return $ChildHabitDtoCopyWith<$Res>(_self.habit!, (value) {
+    return _then(_self.copyWith(habit: value));
+  });
+}
 }
 
 // dart format on

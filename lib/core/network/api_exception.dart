@@ -111,6 +111,10 @@ class ApiException implements Exception {
       chosenMessage = fallbackMessage;
     }
 
+    if (statusCode == 403 && extractedErrors.contains('CHILD_FEATURE_DISABLED')) {
+      chosenMessage = 'Bố mẹ chưa bật chức năng này. Em hỏi bố mẹ nhé.';
+    }
+
     return ApiException(
       statusCode: statusCode,
       message: chosenMessage,
@@ -155,4 +159,13 @@ class ApiException implements Exception {
 
   @override
   String toString() => message;
+}
+
+const Set<String> _childGateErrorCodes = {'CHILD_FEATURE_DISABLED', 'READING_TIME_BREAK', 'READING_TIME_BEDTIME', 'READING_TIME_SCREEN_LIMIT', 'READING_TIME_OUTSIDE'};
+bool isChildGateBlock(DioException e) {
+  if (e.response?.statusCode != 403) return false;
+  final data = e.response?.data;
+  final raw = data is Map ? data['errors'] : null;
+  if (raw is! List) return false;
+  return raw.any((item) => item is String && _childGateErrorCodes.contains(item.trim()));
 }

@@ -74,7 +74,7 @@ class ApiKidRewardsRepository implements KidRewardsRepository {
       return await request();
     } on DioException catch (e) {
       final statusCode = e.response?.statusCode;
-      if (statusCode == 401 || statusCode == 403) {
+      if (statusCode == 401 || (statusCode == 403 && !isChildGateBlock(e))) {
         onChildSessionEnded();
       }
       rethrow;

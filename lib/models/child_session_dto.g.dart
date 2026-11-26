@@ -28,6 +28,19 @@ _ChildSessionProfileDto _$ChildSessionProfileDtoFromJson(
   childProfileId: (json['childProfileId'] as num).toInt(),
   nickname: json['nickname'] as String,
   ageBand: json['ageBand'] as String,
+  readingTime: json['readingTime'] == null
+      ? null
+      : ReadingTimeStatusDto.fromJson(
+          json['readingTime'] as Map<String, dynamic>,
+        ),
+  habit: json['habit'] == null
+      ? null
+      : ChildHabitDto.fromJson(json['habit'] as Map<String, dynamic>),
+  disabledFeatures:
+      (json['disabledFeatures'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const <String>[],
 );
 
 Map<String, dynamic> _$ChildSessionProfileDtoToJson(
@@ -36,4 +49,7 @@ Map<String, dynamic> _$ChildSessionProfileDtoToJson(
   'childProfileId': instance.childProfileId,
   'nickname': instance.nickname,
   'ageBand': instance.ageBand,
+  'readingTime': instance.readingTime,
+  'habit': instance.habit,
+  'disabledFeatures': instance.disabledFeatures,
 };

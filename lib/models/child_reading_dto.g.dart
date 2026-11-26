@@ -282,6 +282,11 @@ _ReadingSignal _$ReadingSignalFromJson(Map<String, dynamic> json) =>
       returnTo: json['returnTo'] as String?,
       message: json['message'] as String?,
       sessionStatus: json['sessionStatus'] as String,
+      readingTime: json['readingTime'] == null
+          ? null
+          : ReadingTimeStatusDto.fromJson(
+              json['readingTime'] as Map<String, dynamic>,
+            ),
     );
 
 Map<String, dynamic> _$ReadingSignalToJson(_ReadingSignal instance) =>
@@ -290,6 +295,7 @@ Map<String, dynamic> _$ReadingSignalToJson(_ReadingSignal instance) =>
       'returnTo': instance.returnTo,
       'message': instance.message,
       'sessionStatus': instance.sessionStatus,
+      'readingTime': instance.readingTime,
     };
 
 _VocabularyDefinition _$VocabularyDefinitionFromJson(

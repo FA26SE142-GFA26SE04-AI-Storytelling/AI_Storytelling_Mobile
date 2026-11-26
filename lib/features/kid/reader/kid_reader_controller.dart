@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../models/child_interaction_dto.dart';
 import '../../../models/child_reading_dto.dart';
+import '../../../models/reading_time_dto.dart';
 import '../data/kid_reading_repository.dart';
 import 'kid_reader_pages.dart';
 
@@ -36,6 +37,7 @@ class KidReaderState {
     this.flags,
     this.collectedVocabIds = const <int>{},
     this.answeredInteractionIds = const <int>{},
+    this.readingTime,
   });
 
   final KidReaderStatus status;
@@ -87,6 +89,9 @@ class KidReaderState {
   /// interactionId đã trả lời trong phiên này (để không hỏi lại).
   final Set<int> answeredInteractionIds;
 
+  /// Trạng thái giờ đọc (reading time limit / curfew).
+  final ReadingTimeStatusDto? readingTime;
+
   KidReaderState copyWith({
     KidReaderStatus? status,
     ReadingContent? content,
@@ -105,6 +110,7 @@ class KidReaderState {
     ReadingFlags? flags,
     Set<int>? collectedVocabIds,
     Set<int>? answeredInteractionIds,
+    Object? readingTime = _sentinel,
   }) {
     return KidReaderState(
       status: status ?? this.status,
@@ -129,6 +135,9 @@ class KidReaderState {
       collectedVocabIds: collectedVocabIds ?? this.collectedVocabIds,
       answeredInteractionIds:
           answeredInteractionIds ?? this.answeredInteractionIds,
+      readingTime: readingTime == _sentinel
+          ? this.readingTime
+          : readingTime as ReadingTimeStatusDto?,
     );
   }
 }
@@ -332,6 +341,10 @@ class KidReaderController extends Notifier<KidReaderState> {
       final signal = await _repo.signal(sid.toString());
       if (_disposed) return;
 
+      _safeSetState(state.copyWith(readingTime: signal.readingTime));
+
+      // Như Web: hết giờ / giờ ngủ / hết phút thì thoát về sảnh (sảnh hiện màn chặn từ /me);
+      // riêng nghỉ giữa giờ thì backend không bắt thoát, trình đọc phủ màn nghỉ và vẫn hỏi lại signal.
       if (signal.shouldExit) {
         _stopAllTimers();
         _safeSetState(state.copyWith(
@@ -355,6 +368,11 @@ class KidReaderController extends Notifier<KidReaderState> {
     } catch (_) {
       // Lỗi mạng khác: bỏ qua.
     }
+  }
+
+  /// Kiểm tra lại signal thủ công (ví dụ khi phụ huynh mở chặn hoặc resume).
+  Future<void> recheckSignal() async {
+    await _checkSignal();
   }
 
   // ─── Điều hướng trang ──────────────────────────────────────────────────────
@@ -673,6 +691,7 @@ class KidReaderController extends Notifier<KidReaderState> {
 
   /// Xử lý lỗi API nghiêm trọng khi load.
   void _handleApiError(ApiException e) {
+    // 403 READING_TIME_* khi mở truyện cũng đi nhánh exitReason: về sảnh kèm lời backend, sảnh hiện màn chặn.
     final code = e.statusCode;
     if (code == 401 || code == 403 || code == 404) {
       _safeSetState(state.copyWith(

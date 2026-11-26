@@ -15,6 +15,8 @@ import '../data/kid_reading_repository.dart';
 import '../data/kid_session_controller.dart';
 import '../interaction/kid_interaction_screen.dart';
 import '../quiz/kid_after_reading_screen.dart';
+import '../time/kid_status_provider.dart';
+import '../time/kid_time_layer.dart';
 import 'kid_read_aloud_controller.dart';
 import 'kid_read_aloud_practice_page.dart';
 import 'kid_reader_audio.dart';
@@ -501,16 +503,23 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     );
 
     // Lắng nghe exitReason → toast + điều hướng
-    ref.listen(
-      kidReaderControllerProvider(widget.storyId).select((s) => s.exitReason),
-      (prev, next) {
-        if (next != null && next.isNotEmpty && mounted) {
-          _audio.stop();
-          _toast(next, type: TtToastType.info);
-          context.go('/kid');
-        }
-      },
-    );
+    ref.listen(kidReaderControllerProvider(widget.storyId), (prev, next) {
+      if (next.readingTime?.state == 'Break' &&
+          prev?.readingTime?.state != 'Break') {
+        _audio.stop();
+        _cancelAloud();
+      }
+      if (next.exitReason != null &&
+          next.exitReason != prev?.exitReason &&
+          next.exitReason!.isNotEmpty &&
+          mounted) {
+        _audio.stop();
+        _toast(next.exitReason!, type: TtToastType.info);
+        // Sảnh hỏi lại /me ngay để hiện màn chặn (giờ ngủ, hết phút, ngoài khung) không phải chờ lượt hỏi kế.
+        ref.read(kidStatusProvider.notifier).refresh();
+        context.go('/kid');
+      }
+    });
 
     // Lắng nghe lỗi đọc to → toast + clearError
     ref.listen(kidReadAloudControllerProvider(widget.storyId), (prev, next) {
@@ -547,40 +556,49 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
       }
     });
 
+    final readingTime =
+        ref.watch(kidReaderControllerProvider(widget.storyId)).readingTime;
     final state = ref.watch(kidReaderControllerProvider(widget.storyId));
     final aloud = ref.watch(kidReadAloudControllerProvider(widget.storyId));
     final tt = context.tt;
 
     return Scaffold(
       backgroundColor: tt.bg,
-      body: SafeArea(
-        child: switch (state.status) {
-          KidReaderStatus.loading => Padding(
-            padding: const EdgeInsets.all(24),
-            child: KidPanel(
-              borderColor: tt.primary,
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TtSkeleton(height: 200),
-                  SizedBox(height: 16),
-                  TtSkeleton(height: 20),
-                  SizedBox(height: 12),
-                  TtSkeleton(height: 20),
-                ],
+      // Trong truyện chỉ phủ màn nghỉ giữa giờ (như Web); các kiểu chặn khác thì signal bắt thoát về sảnh.
+      body: KidTimeGate(
+        status: readingTime?.state == 'Break' ? readingTime : null,
+        onDone: () => ref
+            .read(kidReaderControllerProvider(widget.storyId).notifier)
+            .recheckSignal(),
+        child: SafeArea(
+          child: switch (state.status) {
+            KidReaderStatus.loading => Padding(
+              padding: const EdgeInsets.all(24),
+              child: KidPanel(
+                borderColor: tt.primary,
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TtSkeleton(height: 200),
+                    SizedBox(height: 16),
+                    TtSkeleton(height: 20),
+                    SizedBox(height: 12),
+                    TtSkeleton(height: 20),
+                  ],
+                ),
               ),
             ),
-          ),
-          KidReaderStatus.error => TtErrorState(
-            title: 'Chưa mở được truyện',
-            message: state.lastErrorMessage?.isNotEmpty == true
-                ? state.lastErrorMessage!
-                : 'Em thử lại nhé',
-            onRetry: _notifier.load,
-          ),
-          KidReaderStatus.ready => _buildReadyBody(context, state, tt, aloud),
-        },
+            KidReaderStatus.error => TtErrorState(
+              title: 'Chưa mở được truyện',
+              message: state.lastErrorMessage?.isNotEmpty == true
+                  ? state.lastErrorMessage!
+                  : 'Em thử lại nhé',
+              onRetry: _notifier.load,
+            ),
+            KidReaderStatus.ready => _buildReadyBody(context, state, tt, aloud),
+          },
+        ),
       ),
     );
   }
@@ -616,7 +634,13 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     final audioAvailable =
         currentScene != null && _isAudioAvailable(currentScene);
     final practice = content.readAloudPractice;
-    final hasPractice = practice != null && practice.text.trim().isNotEmpty;
+    // Như Web: bố mẹ tắt giọng nói thì bỏ trang luyện đọc to cuối truyện.
+    final voiceOn = !ref
+        .watch(kidStatusProvider)
+        .disabledFeatures
+        .contains(kKidFeatureVoice);
+    final hasPractice =
+        voiceOn && practice != null && practice.text.trim().isNotEmpty;
     void togglePractice() => ref
         .read(kidReadAloudControllerProvider(widget.storyId).notifier)
         .toggle(

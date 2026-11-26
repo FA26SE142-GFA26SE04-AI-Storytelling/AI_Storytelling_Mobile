@@ -8,6 +8,7 @@ import '../../../core/widgets/kid_panel.dart';
 import '../../../core/widgets/tt_toast.dart';
 import '../../../models/child_rewards_dto.dart';
 import '../../../models/my_roadmap_dto.dart';
+import '../time/kid_status_provider.dart';
 import 'kid_frog_cue.dart';
 import 'kid_lobby_frog.dart';
 import 'kid_lobby_layout.dart';
@@ -30,9 +31,13 @@ class KidLobby extends StatefulWidget {
     required this.onNotebook,
     required this.onWish,
     required this.onRewards,
+    this.disabledFeatures = const <String>[],
   });
 
   final MyRoadmapDto roadmap;
+
+  /// Mã chức năng bố mẹ đang tắt (kKidFeature*): nút tương ứng mờ đi, bấm thì báo nhẹ nhàng.
+  final List<String> disabledFeatures;
 
   /// Null khi chưa tải được phần thưởng: khi đó không hiện badge.
   final ChildRewards? rewards;
@@ -67,9 +72,15 @@ class _KidLobbyState extends State<KidLobby> {
     open();
   }
 
+  bool _off(String code) => widget.disabledFeatures.contains(code);
+
+  /// Chức năng bị tắt thì chỉ báo, không mở màn (tránh gọi API rồi nhận 403).
+  VoidCallback _gate(String code, VoidCallback open) =>
+      _off(code) ? () => showTtToast(context, kKidFeatureOffMessage) : open;
+
   void _onGo() {
     final open = widget.roadmap.open;
-    if (open == null) return _go(widget.onLibrary);
+    if (open == null) return _go(_gate(kKidFeatureLibrary, widget.onLibrary));
     if (open.isLocked) return showTtToast(context, kKidLockedStoryMessage);
     _go(() => widget.onRead(open.storyId));
   }
@@ -98,21 +109,26 @@ class _KidLobbyState extends State<KidLobby> {
     Color iconColor = Colors.white,
     int? badge,
     String? badgeLabel,
+    String? feature,
   }) {
+    final off = feature != null && _off(feature);
     return _pop(
       KidBob(
         period: Duration(milliseconds: periodMs),
         phase: phase,
-        child: KidStageButton(
-          label: label,
-          icon: icon,
-          color: color,
-          iconColor: iconColor,
-          onTap: () => _go(onTap),
-          onDown: () => _cue.act(action),
-          badge: badge,
-          badgeLabel: badgeLabel,
-          diameter: _button,
+        child: Opacity(
+          opacity: off ? 0.45 : 1,
+          child: KidStageButton(
+            label: label,
+            icon: icon,
+            color: color,
+            iconColor: iconColor,
+            onTap: () => _go(feature == null ? onTap : _gate(feature, onTap)),
+            onDown: () => _cue.act(action),
+            badge: off ? null : badge,
+            badgeLabel: badgeLabel,
+            diameter: _button,
+          ),
         ),
       ),
       order,
@@ -172,6 +188,7 @@ class _KidLobbyState extends State<KidLobby> {
         KidFrogAction.wink,
         order: 3,
         periodMs: 3800,
+        feature: kKidFeatureNotebook,
       ),
       wish: _btn(
         'Điều ước',
@@ -182,6 +199,7 @@ class _KidLobbyState extends State<KidLobby> {
         order: 1,
         phase: 0.5,
         iconColor: kKidInkOnBright,
+        feature: kKidFeatureWishes,
       ),
       // Cúp chỉ để xem (không bấm): số huy hiệu bé đã đạt.
       badges: _pop(
@@ -207,6 +225,7 @@ class _KidLobbyState extends State<KidLobby> {
             phase: 0.5,
             badge: water,
             badgeLabel: '$water giọt nước chờ tưới',
+            feature: kKidFeatureRewards,
           ),
         ],
       ),
