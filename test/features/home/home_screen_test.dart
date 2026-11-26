@@ -18,6 +18,8 @@ import 'package:ai_storytelling_mobile/features/library/presentation/search_scre
 import 'package:ai_storytelling_mobile/features/notifications/data/notification_repository.dart';
 import 'package:ai_storytelling_mobile/models/library_story_dto.dart';
 
+import '../../support/ipad_sizes.dart';
+
 LibraryStoryDto _story(
   int id, {
   int? views,
@@ -397,6 +399,16 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       });
+    }
+  });
+
+  testWidgets('bố cục iPad không lỗi tràn', (tester) async {
+    for (final size in kIpadSizes.values) {
+      await _pump(tester, size: size);
+      expect(tester.takeException(), isNull);
+      expect(find.text('TaleTale'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(seconds: 10));
     }
   });
 }

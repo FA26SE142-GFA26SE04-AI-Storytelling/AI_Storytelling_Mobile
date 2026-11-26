@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:ai_storytelling_mobile/core/widgets/tt_adaptive.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
@@ -270,43 +271,55 @@ class _StoryPreviewScreenState extends ConsumerState<StoryPreviewScreen> {
       );
     }
 
+    final header = Row(
+      children: [
+        Expanded(
+          child: Text(
+            s.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.headlineMedium,
+          ),
+        ),
+        const SizedBox(width: 8),
+        TtIconButton(
+          icon: Icons.close_rounded,
+          tooltip: 'Đóng xem trước',
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ],
+    );
+
+    final infoCard = info.animate().fadeIn(duration: 260.ms);
+    final readerCard = TtCard(padding: const EdgeInsets.all(12), child: reader)
+        .animate()
+        .fadeIn(delay: 80.ms, duration: 260.ms)
+        .slideY(begin: 0.04, end: 0, duration: 260.ms);
+
+    final isWide = MediaQuery.sizeOf(context).width >= kTwoColumnMinWidth;
+
     return Scaffold(
       backgroundColor: tt.bg,
       bottomNavigationBar: StoryPreviewActionBar(storyId: s.id),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        s.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.headlineMedium,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    TtIconButton(
-                      icon: Icons.close_rounded,
-                      tooltip: 'Đóng xem trước',
-                      onPressed: () => Navigator.of(context).maybePop(),
-                    ),
-                  ],
-                ),
+        child: TtContentWidth(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              if (isWide)
+                // iPad ngang: tiêu đề + bìa + thông tin bên trái, nội dung truyện bên phải.
+                TtAdaptiveColumns(
+                  left: [header, infoCard],
+                  right: [readerCard],
+                )
+              else ...[
+                header,
                 const SizedBox(height: 12),
-                info.animate().fadeIn(duration: 260.ms),
+                infoCard,
                 const SizedBox(height: 16),
-                TtCard(padding: const EdgeInsets.all(12), child: reader)
-                    .animate()
-                    .fadeIn(delay: 80.ms, duration: 260.ms)
-                    .slideY(begin: 0.04, end: 0, duration: 260.ms),
+                readerCard,
               ],
-            ),
+            ],
           ),
         ),
       ),

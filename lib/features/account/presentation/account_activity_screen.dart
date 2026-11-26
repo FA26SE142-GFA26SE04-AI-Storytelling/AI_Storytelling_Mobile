@@ -5,6 +5,7 @@ import 'package:ai_storytelling_mobile/core/network/api_exception.dart';
 import 'package:ai_storytelling_mobile/core/theme/tt_colors.dart';
 import 'package:ai_storytelling_mobile/core/theme/tt_radius.dart';
 import 'package:ai_storytelling_mobile/core/utils/audit_labels.dart';
+import 'package:ai_storytelling_mobile/core/widgets/tt_adaptive.dart';
 import 'package:ai_storytelling_mobile/core/widgets/tt_button.dart';
 import 'package:ai_storytelling_mobile/core/widgets/tt_card.dart';
 import 'package:ai_storytelling_mobile/core/widgets/tt_state_views.dart';
@@ -153,12 +154,8 @@ class _AccountActivityScreenState extends ConsumerState<AccountActivityScreen> {
         title: const Text('Lịch sử hoạt động'),
       ),
       body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 840),
-            child: _buildBody(context),
-          ),
+        child: TtContentWidth(
+          child: _buildBody(context),
         ),
       ),
     );

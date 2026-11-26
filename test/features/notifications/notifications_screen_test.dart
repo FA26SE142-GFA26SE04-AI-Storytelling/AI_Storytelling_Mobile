@@ -13,6 +13,8 @@ import 'package:ai_storytelling_mobile/features/notifications/presentation/notif
 import 'package:ai_storytelling_mobile/models/child_profile_dto.dart';
 import 'package:ai_storytelling_mobile/models/notification_dto.dart';
 
+import '../../support/ipad_sizes.dart';
+
 class _FakeChildren implements ChildProfileRepository {
   @override
   Future<List<ChildProfileDto>> fetchMine() async => const [
@@ -267,6 +269,16 @@ void main() {
         await _pump(tester, size: size);
         expect(tester.takeException(), isNull);
       });
+    }
+  });
+
+  testWidgets('bố cục iPad không lỗi tràn', (tester) async {
+    for (final size in kIpadSizes.values) {
+      await _pump(tester, size: size);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Thông báo'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(seconds: 10));
     }
   });
 }

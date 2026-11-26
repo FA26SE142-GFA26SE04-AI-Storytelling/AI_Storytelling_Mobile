@@ -11,6 +11,7 @@ import 'package:ai_storytelling_mobile/features/library/presentation/library_pro
 import 'package:ai_storytelling_mobile/models/event_dto.dart';
 
 import '../../support/fake_event_repository.dart';
+import '../../support/ipad_sizes.dart';
 
 final _now = DateTime.now();
 
@@ -321,5 +322,13 @@ void main() {
     await tester.tap(find.byTooltip('Quay lại'));
     await tester.pumpAndSettle();
     expect(find.text('LIST'), findsOneWidget);
+  });
+
+  testWidgets('bố cục iPad không lỗi tràn', (tester) async {
+    for (final size in kIpadSizes.values) {
+      await _pump(tester, _joined(), size: size);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Mùa hè đọc sách'), findsOneWidget);
+    }
   });
 }

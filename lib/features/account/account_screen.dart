@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:ai_storytelling_mobile/core/theme/tt_colors.dart';
 import 'package:ai_storytelling_mobile/core/theme/tt_radius.dart';
+import 'package:ai_storytelling_mobile/core/widgets/tt_adaptive.dart';
 import 'package:ai_storytelling_mobile/core/widgets/tt_button.dart';
 import 'package:ai_storytelling_mobile/core/widgets/tt_card.dart';
 import 'package:ai_storytelling_mobile/core/widgets/tt_confirm_dialog.dart';
@@ -30,8 +31,15 @@ class AccountScreen extends ConsumerWidget {
     final user = authState is AuthSignedIn ? authState.user : null;
     final unread = watchUnreadCount(ref);
 
-    final sections = <Widget>[
-      if (user != null) _ProfileCard(user: user),
+    final left = <Widget>[
+      if (user != null)
+        _ProfileCard(user: user)
+            .animate()
+            .fadeIn(duration: 300.ms)
+            .slideY(begin: 0.05, end: 0, duration: 300.ms),
+    ];
+
+    final right = <Widget>[
       _Group(
         title: 'Bảo mật',
         items: [
@@ -57,7 +65,10 @@ class AccountScreen extends ConsumerWidget {
             onTap: () => context.push('/account/activity'),
           ),
         ],
-      ),
+      )
+          .animate(delay: 60.ms)
+          .fadeIn(duration: 300.ms)
+          .slideY(begin: 0.05, end: 0, duration: 300.ms),
       _Group(
         title: 'Khác',
         items: [
@@ -74,31 +85,33 @@ class AccountScreen extends ConsumerWidget {
             onTap: () => _openDeleteAccount(context),
           ),
         ],
-      ),
+      )
+          .animate(delay: 120.ms)
+          .fadeIn(duration: 300.ms)
+          .slideY(begin: 0.05, end: 0, duration: 300.ms),
       TtButton(
         label: 'Đăng xuất',
         icon: Icons.logout_rounded,
         variant: TtButtonVariant.danger,
         expanded: true,
         onPressed: () => _confirmLogout(context, ref),
-      ),
+      )
+          .animate(delay: 180.ms)
+          .fadeIn(duration: 300.ms)
+          .slideY(begin: 0.05, end: 0, duration: 300.ms),
     ];
 
     return Scaffold(
       body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: sections.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 16),
-              itemBuilder: (_, i) => sections[i]
-                  .animate(delay: (60 * i).ms)
-                  .fadeIn(duration: 300.ms)
-                  .slideY(begin: 0.05, end: 0, duration: 300.ms),
-            ),
+        child: TtContentWidth(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TtAdaptiveColumns(
+                left: left,
+                right: right,
+              ),
+            ],
           ),
         ),
       ),

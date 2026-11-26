@@ -8,6 +8,8 @@ import 'package:ai_storytelling_mobile/features/auth/application/auth_controller
 import 'package:ai_storytelling_mobile/features/auth/data/auth_models.dart';
 import 'package:ai_storytelling_mobile/features/notifications/data/notification_repository.dart';
 
+import '../../support/ipad_sizes.dart';
+
 class _FakeAuthController extends AuthController {
   @override
   AuthState build() => const AuthSignedIn(
@@ -90,5 +92,26 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Đăng xuất?'), findsOneWidget);
+  });
+
+  testWidgets('Hiện đủ các mục, không tràn lỗi trên các khổ iPad',
+      (tester) async {
+    for (final size in kIpadSizes.values) {
+      await _pump(tester, size);
+
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('Nguyễn Văn An'), findsOneWidget);
+      expect(find.text('Bảo mật'), findsOneWidget);
+    }
+  });
+
+  testWidgets('Bố cục 2 cột ở khổ 1366x1024', (tester) async {
+    await _pump(tester, const Size(1366, 1024));
+
+    final namePos = tester.getTopLeft(find.textContaining('Nguyễn Văn An'));
+    final securityPos = tester.getTopLeft(find.text('Bảo mật'));
+
+    expect((securityPos.dy - namePos.dy).abs(), lessThan(100));
+    expect(securityPos.dx - namePos.dx, greaterThan(300));
   });
 }

@@ -9,6 +9,7 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import 'package:ai_storytelling_mobile/core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_network_image.dart';
 import '../../../core/widgets/tt_state_views.dart';
@@ -64,7 +65,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
     }
   }
 
-  List<Widget> _body(double side) {
+  List<Widget> _body(double side, bool isWide) {
     Widget padded(Widget child) => SliverPadding(
       padding: EdgeInsets.symmetric(horizontal: side),
       sliver: SliverToBoxAdapter(child: child),
@@ -172,6 +173,32 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
             title: 'Không tìm thấy sự kiện phù hợp',
           ),
         )
+      else if (isWide)
+        SliverPadding(
+          padding: EdgeInsets.symmetric(horizontal: side),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 0.85,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, i) =>
+                  EventCard(
+                        event: shown[i],
+                        group: groups[shown[i].id]!,
+                        parts: joined[shown[i].id] ?? const [],
+                        onTap: () =>
+                            context.push(AppRoutes.eventPath(shown[i].id)),
+                      )
+                      .animate()
+                      .fadeIn(delay: (40 * math.min(i, 8)).ms, duration: 260.ms)
+                      .slideY(begin: 0.05, end: 0, duration: 260.ms),
+              childCount: shown.length,
+            ),
+          ),
+        )
       else
         SliverPadding(
           padding: EdgeInsets.symmetric(horizontal: side),
@@ -206,10 +233,14 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
             slivers: [
               SliverLayoutBuilder(
                 builder: (context, constraints) {
-                  // Nội dung rộng tối đa 960, căn giữa trên màn rộng.
+                  final isWide =
+                      constraints.crossAxisExtent >= kTwoColumnMinWidth;
+                  // Nội dung rộng tối đa kWideContentMaxWidth (màn rộng) hoặc 960, căn giữa trên màn rộng.
                   final side = math.max(
                     16.0,
-                    (constraints.crossAxisExtent - 960) / 2,
+                    (constraints.crossAxisExtent -
+                            (isWide ? kWideContentMaxWidth : 960)) /
+                        2,
                   );
                   return SliverPadding(
                     padding: const EdgeInsets.only(bottom: 16),
@@ -244,7 +275,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                           ),
                         ),
                         const SliverToBoxAdapter(child: SizedBox(height: 4)),
-                        ..._body(side),
+                        ..._body(side, isWide),
                       ],
                     ),
                   );

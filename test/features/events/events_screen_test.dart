@@ -9,6 +9,7 @@ import 'package:ai_storytelling_mobile/features/events/presentation/events_scree
 import 'package:ai_storytelling_mobile/models/event_dto.dart';
 
 import '../../support/fake_event_repository.dart';
+import '../../support/ipad_sizes.dart';
 
 final _now = DateTime.now();
 
@@ -200,5 +201,22 @@ void main() {
         expect(tester.takeException(), isNull);
       });
     }
+  });
+
+  testWidgets('bố cục iPad không lỗi tràn', (tester) async {
+    for (final size in kIpadSizes.values) {
+      await _pump(tester, _sample(), size: size);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Mùa hè đọc sách'), findsOneWidget);
+    }
+  });
+
+  testWidgets('ở khổ Size(1366, 1024) hiển thị thành 2 cột', (tester) async {
+    await _pump(tester, _sample(), size: const Size(1366, 1024));
+
+    final first = tester.getTopLeft(find.byType(EventCard).at(0));
+    final second = tester.getTopLeft(find.byType(EventCard).at(1));
+    expect((first.dy - second.dy).abs(), lessThan(4));
+    expect(second.dx, greaterThan(first.dx));
   });
 }

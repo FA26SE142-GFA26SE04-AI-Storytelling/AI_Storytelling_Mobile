@@ -9,6 +9,27 @@ import 'package:ai_storytelling_mobile/features/auth/data/auth_repository.dart';
 import 'package:ai_storytelling_mobile/features/auth/presentation/login_screen.dart';
 
 import '../../support/fake_auth_repository.dart';
+import '../../support/ipad_sizes.dart';
+
+Future<void> _pump(WidgetTester tester, Size size) async {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+      ],
+      child: MaterialApp(
+        theme: AppTheme.light(),
+        home: const LoginScreen(),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
 
 void main() {
   // Kiểm thử giao diện màn hình đăng nhập
@@ -83,6 +104,19 @@ void main() {
 
       // Kiểm tra hiển thị thông báo lỗi
       expect(find.text('Sai tài khoản hoặc mật khẩu.'), findsOneWidget);
+    });
+
+    testWidgets('bố cục iPad không lỗi tràn', (tester) async {
+      for (final size in kIpadSizes.values) {
+        await _pump(tester, size);
+        expect(tester.takeException(), isNull);
+        expect(
+          find.text('Chào mừng bạn trở lại. Đăng nhập để cho bé đọc truyện.'),
+          findsOneWidget,
+        );
+        expect(find.byType(TextField), findsWidgets);
+        expect(find.widgetWithText(TtButton, 'Đăng nhập'), findsOneWidget);
+      }
     });
   });
 }

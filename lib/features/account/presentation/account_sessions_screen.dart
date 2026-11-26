@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ai_storytelling_mobile/core/network/api_exception.dart';
 import 'package:ai_storytelling_mobile/core/theme/tt_colors.dart';
 import 'package:ai_storytelling_mobile/core/theme/tt_radius.dart';
+import 'package:ai_storytelling_mobile/core/widgets/tt_adaptive.dart';
 import 'package:ai_storytelling_mobile/core/widgets/tt_button.dart';
 import 'package:ai_storytelling_mobile/core/widgets/tt_card.dart';
 import 'package:ai_storytelling_mobile/core/widgets/tt_confirm_dialog.dart';
@@ -143,15 +144,11 @@ class _AccountSessionsScreenState
         title: const Text('Phiên đăng nhập'),
       ),
       body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 840),
-            child: sessionsAsync.when(
-              data: (sessions) => _buildDataView(context, sessions),
-              loading: () => _buildLoadingView(),
-              error: (error, _) => _buildErrorView(error),
-            ),
+        child: TtContentWidth(
+          child: sessionsAsync.when(
+            data: (sessions) => _buildDataView(context, sessions),
+            loading: () => _buildLoadingView(),
+            error: (error, _) => _buildErrorView(error),
           ),
         ),
       ),

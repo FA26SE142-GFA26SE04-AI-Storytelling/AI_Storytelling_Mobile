@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:ai_storytelling_mobile/core/widgets/tt_adaptive.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
 import '../../../core/widgets/tt_button.dart';
@@ -278,6 +279,7 @@ class _EventDialogState extends State<_EventDialog> {
   Widget build(BuildContext context) {
     final tt = context.tt;
     final ready = widget.ready?.call() ?? true;
+    final isWide = MediaQuery.sizeOf(context).width >= kTwoColumnMinWidth;
     return PopScope(
       canPop: !_busy,
       child: Dialog(
@@ -287,7 +289,10 @@ class _EventDialogState extends State<_EventDialog> {
           side: BorderSide(color: tt.line2, width: 1.5),
         ),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 460, maxHeight: 580),
+          constraints: BoxConstraints(
+            maxWidth: isWide ? 560 : 460,
+            maxHeight: 580,
+          ),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(

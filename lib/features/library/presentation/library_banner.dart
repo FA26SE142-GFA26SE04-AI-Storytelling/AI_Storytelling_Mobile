@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_network_image.dart';
 import '../../../models/library_story_dto.dart';
 import '../data/library_logic.dart';
@@ -75,127 +76,133 @@ class _LibraryBannerState extends State<LibraryBanner> {
       ),
     );
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth * 0.92;
-        return SizedBox(
-          height: width * 9 / 16,
-          child: Listener(
-            onPointerDown: (_) => _touching = true,
-            onPointerUp: (_) => _touching = false,
-            onPointerCancel: (_) => _touching = false,
-            child: Stack(
-              children: [
-                PageView.builder(
-                  controller: _controller,
-                  itemCount: items.length,
-                  onPageChanged: (i) => setState(() => _page = i),
-                  itemBuilder: (context, i) {
-                    final s = items[i];
-                    void open() => openStoryPreview(context, s);
-                    return Padding(
-                      key: ValueKey('banner-${s.id}'),
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Semantics(
-                        button: true,
-                        label: 'Truyện nổi bật: ${s.title}',
-                        excludeSemantics: true,
-                        onTap: open,
-                        child: GestureDetector(
+    return TtContentWidth(
+      maxWidth: 960,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isTablet = MediaQuery.sizeOf(context).width >= 700;
+          final width = constraints.maxWidth * 0.92;
+          final height = isTablet ? 260.0 : width * 9 / 16;
+          return SizedBox(
+            height: height,
+            child: Listener(
+              onPointerDown: (_) => _touching = true,
+              onPointerUp: (_) => _touching = false,
+              onPointerCancel: (_) => _touching = false,
+              child: Stack(
+                children: [
+                  PageView.builder(
+                    controller: _controller,
+                    itemCount: items.length,
+                    onPageChanged: (i) => setState(() => _page = i),
+                    itemBuilder: (context, i) {
+                      final s = items[i];
+                      void open() => openStoryPreview(context, s);
+                      return Padding(
+                        key: ValueKey('banner-${s.id}'),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Semantics(
+                          button: true,
+                          label: 'Truyện nổi bật: ${s.title}',
+                          excludeSemantics: true,
                           onTap: open,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(TtRadius.lg),
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                // Hiện trọn ảnh gốc (bỏ vùng cắt 3:4 của thẻ bìa) trên nền mờ.
-                                TtWholeImage(url: s.coverImageUrl),
-                                // Lớp tối phía dưới để chữ trắng đọc rõ trên mọi ảnh.
-                                DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      stops: const [0.35, 1],
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.black.withValues(alpha: 0.72),
+                          child: GestureDetector(
+                            onTap: open,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(TtRadius.lg),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  // Hiện trọn ảnh gốc (bỏ vùng cắt 3:4 của thẻ bìa) trên nền mờ.
+                                  TtWholeImage(url: s.coverImageUrl),
+                                  // Lớp tối phía dưới để chữ trắng đọc rõ trên mọi ảnh.
+                                  DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        stops: const [0.35, 1],
+                                        colors: [
+                                          Colors.transparent,
+                                          Colors.black.withValues(alpha: 0.72),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    left: 14,
+                                    right: 90,
+                                    bottom: 12,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          s.title,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: textTheme.titleMedium
+                                              ?.copyWith(
+                                                color: Colors.white,
+                                                fontSize: 18,
+                                                height: 1.2,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Wrap(
+                                          spacing: 6,
+                                          runSpacing: 4,
+                                          children: [
+                                            if (s.ageBand.isNotEmpty)
+                                              tag(ageLabel(s.ageBand)),
+                                            tag(s.topic),
+                                          ],
+                                        ),
                                       ],
                                     ),
                                   ),
-                                ),
-                                Positioned(
-                                  left: 14,
-                                  right: 90,
-                                  bottom: 12,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        s.title,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: textTheme.titleMedium?.copyWith(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          height: 1.2,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Wrap(
-                                        spacing: 6,
-                                        runSpacing: 4,
-                                        children: [
-                                          if (s.ageBand.isNotEmpty)
-                                            tag(ageLabel(s.ageBand)),
-                                          tag(s.topic),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-                if (items.length > 1)
-                  Positioned(
-                    right: constraints.maxWidth * 0.04 + 16,
-                    bottom: 16,
-                    child: ExcludeSemantics(
-                      child: Row(
-                        children: [
-                          for (var i = 0; i < items.length; i++)
-                            AnimatedContainer(
-                              key: ValueKey('banner-dot-$i'),
-                              duration: const Duration(milliseconds: 250),
-                              margin: const EdgeInsets.only(left: 4),
-                              width: i == _page ? 16 : 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: i == _page
-                                    ? tt.gold
-                                    : Colors.white.withValues(alpha: 0.7),
-                                borderRadius: BorderRadius.circular(
-                                  TtRadius.full,
+                      );
+                    },
+                  ),
+                  if (items.length > 1)
+                    Positioned(
+                      right: constraints.maxWidth * 0.04 + 16,
+                      bottom: 16,
+                      child: ExcludeSemantics(
+                        child: Row(
+                          children: [
+                            for (var i = 0; i < items.length; i++)
+                              AnimatedContainer(
+                                key: ValueKey('banner-dot-$i'),
+                                duration: const Duration(milliseconds: 250),
+                                margin: const EdgeInsets.only(left: 4),
+                                width: i == _page ? 16 : 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: i == _page
+                                      ? tt.gold
+                                      : Colors.white.withValues(alpha: 0.7),
+                                  borderRadius: BorderRadius.circular(
+                                    TtRadius.full,
+                                  ),
                                 ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

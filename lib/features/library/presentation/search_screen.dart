@@ -157,10 +157,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             slivers: [
               SliverLayoutBuilder(
                 builder: (context, constraints) {
-                  // Nội dung rộng tối đa 960, căn giữa trên màn rộng.
+                  // Nội dung rộng tối đa 960 (1200 nếu >= 1100), căn giữa trên màn rộng.
+                  final maxW = constraints.crossAxisExtent >= 1100
+                      ? 1200.0
+                      : 960.0;
                   final side = math.max(
                     16.0,
-                    (constraints.crossAxisExtent - 960) / 2,
+                    (constraints.crossAxisExtent - maxW) / 2,
                   );
                   return SliverPadding(
                     padding: const EdgeInsets.only(bottom: 16),

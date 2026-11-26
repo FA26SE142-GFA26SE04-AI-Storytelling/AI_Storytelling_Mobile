@@ -9,6 +9,7 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_network_image.dart';
 import '../../../core/widgets/tt_state_views.dart';
@@ -120,7 +121,6 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                _EventHero(detail: detail),
                 ..._sections(detail),
               ];
             }
@@ -200,8 +200,10 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
         },
     ];
 
-    final sections = <Widget>[
-      if (activityBased) ...[
+    // ── Cột trái: giới thiệu + phần đăng ký ──────────────────────────────
+    final leftItems = <Widget>[
+      _EventHero(detail: detail),
+      if (activityBased)
         EventActivitiesPanel(
           detail: detail,
           onRegister: (st) => _run(
@@ -214,9 +216,8 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                   'Đã đăng ký hoạt động ${eventActivityLabel[st.activityType] ?? ''}.',
             ),
           ),
-        ),
-        ...missionWidgets,
-      ] else if (!joined)
+        )
+      else if (!joined)
         EventJoinPanel(
           detail: detail,
           onRegister: () => _run(
@@ -228,7 +229,7 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
             ),
           ),
         )
-      else ...[
+      else
         Wrap(
           spacing: 6,
           runSpacing: 6,
@@ -247,8 +248,12 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
             ),
           ],
         ),
-        if (tab == 'mission') ...missionWidgets,
-      ],
+    ];
+
+    // ── Cột phải: nhiệm vụ & quà ─────────────────────────────────────────
+    final rightItems = <Widget>[
+      if (activityBased) ...missionWidgets,
+      if (!activityBased && joined && tab == 'mission') ...missionWidgets,
       if (rewards.isNotEmpty)
         EventRewardsPanel(
           rewards: rewards,
@@ -257,8 +262,14 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
       if (activityBased || !joined || tab == 'info')
         EventInfoCard(detail: detail),
     ];
+
     return [
-      for (final w in sections) ...[const SizedBox(height: 12), w],
+      const SizedBox(height: 12),
+      TtAdaptiveColumns(
+        spacing: 12,
+        left: leftItems,
+        right: rightItems,
+      ),
     ];
   }
 }

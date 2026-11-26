@@ -11,6 +11,7 @@ import 'library_story_card.dart';
 
 const _gap = 10.0;
 const _rowCardWidth = 104.0;
+const _rowCardWidthTablet = 210.0;
 const _gridMaxWidth = 130.0;
 
 /// Một kệ truyện (sliver), không khung: tiêu đề + "Xem thêm ›" (hoặc nút
@@ -166,10 +167,14 @@ class LibraryShelf extends StatelessWidget {
         sliver: SliverLayoutBuilder(
           builder: (context, constraints) {
             final w = constraints.crossAxisExtent;
-            final cols = math.max(
+            final screenWidth = MediaQuery.sizeOf(context).width;
+            final defaultCols = math.max(
               3,
               ((w + _gap) / (_gridMaxWidth + _gap)).ceil(),
             );
+            final cols = screenWidth >= 1100
+                ? 6
+                : (screenWidth >= 900 ? 5 : defaultCols);
             final cardWidth = (w - _gap * (cols - 1)) / cols;
             final cardHeight = libraryCardHeight(context, cardWidth);
             final delegate = SliverGridDelegateWithFixedCrossAxisCount(
@@ -214,10 +219,12 @@ class LibraryShelf extends StatelessWidget {
         ),
       );
     } else {
+      final isTablet = MediaQuery.sizeOf(context).width >= 700;
+      final rowCardWidth = isTablet ? _rowCardWidthTablet : _rowCardWidth;
       content = SliverToBoxAdapter(
         child:
             SizedBox(
-                  height: libraryCardHeight(context, _rowCardWidth),
+                  height: libraryCardHeight(context, rowCardWidth),
                   // Không hiện thanh cuộn (web/desktop tự thêm); thẻ lộ mép đã báo cuộn được.
                   child: ScrollConfiguration(
                     behavior: ScrollConfiguration.of(context)
@@ -228,7 +235,7 @@ class LibraryShelf extends StatelessWidget {
                       itemCount: items.length,
                       separatorBuilder: (_, _) => const SizedBox(width: _gap),
                       itemBuilder: (context, i) =>
-                          SizedBox(width: _rowCardWidth, child: _card(i)),
+                          SizedBox(width: rowCardWidth, child: _card(i)),
                     ),
                   ),
                 )

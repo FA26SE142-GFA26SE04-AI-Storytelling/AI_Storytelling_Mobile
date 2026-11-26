@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_card.dart';
 import '../../../core/widgets/tt_child_avatar.dart';
@@ -118,58 +119,55 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         ],
       ),
       body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: async.when(
-              loading: () => ListView.separated(
-                padding: const EdgeInsets.all(16),
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 5,
-                separatorBuilder: (_, _) => const SizedBox(height: 12),
-                itemBuilder: (_, _) => const TtSkeleton(
-                  height: 84,
-                  radius: BorderRadius.all(Radius.circular(TtRadius.lg)),
-                ),
+        child: TtContentWidth(
+          maxWidth: 840,
+          child: async.when(
+            loading: () => ListView.separated(
+              padding: const EdgeInsets.all(16),
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 5,
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              itemBuilder: (_, _) => const TtSkeleton(
+                height: 84,
+                radius: BorderRadius.all(Radius.circular(TtRadius.lg)),
               ),
-              error: (e, _) => Center(
-                child: TtErrorState(
-                  title: 'Chưa tải được thông báo',
-                  message: _errorText(e),
-                  onRetry: _reload,
-                ),
+            ),
+            error: (e, _) => Center(
+              child: TtErrorState(
+                title: 'Chưa tải được thông báo',
+                message: _errorText(e),
+                onRetry: _reload,
               ),
-              data: (items) => RefreshIndicator(
-                onRefresh: () async {
-                  _reload();
-                  try {
-                    await ref.read(notificationsProvider.future);
-                  } catch (_) {}
-                },
-                child: items.isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
-                        children: const [SizedBox(height: 48), _Empty()],
+            ),
+            data: (items) => RefreshIndicator(
+              onRefresh: () async {
+                _reload();
+                try {
+                  await ref.read(notificationsProvider.future);
+                } catch (_) {}
+              },
+              child: items.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(16),
+                      children: const [SizedBox(height: 48), _Empty()],
+                    )
+                  : ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(16),
+                      itemCount: items.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
+                      itemBuilder: (_, i) => _NotificationTile(
+                        key: ValueKey('notification-${items[i].id}'),
+                        item: items[i],
+                        child: children[items[i].childProfileId],
+                        onTap: _busy ? null : () => _open(items[i]),
+                        onDelete: _busy ? null : () => _delete(items[i]),
                       )
-                    : ListView.separated(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
-                        itemCount: items.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 12),
-                        itemBuilder: (_, i) => _NotificationTile(
-                          key: ValueKey('notification-${items[i].id}'),
-                          item: items[i],
-                          child: children[items[i].childProfileId],
-                          onTap: _busy ? null : () => _open(items[i]),
-                          onDelete: _busy ? null : () => _delete(items[i]),
-                        )
-                            .animate(delay: (40 * i.clamp(0, 8)).ms)
-                            .fadeIn(duration: 260.ms)
-                            .slideY(begin: 0.06, end: 0, duration: 260.ms),
-                      ),
-              ),
+                          .animate(delay: (40 * i.clamp(0, 8)).ms)
+                          .fadeIn(duration: 260.ms)
+                          .slideY(begin: 0.06, end: 0, duration: 260.ms),
+                    ),
             ),
           ),
         ),

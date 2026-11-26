@@ -164,6 +164,14 @@ Tham khảo web: `features/learning`, `roadmapService.ts`, `storyWishService.ts`
 
 ---
 
+## iPad / máy tính bảng (26/11)
+
+Dùng chung `core/widgets/tt_adaptive.dart` (`TtContentWidth` 720 → 1200 khi rộng ≥ 900, `TtAdaptiveColumns` 2 cột thẻ) và `test/support/ipad_sizes.dart` (768×1024, 834×1194, 1194×834, 1366×1024). Điện thoại giữ nguyên.
+- [x] Chế độ bé: sảnh phóng to cả sân khấu vừa màn (tối đa 1,6 lần); lưới kho truyện / huy hiệu / thẻ ước / cảnh tăng cột (`kid/kid_responsive.dart`); test không tràn 4 khổ iPad cho sảnh, đọc, tương tác, sau khi đọc, phần thưởng, sổ tay, điều ước, chip đồng hồ.
+- [x] Màn phụ huynh 2 cột khi ngang: An toàn, Thời gian & thói quen, Học tập, Hồ sơ bé, Quản lý bé (lưới ô 3 cột), Mã QR; thêm bé khung 840.
+- [x] Thư viện (thẻ kệ to hơn, lưới 5–6 cột), xem trước truyện (bìa + thông tin trái, nội dung phải), Tài khoản 2 cột, Sự kiện (lưới 2 cột, chi tiết 2 cột), Thông báo khung 840.
+- [ ] Còn thiếu: màn quét QR của bé tràn 44px ở điện thoại ngang 844×390 (lỗi có sẵn); test iPad cho Hành trình, danh sách điều ước, màn nghỉ / dải cảnh báo / dải thói quen, thẻ truyện thư viện; bước An toàn / Học tập của thêm bé và danh sách bé ở tab Học tập chưa 2 cột. Chưa chụp màn hình trên iPad thật.
+
 ## Không làm trên mobile
 
 - Tạo truyện: Studio AI, nhập truyện có sẵn, tự viết, Truyện của tôi, gửi cộng đồng, giao cho nhiều bé (F-06, F-07, F-09, F-10).
