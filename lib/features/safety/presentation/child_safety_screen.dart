@@ -15,6 +15,7 @@ import '../../../models/content_category_dto.dart';
 import '../../../models/safety_policy_dto.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../children/data/child_profile_repository.dart';
+import '../../children/presentation/child_age_presets.dart';
 import '../../children/presentation/children_providers.dart';
 import 'safety_rules_form.dart';
 
@@ -38,6 +39,7 @@ class _ChildSafetyScreenState extends ConsumerState<ChildSafetyScreen> {
   ChildProfileDto? _child;
   SafetyPolicyDto? _policy;
   List<ContentCategoryDto> _categories = [];
+  int? _readingLevel;
 
   @override
   void initState() {
@@ -55,6 +57,10 @@ class _ChildSafetyScreenState extends ConsumerState<ChildSafetyScreen> {
       final repo = ref.read(childProfileRepositoryProvider);
       final childFuture = repo.fetchById(widget.childId);
       final categoriesFuture = repo.fetchContentCategories();
+      final learningFuture = repo
+          .fetchLearning(widget.childId)
+          .then<int?>((l) => l.readingLevel)
+          .catchError((_) => null);
 
       SafetyPolicyDto? policy;
       try {
@@ -70,12 +76,15 @@ class _ChildSafetyScreenState extends ConsumerState<ChildSafetyScreen> {
       final child = await childFuture;
       final allCategories = await categoriesFuture;
       final activeCategories = allCategories.where((c) => c.isActive).toList();
+      final readingLevel =
+          await learningFuture ?? defaultReadingLevel(child.ageBand);
 
       if (!mounted) return;
       setState(() {
         _child = child;
         _categories = activeCategories;
         _policy = policy;
+        _readingLevel = readingLevel;
         _loading = false;
       });
     } on ApiException catch (e) {
@@ -452,6 +461,12 @@ class _ChildSafetyScreenState extends ConsumerState<ChildSafetyScreen> {
 
     final body = <String, dynamic>{
       'maxStoryLength': _child?.ageBand == 'Age_9_10' ? 1500 : 900,
+      'storyLengthTarget': null,
+      'quizEnabled': true,
+      'notebookEnabled': true,
+      'libraryBrowseEnabled': true,
+      'reflectionEnabled': true,
+      'rewardsEnabled': true,
       'requiredApprovalMode': 'AlwaysManual',
       'parentalGateEnabled': true,
       'consentRecorded': true,
@@ -591,6 +606,8 @@ class _ChildSafetyScreenState extends ConsumerState<ChildSafetyScreen> {
               SafetyRulesForm(
                 policy: _policy!,
                 categories: _categories,
+                readingLevel: _readingLevel,
+                ageBand: _child?.ageBand,
                 enabled: canEdit && !_saving,
                 onChanged: _onRulesChanged,
               )

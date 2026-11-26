@@ -34,6 +34,12 @@ abstract class SafetyPolicyDto with _$SafetyPolicyDto {
     bool? childCreationEnabled,
     String? childCreationMode,
     bool? voiceAnswersEnabled,
+    int? storyLengthTarget,
+    bool? quizEnabled,
+    bool? notebookEnabled,
+    bool? libraryBrowseEnabled,
+    bool? reflectionEnabled,
+    bool? rewardsEnabled,
     DateTime? voiceConsentAt,
     @Default([]) List<SafetyCategoryRuleDto> categories,
   }) = _SafetyPolicyDto;
@@ -57,6 +63,14 @@ Map<String, dynamic> safetyPolicyToRequest(SafetyPolicyDto p) {
     'childCreationEnabled': p.childCreationEnabled,
     'childCreationMode': p.childCreationMode,
     'voiceAnswersEnabled': p.voiceAnswersEnabled,
+    // Backend thay toàn bộ khi PUT nên phải gửi lại storyLengthTarget và 5 cờ.
+    'storyLengthTarget': p.storyLengthTarget,
+    'quizEnabled': p.quizEnabled,
+    'notebookEnabled': p.notebookEnabled,
+    'libraryBrowseEnabled': p.libraryBrowseEnabled,
+    'reflectionEnabled': p.reflectionEnabled,
+    'rewardsEnabled': p.rewardsEnabled,
+    'applyAgePreset': false,
     'categories': p.categories
         .map((c) => <String, dynamic>{
               'contentCategoryId': c.contentCategoryId,
@@ -65,5 +79,5 @@ Map<String, dynamic> safetyPolicyToRequest(SafetyPolicyDto p) {
         .toList(),
   }
     // Backend khai bool/int không nhận null (trả 400); chỉ hai ngưỡng điểm được phép null.
-    ..removeWhere((k, v) => v == null && !k.endsWith('ScoreThreshold'));
+    ..removeWhere((k, v) => v == null && !k.endsWith('ScoreThreshold') && k != 'storyLengthTarget');
 }

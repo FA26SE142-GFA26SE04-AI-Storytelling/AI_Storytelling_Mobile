@@ -10,6 +10,7 @@ import 'package:ai_storytelling_mobile/features/children/data/child_profile_repo
 import 'package:ai_storytelling_mobile/features/safety/presentation/child_safety_screen.dart';
 import 'package:ai_storytelling_mobile/models/child_profile_dto.dart';
 import 'package:ai_storytelling_mobile/models/content_category_dto.dart';
+import 'package:ai_storytelling_mobile/models/learning_profile_dto.dart';
 import 'package:ai_storytelling_mobile/models/safety_policy_dto.dart';
 
 class _FakeChildProfileRepository extends Fake
@@ -68,6 +69,13 @@ class _FakeChildProfileRepository extends Fake
 
   @override
   Future<void> reconsent(int id) async {}
+
+  @override
+  Future<LearningProfileDto> fetchLearning(int id) async => LearningProfileDto(
+        id: id,
+        childProfileId: id,
+        readingLevel: 1,
+      );
 }
 
 class _FakeAuthController extends AuthController {
