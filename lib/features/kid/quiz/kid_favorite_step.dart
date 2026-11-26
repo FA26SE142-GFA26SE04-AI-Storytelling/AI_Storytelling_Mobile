@@ -54,9 +54,6 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
   /// Lời đã gửi bố mẹ gần nhất (từ server hoặc lần gửi trong phiên này).
   ChildStoryReflection? _saved;
 
-  /// Bản ghi đã gửi trong phiên này (vẫn hiện để nghe lại, không tính là thay đổi).
-  String? _sentAudioPath;
-
   @override
   void initState() {
     super.initState();
@@ -118,10 +115,7 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
 
       if (!mounted) return;
       // Giữ bản ghi vừa gửi để bé nghe lại; quay lại trang thấy "Đã gửi".
-      setState(() {
-        _sentAudioPath = _audioPath;
-        _applySaved(saved);
-      });
+      setState(() => _applySaved(saved));
       showTtToast(context, 'Đã gửi cho bố mẹ', type: TtToastType.success);
       widget.onSent();
     } on ApiException catch (e) {
@@ -196,11 +190,10 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
     final trimmed = _textController.text.trim();
     final canSubmit = (trimmed.isNotEmpty || _audioPath != null) && !_sending;
     final savedText = (_saved?.noteText ?? '').trim();
-    final noteSent = savedText.isNotEmpty || (_saved?.hasNoteRecording ?? false);
-    // Nút gửi chỉ hiện lại (thành "Gửi lại") khi bé sửa chữ hoặc ghi âm mới.
-    final noteChanged =
-        trimmed != savedText ||
-        (_audioPath != null && _audioPath != _sentAudioPath);
+    final noteSent =
+        savedText.isNotEmpty || (_saved?.hasNoteRecording ?? false);
+    // Đã gửi bố mẹ thì khoá: ẩn ô viết và ghi âm mới, chỉ còn nghe lại bản đã gửi.
+    final showRecorder = _canRecord && (!noteSent || _audioPath != null);
     final size = MediaQuery.sizeOf(context);
     // Màn ngang: tranh trái, ô viết + nút gửi phải để không phải cuộn.
     final wide = size.width >= 600 && size.width > size.height;
@@ -280,52 +273,53 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
                 ),
                 [
                   // Ô viết chia sẻ
-                  TextField(
-                    controller: _textController,
-                    maxLength: 200,
-                    maxLines: 3,
-                    minLines: 2,
-                    enabled: !_sending,
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: tt.text,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Em viết điều em thích nhé...',
-                      hintStyle: TextStyle(
+                  if (!noteSent)
+                    TextField(
+                      controller: _textController,
+                      maxLength: 200,
+                      maxLines: 3,
+                      minLines: 2,
+                      enabled: !_sending,
+                      style: TextStyle(
                         fontFamily: 'Nunito',
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: tt.muted,
-                      ),
-                      filled: true,
-                      fillColor: tt.panel,
-                      contentPadding: const EdgeInsets.all(14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: tt.line2, width: 1.5),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: tt.line2, width: 1.5),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: tt.primary, width: 2),
-                      ),
-                      counterStyle: TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 12,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: tt.muted,
+                        color: tt.text,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Em viết điều em thích nhé...',
+                        hintStyle: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: tt.muted,
+                        ),
+                        filled: true,
+                        fillColor: tt.panel,
+                        contentPadding: const EdgeInsets.all(14),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: tt.line2, width: 1.5),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: tt.line2, width: 1.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: tt.primary, width: 2),
+                        ),
+                        counterStyle: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: tt.muted,
+                        ),
                       ),
                     ),
-                  ),
                   // Thu âm giọng nói (chỉ hiện khi được phép)
-                  if (_canRecord) ...[
-                    const SizedBox(height: 8),
+                  if (showRecorder) ...[
+                    if (!noteSent) const SizedBox(height: 8),
                     KidVoiceRecorder(
                       audioPath: _audioPath,
                       onChanged: _sending
@@ -334,11 +328,11 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
                       enabled: _canRecord && !_sending,
                       sending: _sending,
                       // Bản ghi đã gửi bố mẹ thì chỉ nghe lại, không xoá.
-                      canDelete: _audioPath != _sentAudioPath,
+                      canDelete: !noteSent,
                     ),
                   ],
-                  const SizedBox(height: 18),
-                  if (noteSent && !noteChanged)
+                  if (!noteSent || showRecorder) const SizedBox(height: 18),
+                  if (noteSent)
                     _SentBadge(
                       text: _saved!.hasNoteRecording
                           ? 'Đã gửi lời kể cho bố mẹ'
@@ -346,7 +340,7 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
                     )
                   else
                     KidBtn3D(
-                      label: noteSent ? 'Gửi lại' : 'Gửi bố mẹ',
+                      label: 'Gửi bố mẹ',
                       icon: Icons.favorite_rounded,
                       color: tt.primary,
                       expand: true,

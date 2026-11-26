@@ -23,25 +23,22 @@ Widget _app(ChildStoryReflection? r) => ProviderScope(
 );
 
 void main() {
-  testWidgets('Đã gửi thì hiện "Đã gửi", sửa chữ thì hiện "Gửi lại"', (
+  testWidgets('Đã gửi thì ẩn ô viết và nút gửi, chỉ còn "Đã gửi"', (
     tester,
   ) async {
     await tester.pumpWidget(_app(null));
+    // Nút to in hoa nhãn.
     expect(find.text('GỬI BỐ MẸ'), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget);
 
-    // Nút to in hoa nhãn. Suy ngẫm tải xong sau khi trang đã dựng.
+    // Suy ngẫm tải xong sau khi trang đã dựng.
     await tester.pumpWidget(
       _app(const ChildStoryReflection(sessionId: 1, noteText: 'Con mèo')),
     );
     await tester.pump();
     expect(find.text('Đã gửi cho bố mẹ'), findsOneWidget);
     expect(find.text('GỬI BỐ MẸ'), findsNothing);
-    expect(find.text('GỬI LẠI'), findsNothing);
-
-    await tester.enterText(find.byType(TextField), 'Con mèo đẹp');
-    await tester.pump();
-    expect(find.text('GỬI LẠI'), findsOneWidget);
-    expect(find.text('Đã gửi cho bố mẹ'), findsNothing);
+    expect(find.byType(TextField), findsNothing);
   });
 
   testWidgets('Đã gửi ghi âm thì báo "Đã gửi lời kể"', (tester) async {

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,7 +64,9 @@ class _KidEmotionStepState extends ConsumerState<KidEmotionStep> {
   @override
   void didUpdateWidget(covariant KidEmotionStep oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialCodes != oldWidget.initialCodes && !_sending) {
+    // So theo nội dung: màn cha dựng list mới mỗi lần rebuild, so theo đối tượng
+    // sẽ xoá lựa chọn bé vừa chọn.
+    if (!listEquals(widget.initialCodes, oldWidget.initialCodes) && !_sending) {
       _selectedCodes = widget.initialCodes.take(kReflectionMaxEmotions).toSet();
     }
   }
