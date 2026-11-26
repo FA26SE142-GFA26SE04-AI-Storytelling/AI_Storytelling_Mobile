@@ -143,6 +143,29 @@ RestCopy restCopy(ReadingTimeStatusDto status) {
   }
 }
 
+/// Chip đồng hồ ở đầu sảnh bé (như `timeChip` của web): mốc kết thúc gần nhất backend tính (`endsAt` + `endReason`).
+/// Hết phút màn hình → "Còn N phút"; khung giờ / giờ ngủ → "Đọc đến HH:mm" (giờ máy); đang đọc nốt → "Đọc nốt m:ss".
+/// `warn` khi còn ≤ 5 phút (EndingSoon) hoặc đang đọc nốt. Không đặt giới hạn hoặc đang bị chặn thì null.
+({String text, bool warn})? timeChip(ReadingTimeStatusDto? status, DateTime now) {
+  if (status == null) return null;
+  if (status.state == 'Grace') {
+    final end = status.graceEndsAt;
+    return end == null
+        ? null
+        : (text: 'Đọc nốt ${formatCountdown(secondsUntil(end, now))}', warn: true);
+  }
+  if (status.state != 'Allowed' && status.state != 'EndingSoon') return null;
+  final end = status.endsAt;
+  if (end == null) return null;
+  final warn = status.state == 'EndingSoon';
+  if (status.endReason == 'ScreenLimit') {
+    return (text: 'Còn ${minutesOf(secondsUntil(end, now))} phút', warn: warn);
+  }
+  final local = end.toLocal();
+  String two(int n) => n.toString().padLeft(2, '0');
+  return (text: 'Đọc đến ${two(local.hour)}:${two(local.minute)}', warn: warn);
+}
+
 /// Dòng cảnh báo khi sắp hết giờ (EndingSoon) hoặc đang gia hạn (Grace); các trạng thái khác thì null.
 String? warnLine(ReadingTimeStatusDto? status, DateTime now) {
   if (status == null) return null;

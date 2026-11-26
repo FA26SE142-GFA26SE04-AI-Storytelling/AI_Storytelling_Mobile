@@ -161,20 +161,32 @@ class KidHomeScreen extends ConsumerWidget {
           const SizedBox(width: 8),
           // Expanded (không dùng Spacer + Flexible) để tên dùng hết khoảng giữa hai nút.
           Expanded(
-            child: _swing(
-              context,
-              Text(
-                displayName,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Baloo2',
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: tt.text,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _swing(
+                  context,
+                  Text(
+                    displayName,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Baloo2',
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: tt.text,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+                // Dưới tên (màn 360px không đủ chỗ đặt cạnh): cho bé biết còn bao lâu.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: KidTimeChip(
+                    status: ref.watch(kidStatusProvider).readingTime,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 8),

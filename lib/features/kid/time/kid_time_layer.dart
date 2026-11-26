@@ -302,6 +302,91 @@ class _KidTimeBannerState extends State<KidTimeBanner> {
   }
 }
 
+/// Chip đồng hồ dưới tên bé ở đầu sảnh: "Còn 25 phút" / "Đọc đến 18:00"; còn ≤ 5 phút thì nền vàng đậm.
+/// Không đặt giới hạn thì không hiện. Cập nhật mỗi 15 giây (mỗi giây khi đang đọc nốt).
+class KidTimeChip extends StatefulWidget {
+  const KidTimeChip({super.key, required this.status});
+
+  final ReadingTimeStatusDto? status;
+
+  @override
+  State<KidTimeChip> createState() => _KidTimeChipState();
+}
+
+class _KidTimeChipState extends State<KidTimeChip> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(KidTimeChip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.status != oldWidget.status) _sync();
+  }
+
+  void _sync() {
+    _timer?.cancel();
+    if (widget.status == null) return;
+    final period = widget.status!.state == 'Grace'
+        ? const Duration(seconds: 1)
+        : const Duration(seconds: 15);
+    _timer = Timer.periodic(period, (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chip = timeChip(widget.status, DateTime.now());
+    if (chip == null) return const SizedBox.shrink();
+    final tt = context.tt;
+    return Semantics(
+      label: 'Thời gian đọc: ${chip.text}',
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: BoxDecoration(
+          color: chip.warn
+              ? tt.goldDeep
+              : Color.alphaBlend(tt.gold.withValues(alpha: 0.22), tt.panel),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: tt.goldDeep, width: 2),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.alarm_rounded,
+              size: 20,
+              color: chip.warn ? Colors.white : tt.text,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              chip.text,
+              style: TextStyle(
+                fontFamily: 'Baloo2',
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: chip.warn ? Colors.white : tt.text,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Widget bọc `child` kiểm tra thời gian đọc của bé.
 /// Nếu trạng thái là chặn (`isBlocking`), phủ `KidRestOverlay` lên child.
 class KidTimeGate extends StatelessWidget {

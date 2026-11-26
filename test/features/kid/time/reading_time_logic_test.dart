@@ -257,4 +257,45 @@ void main() {
       expect(weekProgressText(habitNoGoal), '4 ngày');
     });
   });
+
+  group('timeChip', () {
+    final now = DateTime.utc(2026, 11, 26, 9);
+    DateTime inMin(int m) => now.add(Duration(minutes: m));
+
+    test('giới hạn màn hình → còn N phút', () {
+      final chip = timeChip(
+        ReadingTimeStatusDto(state: 'Allowed', endReason: 'ScreenLimit', endsAt: inMin(25)),
+        now,
+      );
+      expect(chip?.text, 'Còn 25 phút');
+      expect(chip?.warn, false);
+    });
+
+    test('khung giờ / giờ ngủ → đọc đến giờ máy; sắp hết thì warn', () {
+      final end = inMin(90);
+      final l = end.toLocal();
+      final hhmm =
+          '${l.hour.toString().padLeft(2, '0')}:${l.minute.toString().padLeft(2, '0')}';
+      expect(
+        timeChip(ReadingTimeStatusDto(state: 'Allowed', endReason: 'Window', endsAt: end), now)?.text,
+        'Đọc đến $hhmm',
+      );
+      expect(
+        timeChip(ReadingTimeStatusDto(state: 'EndingSoon', endReason: 'Bedtime', endsAt: inMin(4)), now)?.warn,
+        true,
+      );
+    });
+
+    test('đọc nốt → đếm ngược, warn', () {
+      final chip = timeChip(ReadingTimeStatusDto(state: 'Grace', graceEndsAt: inMin(2)), now);
+      expect(chip?.text, 'Đọc nốt 2:00');
+      expect(chip?.warn, true);
+    });
+
+    test('không giới hạn, đang bị chặn hoặc không có trạng thái → null', () {
+      expect(timeChip(ReadingTimeStatusDto(state: 'Allowed'), now), isNull);
+      expect(timeChip(ReadingTimeStatusDto(state: 'Bedtime', endsAt: inMin(5)), now), isNull);
+      expect(timeChip(null, now), isNull);
+    });
+  });
 }
