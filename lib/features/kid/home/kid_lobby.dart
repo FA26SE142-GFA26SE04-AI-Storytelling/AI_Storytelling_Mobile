@@ -143,6 +143,9 @@ class _KidLobbyState extends State<KidLobby> {
     final earned = w.rewards?.badges.where((b) => b.earned).length;
     final water = w.rewards?.knowledgeTree.expToWater;
     final hasOpen = w.roadmap.open != null;
+    // Chưa có truyện mở thì nút này vào Kho truyện: bố mẹ tắt thư viện thì mờ như các nút khác.
+    final goOff = !hasOpen && _off(kKidFeatureLibrary);
+    final rewardsOff = _off(kKidFeatureRewards);
 
     Widget go = KidBtn3D(
       label: hasOpen ? 'Đọc ngay' : 'Chọn truyện',
@@ -169,6 +172,7 @@ class _KidLobbyState extends State<KidLobby> {
       phase: 0.25,
       child: KidMagnet(onDown: () => _cue.act(KidFrogAction.wave), child: go),
     );
+    if (goOff) go = Opacity(opacity: 0.45, child: go);
 
     final parts = KidLobbyParts(
       frog: (size) => _pop(KidLobbyFrog(size: size, cue: _cue), 2),
@@ -201,12 +205,20 @@ class _KidLobbyState extends State<KidLobby> {
         iconColor: kKidInkOnBright,
         feature: kKidFeatureWishes,
       ),
-      // Cúp chỉ để xem (không bấm): số huy hiệu bé đã đạt.
+      // Cúp chỉ để xem (không bấm): số huy hiệu bé đã đạt. Bố mẹ tắt phần thưởng thì mờ, chạm thì báo.
       badges: _pop(
         KidBob(
           period: const Duration(milliseconds: 3800),
           phase: 0.5,
-          child: KidTrophyMedal(count: earned, diameter: _button),
+          child: rewardsOff
+              ? GestureDetector(
+                  onTap: () => showTtToast(context, kKidFeatureOffMessage),
+                  child: Opacity(
+                    opacity: 0.45,
+                    child: KidTrophyMedal(count: null, diameter: _button),
+                  ),
+                )
+              : KidTrophyMedal(count: earned, diameter: _button),
         ),
         3,
       ),

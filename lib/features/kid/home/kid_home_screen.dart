@@ -50,12 +50,17 @@ class KidHomeScreen extends ConsumerWidget {
   void _refresh(WidgetRef ref) {
     ref.invalidate(kidHomeDataProvider);
     ref.invalidate(kidLobbyRewardsProvider);
+    // Bố mẹ vừa bật/tắt chức năng hay đổi giờ đọc: hỏi lại ngay, không chờ lượt 60 giây.
+    ref.read(kidStatusProvider.notifier).refresh();
   }
 
   /// Mở màn con; quay về thì tải lại badge (bé có thể vừa tưới cây, nhận huy hiệu).
   Future<void> _open(BuildContext context, WidgetRef ref, String route) async {
     await context.push(route);
-    if (context.mounted) ref.invalidate(kidLobbyRewardsProvider);
+    if (context.mounted) {
+      ref.invalidate(kidLobbyRewardsProvider);
+      ref.read(kidStatusProvider.notifier).refresh();
+    }
   }
 
   @override
