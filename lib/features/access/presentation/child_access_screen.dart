@@ -6,6 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_card.dart';
 import '../../../core/widgets/tt_confirm_dialog.dart';
@@ -170,12 +171,8 @@ class _ChildAccessScreenState extends ConsumerState<ChildAccessScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Mã QR')),
       body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: _buildBody(),
-          ),
+        child: TtContentWidth(
+          child: _buildBody(),
         ),
       ),
     );
@@ -215,8 +212,8 @@ class _ChildAccessScreenState extends ConsumerState<ChildAccessScreen> {
       padding: const EdgeInsets.all(16),
       child: TtCard(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
+        child: TtAdaptiveColumns(
+          left: [
             if (secret != null && secret.isNotEmpty)
               _QrBox(data: kidLoginLink(secret)).animate().scale(
                 begin: const Offset(0.92, 0.92),
@@ -225,13 +222,12 @@ class _ChildAccessScreenState extends ConsumerState<ChildAccessScreen> {
               )
             else
               const _OldCodeNotice(),
-            if (cred.easyLoginCreatedAt != null) ...[
-              const SizedBox(height: 16),
+          ],
+          right: [
+            if (cred.easyLoginCreatedAt != null)
               _CreatedAt(
                 text: 'Tạo lúc ${_formatDateTime(cred.easyLoginCreatedAt!)}',
               ),
-            ],
-            const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(

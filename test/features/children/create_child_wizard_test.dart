@@ -11,6 +11,7 @@ import 'package:ai_storytelling_mobile/features/children/presentation/create_chi
 import 'package:ai_storytelling_mobile/models/child_profile_dto.dart';
 import 'package:ai_storytelling_mobile/models/content_category_dto.dart';
 import 'package:ai_storytelling_mobile/models/learning_profile_dto.dart';
+import '../../support/ipad_sizes.dart';
 
 class _FakeRepo extends Fake implements ChildProfileRepository {
   final calls = <String>[];
@@ -230,4 +231,19 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  group('iPad không tràn', () {
+    for (final entry in kIpadSizes.entries) {
+      testWidgets('${entry.key}: không tràn', (tester) async {
+        tester.view.physicalSize = entry.value;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final repo = _FakeRepo();
+        await _pump(tester, repo);
+        await _goToSummary(tester, consent: true);
+        expect(tester.takeException(), isNull);
+      });
+    }
+  });
 }

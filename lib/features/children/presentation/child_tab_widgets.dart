@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_card.dart';
 import '../../../core/widgets/tt_child_avatar.dart';
@@ -554,12 +555,14 @@ class ChildGroupGrid extends StatelessWidget {
       ),
     ];
 
+    final isWide = MediaQuery.sizeOf(context).width >= kTwoColumnMinWidth;
+
     return GridView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       // Chiều cao cố định: màn rộng không kéo ô cao lên.
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: isWide ? 3 : 2,
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
         mainAxisExtent: 112,

@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_card.dart';
 import '../../../core/widgets/tt_child_avatar.dart';
@@ -385,28 +386,23 @@ class ChildProfileScreen extends ConsumerWidget {
             ),
         ],
       ),
-      // Màn rộng: giới hạn 720 như các màn Tài khoản.
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: childAsync.when(
-            loading: () => _buildSkeleton(context),
-            error: (err, _) => TtErrorState(
-              message: err is ApiException
-                  ? err.message
-                  : 'Không thể tải thông tin bé.',
-              onRetry: () => ref.invalidate(childDetailProvider(childId)),
-            ),
-            data: (child) {
-              final isOwner =
-                  currentUserId != null && child.ownerUserId == currentUserId;
-              return _ChildProfileBody(
-                child: child,
-                isOwner: isOwner,
-              );
-            },
+      body: TtContentWidth(
+        child: childAsync.when(
+          loading: () => _buildSkeleton(context),
+          error: (err, _) => TtErrorState(
+            message: err is ApiException
+                ? err.message
+                : 'Không thể tải thông tin bé.',
+            onRetry: () => ref.invalidate(childDetailProvider(childId)),
           ),
+          data: (child) {
+            final isOwner =
+                currentUserId != null && child.ownerUserId == currentUserId;
+            return _ChildProfileBody(
+              child: child,
+              isOwner: isOwner,
+            );
+          },
         ),
       ),
     );
@@ -495,97 +491,96 @@ class _ChildProfileBodyState extends ConsumerState<_ChildProfileBody> {
     final isOwner = widget.isOwner;
     final formattedDate = _formatDate(child.createdAt as String?);
 
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-      children: [
-        // ── Khối thông tin ──
-        TtCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _SectionHeader(
-                      icon: Icons.person_rounded,
-                      label: 'Thông tin hồ sơ',
-                      tt: tt,
-                    ),
-                  ),
-                  TtChildAvatar(avatarId: child.avatarId as String?, size: 44),
-                ],
-              ),
-              const SizedBox(height: 14),
-              _InfoRow(
-                label: 'Nhóm tuổi',
-                value: _ageBandLabel(child.ageBand as String),
-                tt: tt,
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Trạng thái',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: tt.muted,
-                      ),
-                    ),
-                  ),
-                  _StatusChip(status: child.status as String, tt: tt),
-                ],
-              ),
-              if (formattedDate != null) ...[
-                const SizedBox(height: 10),
-                _InfoRow(
-                  label: 'Ngày tạo',
-                  value: formattedDate,
-                  tt: tt,
-                ),
-              ],
-            ],
-          ),
-        )
-            .animate()
-            .fadeIn(duration: 280.ms)
-            .slideY(begin: 0.05, end: 0, duration: 280.ms),
-
-        const SizedBox(height: 16),
-
-        // ── Khối trạng thái hồ sơ (chỉ Owner) ──
-        if (isOwner) ...[
+      child: TtAdaptiveColumns(
+        left: [
+          // ── Khối thông tin ──
           TtCard(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SectionHeader(
-                  icon: Icons.manage_accounts_rounded,
-                  label: 'Trạng thái hồ sơ',
-                  tt: tt,
+                Row(
+                  children: [
+                    Expanded(
+                      child: _SectionHeader(
+                        icon: Icons.person_rounded,
+                        label: 'Thông tin hồ sơ',
+                        tt: tt,
+                      ),
+                    ),
+                    TtChildAvatar(avatarId: child.avatarId as String?, size: 44),
+                  ],
                 ),
                 const SizedBox(height: 14),
-                _buildLifecycleButtons(child.status as String),
+                _InfoRow(
+                  label: 'Nhóm tuổi',
+                  value: _ageBandLabel(child.ageBand as String),
+                  tt: tt,
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Trạng thái',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: tt.muted,
+                        ),
+                      ),
+                    ),
+                    _StatusChip(status: child.status as String, tt: tt),
+                  ],
+                ),
+                if (formattedDate != null) ...[
+                  const SizedBox(height: 10),
+                  _InfoRow(
+                    label: 'Ngày tạo',
+                    value: formattedDate,
+                    tt: tt,
+                  ),
+                ],
               ],
             ),
           )
               .animate()
-              .fadeIn(duration: 300.ms, delay: 60.ms)
-              .slideY(begin: 0.05, end: 0, duration: 300.ms, delay: 60.ms),
-          const SizedBox(height: 16),
-        ],
+              .fadeIn(duration: 280.ms)
+              .slideY(begin: 0.05, end: 0, duration: 280.ms),
 
-        // ── Lịch sử hoạt động (chỉ Owner) ──
-        if (isOwner)
-          ChildAuditSection(childId: child.id as int)
-              .animate()
-              .fadeIn(duration: 300.ms, delay: 120.ms)
-              .slideY(begin: 0.05, end: 0, duration: 300.ms, delay: 120.ms),
-      ],
+          // ── Khối trạng thái hồ sơ (chỉ Owner) ──
+          if (isOwner)
+            TtCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _SectionHeader(
+                    icon: Icons.manage_accounts_rounded,
+                    label: 'Trạng thái hồ sơ',
+                    tt: tt,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildLifecycleButtons(child.status as String),
+                ],
+              ),
+            )
+                .animate()
+                .fadeIn(duration: 300.ms, delay: 60.ms)
+                .slideY(begin: 0.05, end: 0, duration: 300.ms, delay: 60.ms),
+        ],
+        right: [
+          // ── Lịch sử hoạt động (chỉ Owner) ──
+          if (isOwner)
+            ChildAuditSection(childId: child.id as int)
+                .animate()
+                .fadeIn(duration: 300.ms, delay: 120.ms)
+                .slideY(begin: 0.05, end: 0, duration: 300.ms, delay: 120.ms),
+        ],
+      ),
     );
   }
 

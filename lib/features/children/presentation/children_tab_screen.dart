@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_state_views.dart';
 import '../../../models/child_profile_dto.dart';
 import '../../auth/application/auth_controller.dart';
@@ -134,8 +135,7 @@ class _ChildrenTabScreenState extends ConsumerState<ChildrenTabScreen> {
         : null;
 
     return LayoutBuilder(
-      builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 840;
+      builder: (context, _) {
         Widget content = RefreshIndicator(
           onRefresh: _onRefresh,
           child: SingleChildScrollView(
@@ -165,31 +165,33 @@ class _ChildrenTabScreenState extends ConsumerState<ChildrenTabScreen> {
 
                 const SizedBox(height: 16),
 
-                if (selectedChild != null) ...[
-                  // 2) PrimaryChildCard
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _buildPrimaryCard(context, selectedChild),
-                  ).animate(delay: 60.ms).fadeIn(duration: 320.ms).slideY(
-                        begin: 0.05,
-                        end: 0,
-                        duration: 320.ms,
-                        curve: Curves.easeOut,
-                      ),
-
-                  const SizedBox(height: 16),
-
-                  // 3) ChildGroupGrid
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _buildGroupGrid(selectedChild),
-                  ).animate(delay: 120.ms).fadeIn(duration: 350.ms).slideY(
-                        begin: 0.04,
-                        end: 0,
-                        duration: 350.ms,
-                        curve: Curves.easeOut,
-                      ),
-                ],
+                if (selectedChild != null)
+                  TtAdaptiveColumns(
+                    left: [
+                      // 2) PrimaryChildCard
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _buildPrimaryCard(context, selectedChild),
+                      ).animate(delay: 60.ms).fadeIn(duration: 320.ms).slideY(
+                            begin: 0.05,
+                            end: 0,
+                            duration: 320.ms,
+                            curve: Curves.easeOut,
+                          ),
+                    ],
+                    right: [
+                      // 3) ChildGroupGrid
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _buildGroupGrid(selectedChild),
+                      ).animate(delay: 120.ms).fadeIn(duration: 350.ms).slideY(
+                            begin: 0.04,
+                            end: 0,
+                            duration: 350.ms,
+                            curve: Curves.easeOut,
+                          ),
+                    ],
+                  ),
 
                 const SizedBox(height: 24),
               ],
@@ -197,14 +199,7 @@ class _ChildrenTabScreenState extends ConsumerState<ChildrenTabScreen> {
           ),
         );
 
-        if (wide) {
-          content = Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
-              child: content,
-            ),
-          );
-        }
+        content = TtContentWidth(child: content);
 
         return content;
       },

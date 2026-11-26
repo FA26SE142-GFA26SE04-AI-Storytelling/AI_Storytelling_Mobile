@@ -9,6 +9,7 @@ import 'package:ai_storytelling_mobile/features/children/data/child_profile_repo
 import 'package:ai_storytelling_mobile/features/children/presentation/child_learning_screen.dart';
 import 'package:ai_storytelling_mobile/models/child_profile_dto.dart';
 import 'package:ai_storytelling_mobile/models/learning_profile_dto.dart';
+import '../../support/ipad_sizes.dart';
 
 class FakeChildProfileRepository extends Fake
     implements ChildProfileRepository {
@@ -176,5 +177,31 @@ void main() {
       await pumpScreen(tester);
       expect(tester.takeException(), isNull);
     });
+  });
+
+  group('iPad không tràn', () {
+    for (final entry in kIpadSizes.entries) {
+      testWidgets('${entry.key}: không tràn', (tester) async {
+        tester.view.physicalSize = entry.value;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await pumpScreen(tester);
+        expect(tester.takeException(), isNull);
+
+        if (entry.key.contains('1366')) {
+          expect(
+            tester.getTopLeft(find.text('Mức đọc')).dy,
+            closeTo(
+              tester.getTopLeft(
+                find.text('Mục tiêu đọc hiểu (không bắt buộc)'),
+              ).dy,
+              20,
+            ),
+          );
+        }
+      });
+    }
   });
 }

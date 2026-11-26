@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/tt_colors.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_state_views.dart';
 import '../../../models/child_profile_dto.dart';
@@ -108,13 +109,7 @@ class _LearningScreenState extends ConsumerState<LearningScreen>
     return Scaffold(
       backgroundColor: tt.bg,
       body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: body,
-          ),
-        ),
+        child: TtContentWidth(child: body),
       ),
     );
   }

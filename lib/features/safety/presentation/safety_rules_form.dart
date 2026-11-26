@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_card.dart';
 import '../../../models/content_category_dto.dart';
 import '../../../models/safety_policy_dto.dart';
@@ -108,6 +109,7 @@ class SafetyRulesForm extends StatefulWidget {
     this.showReadingSettings = true,
     this.readingLevel,
     this.ageBand,
+    this.trailingLeft = const [],
   });
 
   /// SafetyPolicyDto hiện tại (đã lưu).
@@ -130,6 +132,9 @@ class SafetyRulesForm extends StatefulWidget {
 
   /// Chỉ dùng khi showReadingSettings true.
   final String? ageBand;
+
+  /// Thẻ thêm vào cuối cột trái (vd. Điều khoản do màn cha truyền vào).
+  final List<Widget> trailingLeft;
 
   @override
   State<SafetyRulesForm> createState() => _SafetyRulesFormState();
@@ -194,12 +199,10 @@ class _SafetyRulesFormState extends State<SafetyRulesForm> {
         ? storyLengthAdvice(band, level, displayedLength)
         : null;
 
-    return Column(
-      // stretch: hai thẻ luôn rộng hết khung, không co theo nội dung.
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Nhóm: Chế độ duyệt
+    return TtAdaptiveColumns(
+      left: [
         if (showReadingSettings) ...[
+          // Nhóm: Chế độ duyệt
           TtCard(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -412,149 +415,6 @@ class _SafetyRulesFormState extends State<SafetyRulesForm> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
-        ],
-        // Nhóm 2: Chủ đề nội dung
-        TtCard(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  'Chủ đề nội dung',
-                  style: Theme.of(context).textTheme.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.bold, color: tt.text),
-                ),
-              ),
-              const SizedBox(height: 12),
-              if (activeCategories.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                  child: Text(
-                    'Chưa có chủ đề nội dung nào.',
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: tt.muted),
-                  ),
-                )
-              else
-                ...activeCategories.map((category) {
-                  final matchingRule = policy.categories
-                      .where((r) => r.contentCategoryId == category.id)
-                      .firstOrNull
-                      ?.rule;
-                  final currentRule = (matchingRule == 'Blocked')
-                      ? 'Blocked'
-                      : 'Allowed';
-                  final isBlockedSelected = currentRule == 'Blocked';
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    // Tên chủ đề và nút chọn cùng một hàng cho danh sách gọn.
-                    child: Row(
-                      // Đẩy nút chọn về mép phải ở màn rộng.
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            category.displayName,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: tt.text),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Flexible: màn hẹp thì nút tự thu nhỏ, không tràn.
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerRight,
-                            child: SegmentedButton<String>(
-                              segments: const [
-                                ButtonSegment<String>(
-                                  value: 'Allowed',
-                                  label: Text('Cho phép'),
-                                ),
-                                ButtonSegment<String>(
-                                  value: 'Blocked',
-                                  label: Text('Chặn'),
-                                ),
-                              ],
-                              selected: {currentRule},
-                              showSelectedIcon: false,
-                              onSelectionChanged: enabled
-                                  ? (newSelection) {
-                                      final newRule = newSelection.first;
-                                      final updatedCategories =
-                                          policy.categories
-                                              .where(
-                                                (r) =>
-                                                    r.contentCategoryId !=
-                                                    category.id,
-                                              )
-                                              .toList()
-                                            ..add(
-                                              SafetyCategoryRuleDto(
-                                                contentCategoryId: category.id,
-                                                rule: newRule,
-                                              ),
-                                            );
-                                      onChanged(
-                                        policy.copyWith(
-                                          categories: updatedCategories,
-                                        ),
-                                      );
-                                    }
-                                  : null,
-                              style: ButtonStyle(
-                                visualDensity: VisualDensity.compact,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                backgroundColor:
-                                    WidgetStateProperty.resolveWith((states) {
-                                      if (states.contains(
-                                        WidgetState.selected,
-                                      )) {
-                                        return isBlockedSelected
-                                            ? tt.danger.withValues(alpha: 0.15)
-                                            : tt.primaryStrong;
-                                      }
-                                      return null;
-                                    }),
-                                foregroundColor:
-                                    WidgetStateProperty.resolveWith((states) {
-                                      if (states.contains(
-                                        WidgetState.selected,
-                                      )) {
-                                        return isBlockedSelected
-                                            ? tt.danger
-                                            : Colors.white;
-                                      }
-                                      return tt.text;
-                                    }),
-                                side: WidgetStateProperty.resolveWith((states) {
-                                  return BorderSide(color: tt.line2);
-                                }),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-            ],
-          ),
-        ),
-        if (showReadingSettings) ...[
-          const SizedBox(height: 16),
           // Nhóm: Giới hạn và quyền
           TtCard(
             padding: const EdgeInsets.all(16),
@@ -761,7 +621,6 @@ class _SafetyRulesFormState extends State<SafetyRulesForm> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
           // Nhóm: Mức đọc hiểu mục tiêu
           TtCard(
             padding: const EdgeInsets.all(16),
@@ -828,7 +687,150 @@ class _SafetyRulesFormState extends State<SafetyRulesForm> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+        ],
+        ...widget.trailingLeft,
+      ],
+      right: [
+        // Nhóm 2: Chủ đề nội dung
+        TtCard(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  'Chủ đề nội dung',
+                  style: Theme.of(context).textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold, color: tt.text),
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (activeCategories.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
+                  child: Text(
+                    'Chưa có chủ đề nội dung nào.',
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: tt.muted),
+                  ),
+                )
+              else
+                ...activeCategories.map((category) {
+                  final matchingRule = policy.categories
+                      .where((r) => r.contentCategoryId == category.id)
+                      .firstOrNull
+                      ?.rule;
+                  final currentRule = (matchingRule == 'Blocked')
+                      ? 'Blocked'
+                      : 'Allowed';
+                  final isBlockedSelected = currentRule == 'Blocked';
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    // Tên chủ đề và nút chọn cùng một hàng cho danh sách gọn.
+                    child: Row(
+                      // Đẩy nút chọn về mép phải ở màn rộng.
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            category.displayName,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: tt.text),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Flexible: màn hẹp thì nút tự thu nhỏ, không tràn.
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: SegmentedButton<String>(
+                              segments: const [
+                                ButtonSegment<String>(
+                                  value: 'Allowed',
+                                  label: Text('Cho phép'),
+                                ),
+                                ButtonSegment<String>(
+                                  value: 'Blocked',
+                                  label: Text('Chặn'),
+                                ),
+                              ],
+                              selected: {currentRule},
+                              showSelectedIcon: false,
+                              onSelectionChanged: enabled
+                                  ? (newSelection) {
+                                      final newRule = newSelection.first;
+                                      final updatedCategories =
+                                          policy.categories
+                                              .where(
+                                                (r) =>
+                                                    r.contentCategoryId !=
+                                                    category.id,
+                                              )
+                                              .toList()
+                                            ..add(
+                                              SafetyCategoryRuleDto(
+                                                contentCategoryId: category.id,
+                                                rule: newRule,
+                                              ),
+                                            );
+                                      onChanged(
+                                        policy.copyWith(
+                                          categories: updatedCategories,
+                                        ),
+                                      );
+                                    }
+                                  : null,
+                              style: ButtonStyle(
+                                visualDensity: VisualDensity.compact,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                backgroundColor:
+                                    WidgetStateProperty.resolveWith((states) {
+                                      if (states.contains(
+                                        WidgetState.selected,
+                                      )) {
+                                        return isBlockedSelected
+                                            ? tt.danger.withValues(alpha: 0.15)
+                                            : tt.primaryStrong;
+                                      }
+                                      return null;
+                                    }),
+                                foregroundColor:
+                                    WidgetStateProperty.resolveWith((states) {
+                                      if (states.contains(
+                                        WidgetState.selected,
+                                      )) {
+                                        return isBlockedSelected
+                                            ? tt.danger
+                                            : Colors.white;
+                                      }
+                                      return tt.text;
+                                    }),
+                                side: WidgetStateProperty.resolveWith((states) {
+                                  return BorderSide(color: tt.line2);
+                                }),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+            ],
+          ),
+        ),
+        if (showReadingSettings)
           // Nhóm: Tính năng cho bé
           TtCard(
             padding: const EdgeInsets.all(16),
@@ -887,7 +889,6 @@ class _SafetyRulesFormState extends State<SafetyRulesForm> {
               ],
             ),
           ),
-        ],
       ],
     );
   }

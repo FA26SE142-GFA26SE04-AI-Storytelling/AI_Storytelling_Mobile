@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_card.dart';
 import '../../../core/widgets/tt_confirm_dialog.dart';
@@ -610,68 +611,69 @@ class _ChildSafetyScreenState extends ConsumerState<ChildSafetyScreen> {
                 ageBand: _child?.ageBand,
                 enabled: canEdit && !_saving,
                 onChanged: _onRulesChanged,
+                trailingLeft: [
+                  TtCard(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Điều khoản',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: tt.text,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _formatConsentDate(_policy!.consentRecordedAt),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: tt.text,
+                              ),
+                        ),
+                        if (_policy!.consentOutdated == true) ...[
+                          const SizedBox(height: 12),
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: tt.gold.withValues(alpha: 0.15),
+                              border: Border.all(color: tt.goldDeep, width: 1.5),
+                              borderRadius: BorderRadius.circular(TtRadius.md),
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Điều khoản đã thay đổi. Bạn cần đọc và đồng ý lại.',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: tt.text,
+                                      ),
+                                ),
+                                const SizedBox(height: 12),
+                                if (canEdit)
+                                  TtButton(
+                                    label: 'Đồng ý điều khoản mới',
+                                    expanded: true,
+                                    isLoading: _saving,
+                                    onPressed:
+                                        (canEdit && !_saving) ? _reconsent : null,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
               )
                   .animate()
                   .fadeIn(duration: 300.ms)
                   .slideY(begin: 0.05, end: 0),
-              const SizedBox(height: 16),
-              TtCard(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Điều khoản',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: tt.text,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _formatConsentDate(_policy!.consentRecordedAt),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: tt.text,
-                          ),
-                    ),
-                    if (_policy!.consentOutdated == true) ...[
-                      const SizedBox(height: 12),
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: tt.gold.withValues(alpha: 0.15),
-                          border: Border.all(color: tt.goldDeep, width: 1.5),
-                          borderRadius: BorderRadius.circular(TtRadius.md),
-                        ),
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Điều khoản đã thay đổi. Bạn cần đọc và đồng ý lại.',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: tt.text,
-                                  ),
-                            ),
-                            const SizedBox(height: 12),
-                            if (canEdit)
-                              TtButton(
-                                label: 'Đồng ý điều khoản mới',
-                                expanded: true,
-                                isLoading: _saving,
-                                onPressed:
-                                    (canEdit && !_saving) ? _reconsent : null,
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
             ] else ...[
               TtCard(
                 padding: const EdgeInsets.all(16),
@@ -693,13 +695,8 @@ class _ChildSafetyScreenState extends ConsumerState<ChildSafetyScreen> {
       appBar: AppBar(
         title: const Text('An toàn'),
       ),
-      // Màn rộng: giới hạn 720 như các màn Tài khoản.
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: body,
-        ),
+      body: TtContentWidth(
+        child: body,
       ),
     );
   }

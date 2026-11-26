@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/ipad_sizes.dart';
+
 import 'package:ai_storytelling_mobile/core/theme/app_theme.dart';
 import 'package:ai_storytelling_mobile/features/access/data/child_access_repository.dart';
 import 'package:ai_storytelling_mobile/features/auth/application/auth_controller.dart';
@@ -237,6 +239,21 @@ void main() {
         await pumpChildrenTab(tester, size: entry.value);
 
         // Không có exception tràn (overflowed) hoặc bất kỳ lỗi nào từ framework
+        expect(tester.takeException(), isNull);
+      });
+    }
+  });
+
+  group('iPad không tràn', () {
+    for (final entry in kIpadSizes.entries) {
+      testWidgets('${entry.key}: không tràn', (tester) async {
+        tester.view.physicalSize = entry.value;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await pumpChildrenTab(tester);
+
         expect(tester.takeException(), isNull);
       });
     }

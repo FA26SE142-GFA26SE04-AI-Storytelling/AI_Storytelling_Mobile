@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_card.dart';
 import '../../../core/widgets/tt_confirm_dialog.dart';
@@ -259,11 +260,10 @@ class _CreateChildWizardScreenState
       child: Scaffold(
         backgroundColor: tt.bg,
         body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
-              child: Column(
-                children: [
+          child: TtContentWidth(
+            maxWidth: 840,
+            child: Column(
+              children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(12, 16, 16, 8),
                     child: Row(
@@ -337,8 +337,7 @@ class _CreateChildWizardScreenState
                       ],
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
           ),
         ),

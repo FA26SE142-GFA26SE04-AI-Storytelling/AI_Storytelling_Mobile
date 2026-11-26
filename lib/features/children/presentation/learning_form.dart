@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_card.dart';
 
 /// Giá trị biểu mẫu học tập của bé.
@@ -171,10 +172,8 @@ class _LearningFormState extends State<LearningForm> {
           color: tt.text,
         );
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+    return TtAdaptiveColumns(
+      left: [
         // a. Mức đọc
         TtCard(
           child: Column(
@@ -217,7 +216,6 @@ class _LearningFormState extends State<LearningForm> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
 
         // b. Chế độ đọc
         TtCard(
@@ -276,8 +274,8 @@ class _LearningFormState extends State<LearningForm> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
-
+      ],
+      right: [
         // c. Mục tiêu đọc hiểu (không bắt buộc)
         TtCard(
           child: Column(
@@ -333,7 +331,6 @@ class _LearningFormState extends State<LearningForm> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
 
         // d. Chủ đề bé yêu thích
         TtCard(
@@ -360,7 +357,6 @@ class _LearningFormState extends State<LearningForm> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
 
         // e. Kỹ năng muốn ưu tiên
         TtCard(

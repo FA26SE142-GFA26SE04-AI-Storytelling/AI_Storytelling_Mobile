@@ -14,6 +14,7 @@ import 'package:ai_storytelling_mobile/models/child_roadmap_dto.dart';
 import 'package:ai_storytelling_mobile/models/parent_reading_feedback_dto.dart';
 import 'package:ai_storytelling_mobile/models/parent_story_summary_dto.dart';
 import 'package:ai_storytelling_mobile/models/story_wish_dto.dart';
+import '../../support/ipad_sizes.dart';
 
 class _FakeChildren implements ChildProfileRepository {
   _FakeChildren(this.children);
@@ -694,6 +695,21 @@ void main() {
       expect(tester.takeException(), isNull, reason: 'chi tiết lần đọc');
     });
   }
+
+  group('iPad không tràn', () {
+    for (final entry in kIpadSizes.entries) {
+      testWidgets('${entry.key}: không tràn', (tester) async {
+        tester.view.physicalSize = entry.value;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        final home = _FakeHome()..items = _richItems();
+        await _pump(tester, size: entry.value, home: home);
+        expect(tester.takeException(), isNull);
+      });
+    }
+  });
 }
 
 void navigationTests() {

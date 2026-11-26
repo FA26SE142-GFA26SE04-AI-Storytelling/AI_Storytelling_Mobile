@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_confirm_dialog.dart';
 import '../../../core/widgets/tt_state_views.dart';
@@ -214,14 +215,8 @@ class _ChildLearningScreenState extends ConsumerState<ChildLearningScreen> {
         appBar: AppBar(
           title: const Text('Học tập'),
         ),
-        // Màn rộng: giới hạn 720 như các màn Tài khoản.
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: _buildBody(isOwner),
-          ),
-        ),
+        // Khung nội dung tự nới khi iPad ngang.
+        body: TtContentWidth(child: _buildBody(isOwner)),
         bottomNavigationBar: (_dirty && isOwner)
             ? SafeArea(
                 child: Padding(

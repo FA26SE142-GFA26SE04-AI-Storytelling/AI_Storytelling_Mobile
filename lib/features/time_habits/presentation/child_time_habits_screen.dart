@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tt_colors.dart';
 import '../../../core/theme/tt_radius.dart';
+import '../../../core/widgets/tt_adaptive.dart';
 import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_card.dart';
 import '../../../core/widgets/tt_confirm_dialog.dart';
@@ -281,13 +282,7 @@ class _ChildTimeHabitsScreenState
       },
       child: Scaffold(
         appBar: AppBar(title: const Text('Thời gian & thói quen')),
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: body,
-          ),
-        ),
+        body: TtContentWidth(child: body),
         bottomNavigationBar: bottomBar,
       ),
     );
@@ -320,8 +315,7 @@ class _TimeHabitsBody extends StatelessWidget {
     final tt = context.tt;
     final locked = !canEdit || saving;
 
-    // Cards with staggered animation delays
-    final cards = <Widget>[
+    final topWidgets = <Widget>[
       if (!canEdit)
         Padding(
           padding: const EdgeInsets.only(bottom: 8),
@@ -333,6 +327,9 @@ class _TimeHabitsBody extends StatelessWidget {
           ),
         ),
       if (dto.isSuggested) _SuggestedBanner(nickname: nickname),
+    ];
+
+    final leftWidgets = <Widget>[
       _ReadingLimitCard(
         current: current,
         locked: locked,
@@ -340,8 +337,10 @@ class _TimeHabitsBody extends StatelessWidget {
         hasBedtimeError: errorSection == ScheduleSection.bedtime,
         onChanged: onChanged,
       ),
-      const SizedBox(height: 4),
-      _SectionHeader(title: 'Màn hình & nghỉ giữa giờ'),
+    ];
+
+    final rightWidgets = <Widget>[
+      const _SectionHeader(title: 'Màn hình & nghỉ giữa giờ'),
       _ScreenLimitCard(
         current: current,
         locked: locked,
@@ -354,8 +353,7 @@ class _TimeHabitsBody extends StatelessWidget {
         hasError: errorSection == ScheduleSection.breakSection,
         onChanged: onChanged,
       ),
-      const SizedBox(height: 4),
-      _SectionHeader(title: 'Thói quen đọc'),
+      const _SectionHeader(title: 'Thói quen đọc'),
       _HabitCard(
         nickname: nickname,
         dto: dto,
@@ -364,23 +362,35 @@ class _TimeHabitsBody extends StatelessWidget {
         hasError: errorSection == ScheduleSection.habit,
         onChanged: onChanged,
       ),
-      const SizedBox(height: 16),
     ];
+
+    int animIndex = 0;
+    Widget animateCard(Widget card) {
+      final i = animIndex++;
+      return card
+          .animate()
+          .fadeIn(duration: 300.ms, delay: (60 * i).ms)
+          .slideY(begin: 0.05, end: 0, duration: 300.ms, delay: (60 * i).ms);
+    }
+
+    final animatedTop = topWidgets.map(animateCard).toList();
+    final animatedLeft = leftWidgets.map(animateCard).toList();
+    final animatedRight = rightWidgets.map(animateCard).toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (int i = 0; i < cards.length; i++) ...[
-            if (i > 0 && cards[i] is! SizedBox && cards[i - 1] is! SizedBox && cards[i] is! _SectionHeader && cards[i - 1] is! _SectionHeader)
-              const SizedBox(height: 12),
-            cards[i]
-                .animate()
-                .fadeIn(duration: 300.ms, delay: (60 * i).ms)
-                .slideY(begin: 0.05, end: 0, duration: 300.ms, delay: (60 * i).ms),
+      child: TtContentWidth(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...animatedTop,
+            if (animatedTop.isNotEmpty) const SizedBox(height: 16),
+            TtAdaptiveColumns(
+              left: animatedLeft,
+              right: animatedRight,
+            ),
           ],
-        ],
+        ),
       ),
     );
   }

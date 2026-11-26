@@ -9,6 +9,8 @@ import 'package:ai_storytelling_mobile/features/access/data/child_access_reposit
 import 'package:ai_storytelling_mobile/features/access/presentation/child_access_screen.dart';
 import 'package:ai_storytelling_mobile/models/child_access_credential_dto.dart';
 
+import '../../support/ipad_sizes.dart';
+
 class FakeChildAccessRepository implements ChildAccessRepository {
   FakeChildAccessRepository({this.secret, this.hasCode = true});
 
@@ -142,5 +144,19 @@ void main() {
         }
       }
     });
+  });
+
+  group('iPad không tràn', () {
+    for (final entry in kIpadSizes.entries) {
+      testWidgets('${entry.key}: không tràn', (tester) async {
+        tester.view.physicalSize = entry.value;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await pumpScreen(tester, FakeChildAccessRepository(secret: 'abc'));
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 }

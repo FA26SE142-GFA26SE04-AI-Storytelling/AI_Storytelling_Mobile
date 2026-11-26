@@ -12,6 +12,7 @@ import 'package:ai_storytelling_mobile/models/child_profile_dto.dart';
 import 'package:ai_storytelling_mobile/models/content_category_dto.dart';
 import 'package:ai_storytelling_mobile/models/learning_profile_dto.dart';
 import 'package:ai_storytelling_mobile/models/safety_policy_dto.dart';
+import '../../support/ipad_sizes.dart';
 
 class _FakeChildProfileRepository extends Fake
     implements ChildProfileRepository {
@@ -175,6 +176,39 @@ void main() {
 
         expect(tester.takeException(), isNull);
       }
+    });
+
+    group('iPad không tràn', () {
+      for (final entry in kIpadSizes.entries) {
+        testWidgets('${entry.key}: không tràn', (tester) async {
+          tester.view.physicalSize = entry.value;
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+
+          final repo = _FakeChildProfileRepository();
+          await _pumpChildSafetyScreen(tester, repo: repo);
+          await tester.pumpAndSettle();
+
+          expect(tester.takeException(), isNull);
+        });
+      }
+
+      testWidgets('Khổ 1366x1024 hiển thị 2 cột song song', (tester) async {
+        tester.view.physicalSize = const Size(1366, 1024);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        final repo = _FakeChildProfileRepository();
+        await _pumpChildSafetyScreen(tester, repo: repo);
+        await tester.pumpAndSettle();
+
+        expect(
+          tester.getTopLeft(find.text('Chế độ duyệt')).dy,
+          closeTo(tester.getTopLeft(find.text('Chủ đề nội dung')).dy, 1),
+        );
+      });
     });
   });
 }
