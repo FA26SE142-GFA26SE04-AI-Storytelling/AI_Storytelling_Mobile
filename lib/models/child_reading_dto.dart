@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'child_interaction_dto.dart';
+import 'reading_time_dto.dart';
 
 part 'child_reading_dto.freezed.dart';
 part 'child_reading_dto.g.dart';
@@ -194,6 +195,7 @@ abstract class ReadingSignal with _$ReadingSignal {
     String? returnTo,
     String? message,
     required String sessionStatus,
+    ReadingTimeStatusDto? readingTime,
   }) = _ReadingSignal;
 
   factory ReadingSignal.fromJson(Map<String, dynamic> json) =>

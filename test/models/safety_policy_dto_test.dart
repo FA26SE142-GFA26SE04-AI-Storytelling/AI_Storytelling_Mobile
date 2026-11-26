@@ -153,6 +153,8 @@ void main() {
         'childCreationMode',
         'voiceAnswersEnabled',
         'categories',
+        'storyLengthTarget',
+        'applyAgePreset',
       ];
 
       final fullPolicy = SafetyPolicyDto.fromJson({
@@ -234,6 +236,67 @@ void main() {
       expect(body['categories'], [
         {'contentCategoryId': 1, 'rule': 'block'},
       ]);
+    });
+
+    test('storyLengthTarget = 1200 thì request[\'storyLengthTarget\'] == 1200', () {
+      final policy = SafetyPolicyDto.fromJson({
+        'childProfileId': 10,
+        'storyLengthTarget': 1200,
+      });
+      final request = safetyPolicyToRequest(policy);
+      expect(request['storyLengthTarget'], 1200);
+    });
+
+    test('storyLengthTarget = null thì request có key \'storyLengthTarget\' và giá trị null', () {
+      final policy = SafetyPolicyDto.fromJson({
+        'childProfileId': 10,
+        'storyLengthTarget': null,
+      });
+      final request = safetyPolicyToRequest(policy);
+      expect(request.containsKey('storyLengthTarget'), isTrue);
+      expect(request['storyLengthTarget'], isNull);
+    });
+
+    test('quizEnabled/notebookEnabled/libraryBrowseEnabled/reflectionEnabled/rewardsEnabled = false thì request có đúng 5 giá trị false', () {
+      final policy = SafetyPolicyDto.fromJson({
+        'childProfileId': 10,
+        'quizEnabled': false,
+        'notebookEnabled': false,
+        'libraryBrowseEnabled': false,
+        'reflectionEnabled': false,
+        'rewardsEnabled': false,
+      });
+      final request = safetyPolicyToRequest(policy);
+      expect(request['quizEnabled'], isFalse);
+      expect(request['notebookEnabled'], isFalse);
+      expect(request['libraryBrowseEnabled'], isFalse);
+      expect(request['reflectionEnabled'], isFalse);
+      expect(request['rewardsEnabled'], isFalse);
+    });
+
+    test('5 cờ tính năng null thì request KHÔNG có các key này', () {
+      final policy = SafetyPolicyDto.fromJson({
+        'childProfileId': 10,
+        'quizEnabled': null,
+        'notebookEnabled': null,
+        'libraryBrowseEnabled': null,
+        'reflectionEnabled': null,
+        'rewardsEnabled': null,
+      });
+      final request = safetyPolicyToRequest(policy);
+      expect(request.containsKey('quizEnabled'), isFalse);
+      expect(request.containsKey('notebookEnabled'), isFalse);
+      expect(request.containsKey('libraryBrowseEnabled'), isFalse);
+      expect(request.containsKey('reflectionEnabled'), isFalse);
+      expect(request.containsKey('rewardsEnabled'), isFalse);
+    });
+
+    test('request luôn có \'applyAgePreset\' == false', () {
+      final policy = SafetyPolicyDto.fromJson({
+        'childProfileId': 10,
+      });
+      final request = safetyPolicyToRequest(policy);
+      expect(request['applyAgePreset'], isFalse);
     });
   });
 }

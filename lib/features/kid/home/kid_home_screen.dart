@@ -14,6 +14,9 @@ import '../../auth/application/auth_controller.dart';
 import '../data/kid_session_controller.dart';
 import '../data/stored_kid_session.dart';
 import '../gate/parental_gate_dialog.dart';
+import '../time/kid_habit_widgets.dart';
+import '../time/kid_status_provider.dart';
+import '../time/kid_time_layer.dart';
 import 'kid_home_providers.dart';
 import 'kid_lobby.dart';
 
@@ -58,6 +61,7 @@ class KidHomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionState = ref.watch(kidSessionProvider);
+    final kidStatus = ref.watch(kidStatusProvider);
     final tt = context.tt;
 
     return switch (sessionState) {
@@ -98,12 +102,23 @@ class KidHomeScreen extends ConsumerWidget {
         },
         child: Scaffold(
           backgroundColor: tt.bg,
-          body: SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(context, ref),
-                Expanded(child: _buildContent(context, ref)),
-              ],
+          body: KidTimeGate(
+            status: kidStatus.readingTime,
+            onDone: () => ref.read(kidStatusProvider.notifier).refresh(),
+            onExit: () => _exit(context, ref),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(context, ref),
+                  KidTimeBanner(status: kidStatus.readingTime),
+                  if (kidStatus.habit != null)
+                    KidReminderHost(
+                      habit: kidStatus.habit,
+                      child: KidHabitStrip(habit: kidStatus.habit!),
+                    ),
+                  Expanded(child: _buildContent(context, ref)),
+                ],
+              ),
             ),
           ),
         ),
@@ -146,20 +161,32 @@ class KidHomeScreen extends ConsumerWidget {
           const SizedBox(width: 8),
           // Expanded (không dùng Spacer + Flexible) để tên dùng hết khoảng giữa hai nút.
           Expanded(
-            child: _swing(
-              context,
-              Text(
-                displayName,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Baloo2',
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: tt.text,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _swing(
+                  context,
+                  Text(
+                    displayName,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Baloo2',
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: tt.text,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+                // Dưới tên (màn 360px không đủ chỗ đặt cạnh): cho bé biết còn bao lâu.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: KidTimeChip(
+                    status: ref.watch(kidStatusProvider).readingTime,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 8),
@@ -218,6 +245,7 @@ class KidHomeScreen extends ConsumerWidget {
           onNotebook: () => _open(context, ref, '/kid/notebook'),
           onWish: () => _open(context, ref, '/kid/wish'),
           onRewards: () => _open(context, ref, '/kid/rewards'),
+          disabledFeatures: ref.watch(kidStatusProvider).disabledFeatures,
         ),
       ),
     );

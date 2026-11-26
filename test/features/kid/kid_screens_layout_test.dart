@@ -11,6 +11,7 @@ import 'package:ai_storytelling_mobile/features/kid/quiz/kid_emotion_step.dart';
 import 'package:ai_storytelling_mobile/features/kid/quiz/kid_feeling_step.dart';
 import 'package:ai_storytelling_mobile/features/kid/rewards/kid_notebook_screen.dart';
 import 'package:ai_storytelling_mobile/features/kid/rewards/kid_rewards_screen.dart';
+import 'package:ai_storytelling_mobile/features/kid/time/kid_status_provider.dart';
 import 'package:ai_storytelling_mobile/features/kid/wish/kid_wish_screen.dart';
 import 'package:ai_storytelling_mobile/models/child_interaction_dto.dart';
 import 'package:ai_storytelling_mobile/models/child_read_aloud_dto.dart';
@@ -150,6 +151,11 @@ class _Reading implements KidReadingRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class _StaticKidStatus extends KidStatusNotifier {
+  @override
+  KidStatus build() => const KidStatus();
+}
+
 Future<void> _pump(WidgetTester tester, Size size, Widget screen) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -160,6 +166,8 @@ Future<void> _pump(WidgetTester tester, Size size, Widget screen) async {
         kidRewardsRepositoryProvider.overrideWithValue(_Rewards()),
         kidWishRepositoryProvider.overrideWithValue(_Wishes()),
         kidReadingRepositoryProvider.overrideWithValue(_Reading()),
+        // Không hỏi /me theo chu kỳ trong test (bộ đếm 60 giây làm test báo còn Timer).
+        kidStatusProvider.overrideWith(_StaticKidStatus.new),
       ],
       child: MaterialApp(theme: AppTheme.light(), home: screen),
     ),

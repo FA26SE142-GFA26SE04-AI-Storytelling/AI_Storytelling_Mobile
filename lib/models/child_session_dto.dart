@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'reading_time_dto.dart';
 
 part 'child_session_dto.freezed.dart';
 part 'child_session_dto.g.dart';
@@ -22,6 +23,9 @@ abstract class ChildSessionProfileDto with _$ChildSessionProfileDto {
     required int childProfileId,
     required String nickname,
     required String ageBand,
+    ReadingTimeStatusDto? readingTime,
+    ChildHabitDto? habit,
+    @Default(<String>[]) List<String> disabledFeatures,
   }) = _ChildSessionProfileDto;
 
   factory ChildSessionProfileDto.fromJson(Map<String, dynamic> json) =>

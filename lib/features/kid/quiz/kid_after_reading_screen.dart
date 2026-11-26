@@ -19,6 +19,7 @@ import './kid_questions_step.dart';
 import './kid_quiz_step.dart';
 import './kid_scene_grid.dart';
 import './kid_summary_step.dart';
+import '../time/kid_status_provider.dart';
 
 /// Màn hình wizard "Sau khi đọc xong" dành cho bé — 7 trang (6 khi truyện không có câu đố).
 ///
@@ -49,7 +50,21 @@ class KidAfterReadingScreen extends ConsumerStatefulWidget {
 class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
   /// Truyện không có câu đố (API trả danh sách câu rỗng) thì bỏ trang câu đố ở cuối.
   bool _hasQuiz = true;
-  int get _totalPages => _hasQuiz ? 7 : 6;
+
+  bool _on(String code) =>
+      !ref.read(kidStatusProvider).disabledFeatures.contains(code);
+
+  /// Các trang được hiện (như Web): bố mẹ tắt cảm nhận / giọng nói / câu đố thì bỏ trang đó; trang thắc mắc luôn có.
+  List<int> get _pages => [
+        if (_on(kKidFeatureReflection)) ...[0, 1, 2, 3],
+        if (_on(kKidFeatureVoice)) 4,
+        5,
+        if (_on(kKidFeatureQuiz) && _hasQuiz) 6,
+      ];
+
+  /// Trang đang hiện; trang đang đứng bị ẩn (vừa nhận danh sách tắt) thì về trang hiện đầu tiên.
+  int get _current => _pages.contains(_pageIndex) ? _pageIndex : _pages.first;
+  int get _pos => _pages.indexOf(_current);
 
   int _pageIndex = 0;
   int _prevPageIndex = 0; // dùng để tính hướng animation
@@ -89,6 +104,7 @@ class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
   Map<String, String> _badgeNames = const {};
 
   Future<void> _checkQuiz() async {
+    if (!_on(kKidFeatureQuiz)) return;
     try {
       final quiz = await ref
           .read(kidReadingRepositoryProvider)
@@ -96,12 +112,13 @@ class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
       if (!mounted || quiz.questions.isNotEmpty) return;
       setState(() {
         _hasQuiz = false;
-        if (_pageIndex > 5) _pageIndex = 5;
+        if (_pageIndex > 5) _pageIndex = _pages.last;
       });
     } catch (_) {} // không tải được thì giữ trang câu đố, trang đó tự báo lỗi
   }
 
   Future<void> _loadReflection() async {
+    if (!_on(kKidFeatureReflection)) return;
     try {
       final repo = ref.read(kidReadingRepositoryProvider);
       final r = await repo.reflection(widget.sessionId);
@@ -154,25 +171,22 @@ class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
   }
 
   void _goToPage(int index, {bool markUserNav = true}) {
-    if (index < 0 || index >= _totalPages) return;
-    if (index == _pageIndex) return;
+    if (!_pages.contains(index)) return;
+    if (index == _current) return;
     setState(() {
-      _prevPageIndex = _pageIndex;
+      _prevPageIndex = _current;
       _pageIndex = index;
       if (markUserNav) _userNavigated = true;
     });
   }
 
   void _goNext() {
-    if (_pageIndex < _totalPages - 1) {
-      _goToPage(_pageIndex + 1);
-    }
+    final pages = _pages;
+    if (_pos < pages.length - 1) _goToPage(pages[_pos + 1]);
   }
 
   void _goPrev() {
-    if (_pageIndex > 0) {
-      _goToPage(_pageIndex - 1);
-    }
+    if (_pos > 0) _goToPage(_pages[_pos - 1]);
   }
 
   Future<void> _pickFavoriteScene(KidSceneTile tile) async {
@@ -358,7 +372,10 @@ class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
     ];
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isNarrow = screenWidth < 400;
-    final goingForward = _pageIndex >= _prevPageIndex;
+    // Theo dõi danh sách chức năng bố mẹ tắt để ẩn trang ngay khi /me trả về.
+    ref.watch(kidStatusProvider.select((s) => s.disabledFeatures.join(',')));
+    final pages = _pages;
+    final goingForward = _current >= _prevPageIndex;
 
     return Scaffold(
       backgroundColor: tt.bg,
@@ -417,9 +434,9 @@ class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
             // ── Nội dung trang — IndexedStack giữ state, animate overlay ──────
             Expanded(
               child: _AnimatedIndexedStack(
-                index: _pageIndex,
+                index: _pos,
                 goingForward: goingForward,
-                children: List.generate(_totalPages, (i) => _buildPage(i)),
+                children: [for (final p in pages) _buildPage(p)],
               ),
             ),
 
@@ -449,7 +466,7 @@ class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
           SizedBox(
             width: navBtnSize,
             height: navBtnSize,
-            child: _pageIndex == 0
+            child: _pos == 0
                 ? const SizedBox.shrink()
                 : IconButton(
                     icon: Icon(
@@ -467,9 +484,9 @@ class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_totalPages, (i) {
-                final isCurrent = i == _pageIndex;
-                final isPast = i < _pageIndex;
+              children: List.generate(_pages.length, (i) {
+                final isCurrent = i == _pos;
+                final isPast = i < _pos;
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeInOut,
@@ -493,7 +510,7 @@ class _KidAfterReadingScreenState extends ConsumerState<KidAfterReadingScreen> {
           SizedBox(
             width: navBtnSize,
             height: navBtnSize,
-            child: _pageIndex == _totalPages - 1
+            child: _pos == _pages.length - 1
                 ? const SizedBox.shrink()
                 : IconButton(
                     icon: Icon(

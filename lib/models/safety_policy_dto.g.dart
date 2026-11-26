@@ -44,6 +44,12 @@ _SafetyPolicyDto _$SafetyPolicyDtoFromJson(Map<String, dynamic> json) =>
       childCreationEnabled: json['childCreationEnabled'] as bool?,
       childCreationMode: json['childCreationMode'] as String?,
       voiceAnswersEnabled: json['voiceAnswersEnabled'] as bool?,
+      storyLengthTarget: (json['storyLengthTarget'] as num?)?.toInt(),
+      quizEnabled: json['quizEnabled'] as bool?,
+      notebookEnabled: json['notebookEnabled'] as bool?,
+      libraryBrowseEnabled: json['libraryBrowseEnabled'] as bool?,
+      reflectionEnabled: json['reflectionEnabled'] as bool?,
+      rewardsEnabled: json['rewardsEnabled'] as bool?,
       voiceConsentAt: json['voiceConsentAt'] == null
           ? null
           : DateTime.parse(json['voiceConsentAt'] as String),
@@ -76,6 +82,12 @@ Map<String, dynamic> _$SafetyPolicyDtoToJson(_SafetyPolicyDto instance) =>
       'childCreationEnabled': instance.childCreationEnabled,
       'childCreationMode': instance.childCreationMode,
       'voiceAnswersEnabled': instance.voiceAnswersEnabled,
+      'storyLengthTarget': instance.storyLengthTarget,
+      'quizEnabled': instance.quizEnabled,
+      'notebookEnabled': instance.notebookEnabled,
+      'libraryBrowseEnabled': instance.libraryBrowseEnabled,
+      'reflectionEnabled': instance.reflectionEnabled,
+      'rewardsEnabled': instance.rewardsEnabled,
       'voiceConsentAt': instance.voiceConsentAt?.toIso8601String(),
       'categories': instance.categories,
     };
