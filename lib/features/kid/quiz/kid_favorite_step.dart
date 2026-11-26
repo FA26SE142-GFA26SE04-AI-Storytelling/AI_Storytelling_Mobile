@@ -333,6 +333,8 @@ class _KidFavoriteStepState extends ConsumerState<KidFavoriteStep> {
                           : (path) => setState(() => _audioPath = path),
                       enabled: _canRecord && !_sending,
                       sending: _sending,
+                      // Bản ghi đã gửi bố mẹ thì chỉ nghe lại, không xoá.
+                      canDelete: _audioPath != _sentAudioPath,
                     ),
                   ],
                   const SizedBox(height: 18),
