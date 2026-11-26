@@ -1,4 +1,19 @@
+import 'dart:convert';
+
 import '../../../models/child_reading_dto.dart';
+
+/// Đoạn có mốc thời gian từng chữ hợp lệ trong DB (`[{word, start, end}]`, như
+/// `parseWordTimings` của web). Không có thì không tô sáng khi nghe đọc.
+bool hasWordTimings(String? json) {
+  if (json == null || json.trim().isEmpty) return false;
+  try {
+    final raw = jsonDecode(json);
+    return raw is List &&
+        raw.any((t) => t is Map && t['word'] is String && t['start'] is num);
+  } catch (_) {
+    return false;
+  }
+}
 
 /// Một tranh của cảnh và đoạn chữ [start, end) nó minh hoạ.
 typedef ScenePicture = ({String? url, int start, int end});

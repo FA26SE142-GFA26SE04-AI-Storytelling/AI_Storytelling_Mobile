@@ -43,6 +43,12 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   bool _isAudioPlaying = false;
   int? _activeSegmentId;
 
+  /// Đoạn đang đọc có mốc thời gian từng chữ thì mới tô sáng.
+  bool _highlightActive = true;
+
+  /// Đã báo "chưa có tô sáng chữ" trong lần mở truyện này.
+  bool _noHighlightTold = false;
+
   /// Cờ để chỉ tự động phát lần đầu khi chuyển sang ready một lần duy nhất.
   bool _didAutoPlay = false;
 
@@ -337,8 +343,16 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     _audio.playUrls(
       urls,
       onIndexChanged: (idx) {
-        if (mounted) {
-          setState(() => _activeSegmentId = segments[idx].segmentId);
+        if (!mounted) return;
+        final timed = hasWordTimings(segments[idx].wordTimingsJson);
+        setState(() {
+          _activeSegmentId = segments[idx].segmentId;
+          _highlightActive = timed;
+        });
+        // Như web: mỗi lần mở truyện chỉ báo một lần.
+        if (!timed && !_noHighlightTold) {
+          _noHighlightTold = true;
+          _toast('Truyện này chưa có tô sáng chữ khi nghe đọc.');
         }
       },
       onCompleted: () {
@@ -782,6 +796,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                 scene: scenes[i],
                 vocabulary: content.vocabulary,
                 activeSegmentId: i == currentPage ? _activeSegmentId : null,
+                highlightActive: _highlightActive,
                 aloudSegmentId: i == currentPage && aloud.recording
                     ? aloud.segmentId
                     : null,

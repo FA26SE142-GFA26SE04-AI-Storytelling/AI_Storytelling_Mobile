@@ -49,6 +49,8 @@ void main() {
     int? aloudSegmentId,
     ReadAloudResult? aloudResult,
     void Function(String)? onHintTap,
+    int? activeSegmentId,
+    bool highlightActive = true,
   }) {
     return ProviderScope(
       child: MaterialApp(
@@ -58,6 +60,8 @@ void main() {
             scene: scene,
             vocabulary: const <ReadingVocabulary>[],
             layout: KidReaderLayout.stacked,
+            activeSegmentId: activeSegmentId,
+            highlightActive: highlightActive,
             aloudSegmentId: aloudSegmentId,
             aloudResult: aloudResult,
             onAloudHintTap: onHintTap,
@@ -83,6 +87,35 @@ void main() {
     return result;
   }
 
+  group('Tô sáng đoạn đang nghe', () {
+    for (final highlight in [true, false]) {
+      testWidgets(
+        'highlightActive=$highlight thì ${highlight ? 'có' : 'không có'} nền vàng ở đoạn đang đọc',
+        (tester) async {
+          await tester.pumpWidget(
+            buildTestWidget(
+              scene: testScene,
+              activeSegmentId: 1,
+              highlightActive: highlight,
+            ),
+          );
+          await tester.pumpAndSettle();
+          final richText = tester.widget<RichText>(
+            find
+                .descendant(
+                  of: find.byType(KidReaderPage),
+                  matching: find.byType(RichText),
+                )
+                .first,
+          );
+          final lit = collectTextSpans(richText.text)
+              .where((s) => s.style?.backgroundColor != null);
+          expect(lit.isNotEmpty, highlight);
+        },
+      );
+    }
+  });
+
   group('KidReaderPage Read Aloud Tests', () {
     testWidgets(
       'Test 1: aloudResult segment 1 tô màu đúng status good, retry và không đổi style segment 2',
@@ -99,10 +132,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          buildTestWidget(
-            scene: testScene,
-            aloudResult: aloudResult,
-          ),
+          buildTestWidget(scene: testScene, aloudResult: aloudResult),
         );
         await tester.pumpAndSettle();
 
@@ -193,10 +223,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          buildTestWidget(
-            scene: testScene,
-            aloudResult: aloudResult,
-          ),
+          buildTestWidget(scene: testScene, aloudResult: aloudResult),
         );
         await tester.pumpAndSettle();
 

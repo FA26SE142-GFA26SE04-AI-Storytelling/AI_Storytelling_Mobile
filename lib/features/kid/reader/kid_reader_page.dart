@@ -43,6 +43,7 @@ class KidReaderPage extends StatefulWidget {
     required this.scene,
     required this.vocabulary,
     this.activeSegmentId,
+    this.highlightActive = true,
     this.aloudSegmentId,
     this.aloudResult,
     this.onAloudHintTap,
@@ -60,6 +61,9 @@ class KidReaderPage extends StatefulWidget {
 
   /// Id đoạn đang đọc (được highlight màu vàng nhạt)
   final int? activeSegmentId;
+
+  /// Tô sáng đoạn đang đọc; false khi đoạn không có mốc thời gian từng chữ (như web).
+  final bool highlightActive;
 
   /// Id đoạn đang ghi âm (tô nền vàng như đoạn active)
   final int? aloudSegmentId;
@@ -183,6 +187,7 @@ class _KidReaderPageState extends State<KidReaderPage> {
 
   /// Tìm khoảng offset [start, end) của đoạn đang đọc trong scene.text
   ({int start, int end})? _getActiveRange(String text) {
+    if (!widget.highlightActive) return null;
     return _segmentRange(text, widget.activeSegmentId);
   }
 
