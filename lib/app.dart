@@ -17,7 +17,7 @@ class TaleTaleApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
     return MaterialApp.router(
-      title: 'Đầm Sen Kể Chuyện',
+      title: 'Taletale',
       debugShowCheckedModeBanner: false,
       // Luôn dùng theme sáng, không theo chế độ tối của máy.
       theme: AppTheme.light(),

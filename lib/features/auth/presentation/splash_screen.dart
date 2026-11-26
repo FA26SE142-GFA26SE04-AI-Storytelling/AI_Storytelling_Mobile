@@ -25,7 +25,7 @@ class SplashScreen extends StatelessWidget {
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
             Text(
-              'Đang mở Đầm Sen Kể Chuyện...',
+              'Đang mở Taletale...',
               style: textTheme.bodyMedium?.copyWith(
                 color: tt.muted,
               ),
