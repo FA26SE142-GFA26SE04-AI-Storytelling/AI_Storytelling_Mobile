@@ -118,6 +118,13 @@ class _Reading implements KidReadingRepository {
   }) => throw UnimplementedError();
 
   @override
+  Future<ReadAloudResult> readAloudPractice(
+    String sessionId,
+    int interactionId, {
+    required String filePath,
+  }) => throw UnimplementedError();
+
+  @override
   Future<ChildStoryReflection> reflection(int sessionId) async =>
       const ChildStoryReflection(
         sessionId: 1,
@@ -133,8 +140,11 @@ class _Reading implements KidReadingRepository {
   Future<ReadingFeelingResult> feeling(
     String sessionId, {
     required String feeling,
-  }) async =>
-      const ReadingFeelingResult(sessionId: 1, feeling: 'VeryLike', label: 'Rất thích');
+  }) async => const ReadingFeelingResult(
+    sessionId: 1,
+    feeling: 'VeryLike',
+    label: 'Rất thích',
+  );
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -196,7 +206,9 @@ void main() {
     }
   }
 
-  testWidgets('Sau khi đọc: chạm "Rất thích" chuyển sang trang cảm xúc', (tester) async {
+  testWidgets('Sau khi đọc: chạm "Rất thích" chuyển sang trang cảm xúc', (
+    tester,
+  ) async {
     await _pump(
       tester,
       const Size(390, 844),

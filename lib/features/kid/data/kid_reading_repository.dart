@@ -125,6 +125,13 @@ abstract class KidReadingRepository {
     int segmentId, {
     required String filePath,
   });
+
+  /// Trẻ luyện đọc to câu sau cảnh cuối; filePath là file WAV đã ghi âm.
+  Future<ReadAloudResult> readAloudPractice(
+    String sessionId,
+    int interactionId, {
+    required String filePath,
+  });
 }
 
 // ─── Implementation ──────────────────────────────────────────────────────────
@@ -438,7 +445,12 @@ class ApiKidReadingRepository implements KidReadingRepository {
     required String filePath,
   }) => _childCall(() async {
     final formData = FormData.fromMap({
-      'audio': await MultipartFile.fromFile(filePath, filename: 'summary.wav'),
+      // Phải ghi rõ audio/wav: Dio tự đoán audio/x-wav, kho lưu Backend không nhận → lỗi 500.
+      'audio': await MultipartFile.fromFile(
+        filePath,
+        filename: 'summary.wav',
+        contentType: DioMediaType('audio', 'wav'),
+      ),
     });
     final response = await dio.post<dynamic>(
       '/child/reading/sessions/$sessionId/summary/recording',
@@ -465,28 +477,28 @@ class ApiKidReadingRepository implements KidReadingRepository {
     int sessionId,
     List<String> codes,
   ) => _childCall(() async {
-        final response = await dio.put<dynamic>(
-          '/child/reading/sessions/$sessionId/reflection/emotions',
-          data: {'emotions': codes},
-          options: _childOptions(_token),
-        );
-        final data = _unwrap(response) as Map<String, dynamic>;
-        return ChildStoryReflection.fromJson(data);
-      });
+    final response = await dio.put<dynamic>(
+      '/child/reading/sessions/$sessionId/reflection/emotions',
+      data: {'emotions': codes},
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ChildStoryReflection.fromJson(data);
+  });
 
   @override
   Future<ChildStoryReflection> reflectionFavoriteScene(
     int sessionId,
     int sceneId,
   ) => _childCall(() async {
-        final response = await dio.put<dynamic>(
-          '/child/reading/sessions/$sessionId/reflection/favorite-scene',
-          data: {'sceneId': sceneId},
-          options: _childOptions(_token),
-        );
-        final data = _unwrap(response) as Map<String, dynamic>;
-        return ChildStoryReflection.fromJson(data);
-      });
+    final response = await dio.put<dynamic>(
+      '/child/reading/sessions/$sessionId/reflection/favorite-scene',
+      data: {'sceneId': sceneId},
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ChildStoryReflection.fromJson(data);
+  });
 
   @override
   Future<ChildStoryReflection> reflectionNote(
@@ -494,33 +506,33 @@ class ApiKidReadingRepository implements KidReadingRepository {
     String? text,
     String? audioPath,
   }) => runApi(() async {
-        final map = <String, dynamic>{};
-        final trimmedText = text?.trim();
-        if (trimmedText != null && trimmedText.isNotEmpty) {
-          map['Text'] = trimmedText;
-        }
-        if (audioPath != null) {
-          map['Audio'] = await MultipartFile.fromFile(
-            audioPath,
-            filename: 'note.wav',
-            contentType: DioMediaType('audio', 'wav'),
-          );
-        }
-        try {
-          final response = await dio.post<dynamic>(
-            '/child/reading/sessions/$sessionId/reflection/note',
-            data: FormData.fromMap(map),
-            options: _childOptions(_token),
-          );
-          final data = _unwrap(response) as Map<String, dynamic>;
-          return ChildStoryReflection.fromJson(data);
-        } on DioException catch (e) {
-          if (e.response?.statusCode == 401) {
-            onChildSessionEnded();
-          }
-          rethrow;
-        }
-      });
+    final map = <String, dynamic>{};
+    final trimmedText = text?.trim();
+    if (trimmedText != null && trimmedText.isNotEmpty) {
+      map['Text'] = trimmedText;
+    }
+    if (audioPath != null) {
+      map['Audio'] = await MultipartFile.fromFile(
+        audioPath,
+        filename: 'note.wav',
+        contentType: DioMediaType('audio', 'wav'),
+      );
+    }
+    try {
+      final response = await dio.post<dynamic>(
+        '/child/reading/sessions/$sessionId/reflection/note',
+        data: FormData.fromMap(map),
+        options: _childOptions(_token),
+      );
+      final data = _unwrap(response) as Map<String, dynamic>;
+      return ChildStoryReflection.fromJson(data);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        onChildSessionEnded();
+      }
+      rethrow;
+    }
+  });
 
   @override
   // 409 = tranh này đã hỏi rồi
@@ -531,31 +543,29 @@ class ApiKidReadingRepository implements KidReadingRepository {
     String? text,
     String? audioPath,
   }) => _childCall(() async {
-        final map = <String, dynamic>{
-          'SceneId': sceneId,
-        };
-        if (beatOrder != null) {
-          map['BeatOrder'] = beatOrder;
-        }
-        final trimmedText = text?.trim();
-        if (trimmedText != null && trimmedText.isNotEmpty) {
-          map['Text'] = trimmedText;
-        }
-        if (audioPath != null) {
-          map['Audio'] = await MultipartFile.fromFile(
-            audioPath,
-            filename: 'question.wav',
-            contentType: DioMediaType('audio', 'wav'),
-          );
-        }
-        final response = await dio.post<dynamic>(
-          '/child/reading/sessions/$sessionId/summary/questions',
-          data: FormData.fromMap(map),
-          options: _childOptions(_token),
-        );
-        final data = _unwrap(response) as Map<String, dynamic>;
-        return StorySummaryQuestionSent.fromJson(data);
-      });
+    final map = <String, dynamic>{'SceneId': sceneId};
+    if (beatOrder != null) {
+      map['BeatOrder'] = beatOrder;
+    }
+    final trimmedText = text?.trim();
+    if (trimmedText != null && trimmedText.isNotEmpty) {
+      map['Text'] = trimmedText;
+    }
+    if (audioPath != null) {
+      map['Audio'] = await MultipartFile.fromFile(
+        audioPath,
+        filename: 'question.wav',
+        contentType: DioMediaType('audio', 'wav'),
+      );
+    }
+    final response = await dio.post<dynamic>(
+      '/child/reading/sessions/$sessionId/summary/questions',
+      data: FormData.fromMap(map),
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return StorySummaryQuestionSent.fromJson(data);
+  });
 
   @override
   Future<ListeningAttemptResult> attemptInteraction(
@@ -593,6 +603,28 @@ class ApiKidReadingRepository implements KidReadingRepository {
     });
     final response = await dio.post<dynamic>(
       '/child/reading/sessions/$sessionId/segments/$segmentId/read-aloud',
+      data: formData,
+      options: _childOptions(_token),
+    );
+    final data = _unwrap(response) as Map<String, dynamic>;
+    return ReadAloudResult.fromJson(data);
+  });
+
+  @override
+  Future<ReadAloudResult> readAloudPractice(
+    String sessionId,
+    int interactionId, {
+    required String filePath,
+  }) => _childCall(() async {
+    final formData = FormData.fromMap({
+      'Audio': await MultipartFile.fromFile(
+        filePath,
+        filename: 'practice.wav',
+        contentType: DioMediaType('audio', 'wav'),
+      ),
+    });
+    final response = await dio.post<dynamic>(
+      '/child/reading/sessions/$sessionId/read-aloud-practice/$interactionId',
       data: formData,
       options: _childOptions(_token),
     );

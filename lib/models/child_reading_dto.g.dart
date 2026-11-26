@@ -118,6 +118,11 @@ _ReadingContent _$ReadingContentFromJson(Map<String, dynamic> json) =>
               )
               .toList() ??
           const <ReadingVocabulary>[],
+      readAloudPractice: json['readAloudPractice'] == null
+          ? null
+          : ReadAloudPractice.fromJson(
+              json['readAloudPractice'] as Map<String, dynamic>,
+            ),
     );
 
 Map<String, dynamic> _$ReadingContentToJson(_ReadingContent instance) =>
@@ -129,6 +134,25 @@ Map<String, dynamic> _$ReadingContentToJson(_ReadingContent instance) =>
       'listenOnly': instance.listenOnly,
       'scenes': instance.scenes,
       'vocabulary': instance.vocabulary,
+      'readAloudPractice': instance.readAloudPractice,
+    };
+
+_ReadAloudPractice _$ReadAloudPracticeFromJson(Map<String, dynamic> json) =>
+    _ReadAloudPractice(
+      interactionId: (json['interactionId'] as num).toInt(),
+      text: json['text'] as String? ?? '',
+      audioUrl: json['audioUrl'] as String?,
+      praiseFeedback: json['praiseFeedback'] as String?,
+      praiseAudioUrl: json['praiseAudioUrl'] as String?,
+    );
+
+Map<String, dynamic> _$ReadAloudPracticeToJson(_ReadAloudPractice instance) =>
+    <String, dynamic>{
+      'interactionId': instance.interactionId,
+      'text': instance.text,
+      'audioUrl': instance.audioUrl,
+      'praiseFeedback': instance.praiseFeedback,
+      'praiseAudioUrl': instance.praiseAudioUrl,
     };
 
 _ReadingVocabulary _$ReadingVocabularyFromJson(Map<String, dynamic> json) =>

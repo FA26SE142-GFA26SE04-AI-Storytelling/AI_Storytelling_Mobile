@@ -178,6 +178,13 @@ class FakeKidReadingRepository implements KidReadingRepository {
   }) => throw UnimplementedError();
 
   @override
+  Future<ReadAloudResult> readAloudPractice(
+    String sessionId,
+    int interactionId, {
+    required String filePath,
+  }) => throw UnimplementedError();
+
+  @override
   Future<List<ChildStory>> stories({
     String? search,
     int pageIndex = 1,
@@ -227,19 +234,36 @@ class FakeKidReadingRepository implements KidReadingRepository {
   }
 
   @override
-  Future<ChildStoryReflection> reflection(int sessionId) => throw UnimplementedError();
+  Future<ChildStoryReflection> reflection(int sessionId) =>
+      throw UnimplementedError();
 
   @override
-  Future<ChildStoryReflection> reflectionEmotions(int sessionId, List<String> codes) => throw UnimplementedError();
+  Future<ChildStoryReflection> reflectionEmotions(
+    int sessionId,
+    List<String> codes,
+  ) => throw UnimplementedError();
 
   @override
-  Future<ChildStoryReflection> reflectionFavoriteScene(int sessionId, int sceneId) => throw UnimplementedError();
+  Future<ChildStoryReflection> reflectionFavoriteScene(
+    int sessionId,
+    int sceneId,
+  ) => throw UnimplementedError();
 
   @override
-  Future<ChildStoryReflection> reflectionNote(int sessionId, {String? text, String? audioPath}) => throw UnimplementedError();
+  Future<ChildStoryReflection> reflectionNote(
+    int sessionId, {
+    String? text,
+    String? audioPath,
+  }) => throw UnimplementedError();
 
   @override
-  Future<StorySummaryQuestionSent> summaryQuestion(int sessionId, {required int sceneId, int? beatOrder, String? text, String? audioPath}) => throw UnimplementedError();
+  Future<StorySummaryQuestionSent> summaryQuestion(
+    int sessionId, {
+    required int sceneId,
+    int? beatOrder,
+    String? text,
+    String? audioPath,
+  }) => throw UnimplementedError();
 }
 
 List<ReadingScene> makeScenes(int count) {
@@ -591,60 +615,82 @@ void main() {
       },
     );
 
-    test(
-      'mỗi tranh 1 trang: resume về trang đầu cảnh, progress gửi số cảnh, lật lùi qua ranh giới cảnh',
-      () async {
-        final fakeRepo = FakeKidReadingRepository();
-        // Cảnh 1 có 3 tranh, cảnh 2 không có tranh riêng → 4 trang.
-        fakeRepo.contentResult = const ReadingContent(
-          sessionId: 101,
-          storyId: 1,
-          title: 'T',
-          scenes: [
-            ReadingScene(
-              sceneId: 1,
-              sceneIndex: 0,
-              text: 'Mot. Hai. Ba.',
-              illustrations: [
-                SceneIllustration(beatOrder: 1, startOffset: 0, endOffset: 4, url: 'a'),
-                SceneIllustration(beatOrder: 2, startOffset: 5, endOffset: 9, url: 'b'),
-                SceneIllustration(beatOrder: 3, startOffset: 10, endOffset: 13, url: 'c'),
-              ],
-            ),
-            ReadingScene(sceneId: 2, sceneIndex: 1, text: 'Bon.'),
-          ],
-        );
+    test('mỗi tranh 1 trang: resume về trang đầu cảnh, progress gửi số cảnh, lật lùi qua ranh giới cảnh', () async {
+      final fakeRepo = FakeKidReadingRepository();
+      // Cảnh 1 có 3 tranh, cảnh 2 không có tranh riêng → 4 trang.
+      fakeRepo.contentResult = const ReadingContent(
+        sessionId: 101,
+        storyId: 1,
+        title: 'T',
+        scenes: [
+          ReadingScene(
+            sceneId: 1,
+            sceneIndex: 0,
+            text: 'Mot. Hai. Ba.',
+            illustrations: [
+              SceneIllustration(
+                beatOrder: 1,
+                startOffset: 0,
+                endOffset: 4,
+                url: 'a',
+              ),
+              SceneIllustration(
+                beatOrder: 2,
+                startOffset: 5,
+                endOffset: 9,
+                url: 'b',
+              ),
+              SceneIllustration(
+                beatOrder: 3,
+                startOffset: 10,
+                endOffset: 13,
+                url: 'c',
+              ),
+            ],
+          ),
+          ReadingScene(sceneId: 2, sceneIndex: 1, text: 'Bon.'),
+        ],
+      );
 
-        // Thoát giữa chừng ở cảnh 2 rồi vào lại: Backend trả lastPage = 2 (cảnh).
-        fakeRepo.startResult = const ReadingStarted(sessionId: 101, storyId: 1, lastPage: 2);
-        final container = ProviderContainer(
-          overrides: [kidReadingRepositoryProvider.overrideWithValue(fakeRepo)],
-        );
-        addTearDown(container.dispose);
-        final notifier = container.read(kidReaderControllerProvider('1').notifier);
-        await notifier.load();
+      // Thoát giữa chừng ở cảnh 2 rồi vào lại: Backend trả lastPage = 2 (cảnh).
+      fakeRepo.startResult = const ReadingStarted(
+        sessionId: 101,
+        storyId: 1,
+        lastPage: 2,
+      );
+      final container = ProviderContainer(
+        overrides: [kidReadingRepositoryProvider.overrideWithValue(fakeRepo)],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(
+        kidReaderControllerProvider('1').notifier,
+      );
+      await notifier.load();
 
-        var state = container.read(kidReaderControllerProvider('1'));
-        expect(state.totalPages, 4);
-        expect(state.currentPage, 3);
-        expect(state.currentSceneIndex, 1);
+      var state = container.read(kidReaderControllerProvider('1'));
+      expect(state.totalPages, 4);
+      expect(state.currentPage, 3);
+      expect(state.currentSceneIndex, 1);
 
-        // Lật lùi sang tranh cuối của cảnh 1.
-        notifier.prevPage();
-        state = container.read(kidReaderControllerProvider('1'));
-        expect(state.currentPage, 2);
-        expect(state.pages[2].scene.text, 'Ba.');
+      // Lật lùi sang tranh cuối của cảnh 1.
+      notifier.prevPage();
+      state = container.read(kidReaderControllerProvider('1'));
+      expect(state.currentPage, 2);
+      expect(state.pages[2].scene.text, 'Ba.');
 
-        await notifier.saveProgressNow();
-        expect(fakeRepo.progressCalls.last.page, 1); // cảnh 1 (1-based)
-        // Server trả đúng cảnh hiện tại → giữ nguyên trang tranh.
-        expect(container.read(kidReaderControllerProvider('1')).currentPage, 2);
+      await notifier.saveProgressNow();
+      expect(fakeRepo.progressCalls.last.page, 1); // cảnh 1 (1-based)
+      // Server trả đúng cảnh hiện tại → giữ nguyên trang tranh.
+      expect(container.read(kidReaderControllerProvider('1')).currentPage, 2);
 
-        // Resume về cảnh 1 → mở trang đầu của cảnh 1.
-        fakeRepo.startResult = const ReadingStarted(sessionId: 101, storyId: 1, lastPage: 1);
-        await notifier.load();
-        expect(container.read(kidReaderControllerProvider('1')).currentPage, 0);
-      },
-    );
+      // Resume về cảnh 1 → mở trang đầu của cảnh 1.
+      fakeRepo.startResult = const ReadingStarted(
+        sessionId: 101,
+        storyId: 1,
+        lastPage: 1,
+      );
+      await notifier.load();
+      expect(container.read(kidReaderControllerProvider('1')).currentPage, 0);
+    });
   });
 }

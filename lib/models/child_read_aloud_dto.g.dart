@@ -25,7 +25,8 @@ Map<String, dynamic> _$ReadAloudWordToJson(_ReadAloudWord instance) =>
 _ReadAloudResult _$ReadAloudResultFromJson(Map<String, dynamic> json) =>
     _ReadAloudResult(
       sessionId: (json['sessionId'] as num).toInt(),
-      segmentId: (json['segmentId'] as num).toInt(),
+      segmentId: (json['segmentId'] as num?)?.toInt(),
+      interactionId: (json['interactionId'] as num?)?.toInt(),
       words:
           (json['words'] as List<dynamic>?)
               ?.map((e) => ReadAloudWord.fromJson(e as Map<String, dynamic>))
@@ -42,6 +43,7 @@ Map<String, dynamic> _$ReadAloudResultToJson(_ReadAloudResult instance) =>
     <String, dynamic>{
       'sessionId': instance.sessionId,
       'segmentId': instance.segmentId,
+      'interactionId': instance.interactionId,
       'words': instance.words,
       'goodCount': instance.goodCount,
       'retryCount': instance.retryCount,

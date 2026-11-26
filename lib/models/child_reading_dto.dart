@@ -83,10 +83,25 @@ abstract class ReadingContent with _$ReadingContent {
     @Default(false) bool listenOnly,
     @Default(<ReadingScene>[]) List<ReadingScene> scenes,
     @Default(<ReadingVocabulary>[]) List<ReadingVocabulary> vocabulary,
+    ReadAloudPractice? readAloudPractice,
   }) = _ReadingContent;
 
   factory ReadingContent.fromJson(Map<String, dynamic> json) =>
       _$ReadingContentFromJson(json);
+}
+
+@freezed
+abstract class ReadAloudPractice with _$ReadAloudPractice {
+  const factory ReadAloudPractice({
+    required int interactionId,
+    @Default('') String text,
+    String? audioUrl,
+    String? praiseFeedback,
+    String? praiseAudioUrl,
+  }) = _ReadAloudPractice;
+
+  factory ReadAloudPractice.fromJson(Map<String, dynamic> json) =>
+      _$ReadAloudPracticeFromJson(json);
 }
 
 @freezed

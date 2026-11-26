@@ -295,7 +295,7 @@ as String?,
 /// @nodoc
 mixin _$ReadAloudResult {
 
- int get sessionId; int get segmentId; List<ReadAloudWord> get words; int get goodCount; int get retryCount; int get skippedCount; int get totalCount; String get message;
+ int get sessionId; int? get segmentId; int? get interactionId; List<ReadAloudWord> get words; int get goodCount; int get retryCount; int get skippedCount; int get totalCount; String get message;
 /// Create a copy of ReadAloudResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -309,20 +309,20 @@ $ReadAloudResultCopyWith<ReadAloudResult> get copyWith => _$ReadAloudResultCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as ReadAloudResult;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadAloudResult&&(identical(other.sessionId, _this.sessionId) || other.sessionId == _this.sessionId)&&(identical(other.segmentId, _this.segmentId) || other.segmentId == _this.segmentId)&&const DeepCollectionEquality().equals(other.words, _this.words)&&(identical(other.goodCount, _this.goodCount) || other.goodCount == _this.goodCount)&&(identical(other.retryCount, _this.retryCount) || other.retryCount == _this.retryCount)&&(identical(other.skippedCount, _this.skippedCount) || other.skippedCount == _this.skippedCount)&&(identical(other.totalCount, _this.totalCount) || other.totalCount == _this.totalCount)&&(identical(other.message, _this.message) || other.message == _this.message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadAloudResult&&(identical(other.sessionId, _this.sessionId) || other.sessionId == _this.sessionId)&&(identical(other.segmentId, _this.segmentId) || other.segmentId == _this.segmentId)&&(identical(other.interactionId, _this.interactionId) || other.interactionId == _this.interactionId)&&const DeepCollectionEquality().equals(other.words, _this.words)&&(identical(other.goodCount, _this.goodCount) || other.goodCount == _this.goodCount)&&(identical(other.retryCount, _this.retryCount) || other.retryCount == _this.retryCount)&&(identical(other.skippedCount, _this.skippedCount) || other.skippedCount == _this.skippedCount)&&(identical(other.totalCount, _this.totalCount) || other.totalCount == _this.totalCount)&&(identical(other.message, _this.message) || other.message == _this.message));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ReadAloudResult;
-  return Object.hash(runtimeType,_this.sessionId,_this.segmentId,const DeepCollectionEquality().hash(_this.words),_this.goodCount,_this.retryCount,_this.skippedCount,_this.totalCount,_this.message);
+  return Object.hash(runtimeType,_this.sessionId,_this.segmentId,_this.interactionId,const DeepCollectionEquality().hash(_this.words),_this.goodCount,_this.retryCount,_this.skippedCount,_this.totalCount,_this.message);
 }
 
 @override
 String toString() {
   final _this = this as ReadAloudResult;
-  return 'ReadAloudResult(sessionId: ${_this.sessionId}, segmentId: ${_this.segmentId}, words: ${_this.words}, goodCount: ${_this.goodCount}, retryCount: ${_this.retryCount}, skippedCount: ${_this.skippedCount}, totalCount: ${_this.totalCount}, message: ${_this.message})';
+  return 'ReadAloudResult(sessionId: ${_this.sessionId}, segmentId: ${_this.segmentId}, interactionId: ${_this.interactionId}, words: ${_this.words}, goodCount: ${_this.goodCount}, retryCount: ${_this.retryCount}, skippedCount: ${_this.skippedCount}, totalCount: ${_this.totalCount}, message: ${_this.message})';
 }
 
 
@@ -333,7 +333,7 @@ abstract mixin class $ReadAloudResultCopyWith<$Res>  {
   factory $ReadAloudResultCopyWith(ReadAloudResult value, $Res Function(ReadAloudResult) _then) = _$ReadAloudResultCopyWithImpl;
 @useResult
 $Res call({
- int sessionId, int segmentId, List<ReadAloudWord> words, int goodCount, int retryCount, int skippedCount, int totalCount, String message
+ int sessionId, int? segmentId, int? interactionId, List<ReadAloudWord> words, int goodCount, int retryCount, int skippedCount, int totalCount, String message
 });
 
 
@@ -350,11 +350,12 @@ class _$ReadAloudResultCopyWithImpl<$Res>
 
 /// Create a copy of ReadAloudResult
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = null,Object? segmentId = null,Object? words = null,Object? goodCount = null,Object? retryCount = null,Object? skippedCount = null,Object? totalCount = null,Object? message = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = null,Object? segmentId = freezed,Object? interactionId = freezed,Object? words = null,Object? goodCount = null,Object? retryCount = null,Object? skippedCount = null,Object? totalCount = null,Object? message = null,}) {
   return _then(ReadAloudResult(
 sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
-as int,segmentId: null == segmentId ? _self.segmentId : segmentId // ignore: cast_nullable_to_non_nullable
-as int,words: null == words ? _self.words : words // ignore: cast_nullable_to_non_nullable
+as int,segmentId: freezed == segmentId ? _self.segmentId : segmentId // ignore: cast_nullable_to_non_nullable
+as int?,interactionId: freezed == interactionId ? _self.interactionId : interactionId // ignore: cast_nullable_to_non_nullable
+as int?,words: null == words ? _self.words : words // ignore: cast_nullable_to_non_nullable
 as List<ReadAloudWord>,goodCount: null == goodCount ? _self.goodCount : goodCount // ignore: cast_nullable_to_non_nullable
 as int,retryCount: null == retryCount ? _self.retryCount : retryCount // ignore: cast_nullable_to_non_nullable
 as int,skippedCount: null == skippedCount ? _self.skippedCount : skippedCount // ignore: cast_nullable_to_non_nullable
@@ -445,10 +446,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int sessionId,  int segmentId,  List<ReadAloudWord> words,  int goodCount,  int retryCount,  int skippedCount,  int totalCount,  String message)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int sessionId,  int? segmentId,  int? interactionId,  List<ReadAloudWord> words,  int goodCount,  int retryCount,  int skippedCount,  int totalCount,  String message)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ReadAloudResult() when $default != null:
-return $default(_that.sessionId,_that.segmentId,_that.words,_that.goodCount,_that.retryCount,_that.skippedCount,_that.totalCount,_that.message);case _:
+return $default(_that.sessionId,_that.segmentId,_that.interactionId,_that.words,_that.goodCount,_that.retryCount,_that.skippedCount,_that.totalCount,_that.message);case _:
   return orElse();
 
 }
@@ -466,10 +467,10 @@ return $default(_that.sessionId,_that.segmentId,_that.words,_that.goodCount,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int sessionId,  int segmentId,  List<ReadAloudWord> words,  int goodCount,  int retryCount,  int skippedCount,  int totalCount,  String message)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int sessionId,  int? segmentId,  int? interactionId,  List<ReadAloudWord> words,  int goodCount,  int retryCount,  int skippedCount,  int totalCount,  String message)  $default,) {final _that = this;
 switch (_that) {
 case _ReadAloudResult():
-return $default(_that.sessionId,_that.segmentId,_that.words,_that.goodCount,_that.retryCount,_that.skippedCount,_that.totalCount,_that.message);case _:
+return $default(_that.sessionId,_that.segmentId,_that.interactionId,_that.words,_that.goodCount,_that.retryCount,_that.skippedCount,_that.totalCount,_that.message);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -486,10 +487,10 @@ return $default(_that.sessionId,_that.segmentId,_that.words,_that.goodCount,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int sessionId,  int segmentId,  List<ReadAloudWord> words,  int goodCount,  int retryCount,  int skippedCount,  int totalCount,  String message)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int sessionId,  int? segmentId,  int? interactionId,  List<ReadAloudWord> words,  int goodCount,  int retryCount,  int skippedCount,  int totalCount,  String message)?  $default,) {final _that = this;
 switch (_that) {
 case _ReadAloudResult() when $default != null:
-return $default(_that.sessionId,_that.segmentId,_that.words,_that.goodCount,_that.retryCount,_that.skippedCount,_that.totalCount,_that.message);case _:
+return $default(_that.sessionId,_that.segmentId,_that.interactionId,_that.words,_that.goodCount,_that.retryCount,_that.skippedCount,_that.totalCount,_that.message);case _:
   return null;
 
 }
@@ -501,11 +502,12 @@ return $default(_that.sessionId,_that.segmentId,_that.words,_that.goodCount,_tha
 @JsonSerializable()
 
 class _ReadAloudResult implements ReadAloudResult {
-  const _ReadAloudResult({required this.sessionId, required this.segmentId,  List<ReadAloudWord> words = const <ReadAloudWord>[], this.goodCount = 0, this.retryCount = 0, this.skippedCount = 0, this.totalCount = 0, this.message = ''}): _words = words;
+  const _ReadAloudResult({required this.sessionId, this.segmentId, this.interactionId,  List<ReadAloudWord> words = const <ReadAloudWord>[], this.goodCount = 0, this.retryCount = 0, this.skippedCount = 0, this.totalCount = 0, this.message = ''}): _words = words;
   factory _ReadAloudResult.fromJson(Map<String, dynamic> json) => _$ReadAloudResultFromJson(json);
 
 @override final  int sessionId;
-@override final  int segmentId;
+@override final  int? segmentId;
+@override final  int? interactionId;
  final  List<ReadAloudWord> _words;
 @override@JsonKey() List<ReadAloudWord> get words {
   if (_words is EqualUnmodifiableListView) return _words;
@@ -532,18 +534,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadAloudResult&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.segmentId, segmentId) || other.segmentId == segmentId)&&const DeepCollectionEquality().equals(other.words, _words)&&(identical(other.goodCount, goodCount) || other.goodCount == goodCount)&&(identical(other.retryCount, retryCount) || other.retryCount == retryCount)&&(identical(other.skippedCount, skippedCount) || other.skippedCount == skippedCount)&&(identical(other.totalCount, totalCount) || other.totalCount == totalCount)&&(identical(other.message, message) || other.message == message));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadAloudResult&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.segmentId, segmentId) || other.segmentId == segmentId)&&(identical(other.interactionId, interactionId) || other.interactionId == interactionId)&&const DeepCollectionEquality().equals(other.words, _words)&&(identical(other.goodCount, goodCount) || other.goodCount == goodCount)&&(identical(other.retryCount, retryCount) || other.retryCount == retryCount)&&(identical(other.skippedCount, skippedCount) || other.skippedCount == skippedCount)&&(identical(other.totalCount, totalCount) || other.totalCount == totalCount)&&(identical(other.message, message) || other.message == message));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,sessionId,segmentId,const DeepCollectionEquality().hash(_words),goodCount,retryCount,skippedCount,totalCount,message);
+    return Object.hash(runtimeType,sessionId,segmentId,interactionId,const DeepCollectionEquality().hash(_words),goodCount,retryCount,skippedCount,totalCount,message);
 }
 
 @override
 String toString() {
-    return 'ReadAloudResult(sessionId: $sessionId, segmentId: $segmentId, words: $words, goodCount: $goodCount, retryCount: $retryCount, skippedCount: $skippedCount, totalCount: $totalCount, message: $message)';
+    return 'ReadAloudResult(sessionId: $sessionId, segmentId: $segmentId, interactionId: $interactionId, words: $words, goodCount: $goodCount, retryCount: $retryCount, skippedCount: $skippedCount, totalCount: $totalCount, message: $message)';
 }
 
 
@@ -554,7 +556,7 @@ abstract mixin class _$ReadAloudResultCopyWith<$Res> implements $ReadAloudResult
   factory _$ReadAloudResultCopyWith(_ReadAloudResult value, $Res Function(_ReadAloudResult) _then) = __$ReadAloudResultCopyWithImpl;
 @override @useResult
 $Res call({
- int sessionId, int segmentId, List<ReadAloudWord> words, int goodCount, int retryCount, int skippedCount, int totalCount, String message
+ int sessionId, int? segmentId, int? interactionId, List<ReadAloudWord> words, int goodCount, int retryCount, int skippedCount, int totalCount, String message
 });
 
 
@@ -571,11 +573,12 @@ class __$ReadAloudResultCopyWithImpl<$Res>
 
 /// Create a copy of ReadAloudResult
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = null,Object? segmentId = null,Object? words = null,Object? goodCount = null,Object? retryCount = null,Object? skippedCount = null,Object? totalCount = null,Object? message = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = null,Object? segmentId = freezed,Object? interactionId = freezed,Object? words = null,Object? goodCount = null,Object? retryCount = null,Object? skippedCount = null,Object? totalCount = null,Object? message = null,}) {
   return _then(_ReadAloudResult(
 sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
-as int,segmentId: null == segmentId ? _self.segmentId : segmentId // ignore: cast_nullable_to_non_nullable
-as int,words: null == words ? _self._words : words // ignore: cast_nullable_to_non_nullable
+as int,segmentId: freezed == segmentId ? _self.segmentId : segmentId // ignore: cast_nullable_to_non_nullable
+as int?,interactionId: freezed == interactionId ? _self.interactionId : interactionId // ignore: cast_nullable_to_non_nullable
+as int?,words: null == words ? _self._words : words // ignore: cast_nullable_to_non_nullable
 as List<ReadAloudWord>,goodCount: null == goodCount ? _self.goodCount : goodCount // ignore: cast_nullable_to_non_nullable
 as int,retryCount: null == retryCount ? _self.retryCount : retryCount // ignore: cast_nullable_to_non_nullable
 as int,skippedCount: null == skippedCount ? _self.skippedCount : skippedCount // ignore: cast_nullable_to_non_nullable

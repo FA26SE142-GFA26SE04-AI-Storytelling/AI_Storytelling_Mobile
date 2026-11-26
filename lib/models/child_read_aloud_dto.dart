@@ -22,7 +22,8 @@ abstract class ReadAloudWord with _$ReadAloudWord {
 abstract class ReadAloudResult with _$ReadAloudResult {
   const factory ReadAloudResult({
     required int sessionId,
-    required int segmentId,
+    int? segmentId,
+    int? interactionId,
     @Default(<ReadAloudWord>[]) List<ReadAloudWord> words,
     @Default(0) int goodCount,
     @Default(0) int retryCount,

@@ -1432,7 +1432,7 @@ as bool?,
 /// @nodoc
 mixin _$ReadingContent {
 
- int get sessionId; int get storyId; String get title; String? get lesson; bool get listenOnly; List<ReadingScene> get scenes; List<ReadingVocabulary> get vocabulary;
+ int get sessionId; int get storyId; String get title; String? get lesson; bool get listenOnly; List<ReadingScene> get scenes; List<ReadingVocabulary> get vocabulary; ReadAloudPractice? get readAloudPractice;
 /// Create a copy of ReadingContent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1446,20 +1446,20 @@ $ReadingContentCopyWith<ReadingContent> get copyWith => _$ReadingContentCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as ReadingContent;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadingContent&&(identical(other.sessionId, _this.sessionId) || other.sessionId == _this.sessionId)&&(identical(other.storyId, _this.storyId) || other.storyId == _this.storyId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.lesson, _this.lesson) || other.lesson == _this.lesson)&&(identical(other.listenOnly, _this.listenOnly) || other.listenOnly == _this.listenOnly)&&const DeepCollectionEquality().equals(other.scenes, _this.scenes)&&const DeepCollectionEquality().equals(other.vocabulary, _this.vocabulary));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadingContent&&(identical(other.sessionId, _this.sessionId) || other.sessionId == _this.sessionId)&&(identical(other.storyId, _this.storyId) || other.storyId == _this.storyId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.lesson, _this.lesson) || other.lesson == _this.lesson)&&(identical(other.listenOnly, _this.listenOnly) || other.listenOnly == _this.listenOnly)&&const DeepCollectionEquality().equals(other.scenes, _this.scenes)&&const DeepCollectionEquality().equals(other.vocabulary, _this.vocabulary)&&(identical(other.readAloudPractice, _this.readAloudPractice) || other.readAloudPractice == _this.readAloudPractice));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ReadingContent;
-  return Object.hash(runtimeType,_this.sessionId,_this.storyId,_this.title,_this.lesson,_this.listenOnly,const DeepCollectionEquality().hash(_this.scenes),const DeepCollectionEquality().hash(_this.vocabulary));
+  return Object.hash(runtimeType,_this.sessionId,_this.storyId,_this.title,_this.lesson,_this.listenOnly,const DeepCollectionEquality().hash(_this.scenes),const DeepCollectionEquality().hash(_this.vocabulary),_this.readAloudPractice);
 }
 
 @override
 String toString() {
   final _this = this as ReadingContent;
-  return 'ReadingContent(sessionId: ${_this.sessionId}, storyId: ${_this.storyId}, title: ${_this.title}, lesson: ${_this.lesson}, listenOnly: ${_this.listenOnly}, scenes: ${_this.scenes}, vocabulary: ${_this.vocabulary})';
+  return 'ReadingContent(sessionId: ${_this.sessionId}, storyId: ${_this.storyId}, title: ${_this.title}, lesson: ${_this.lesson}, listenOnly: ${_this.listenOnly}, scenes: ${_this.scenes}, vocabulary: ${_this.vocabulary}, readAloudPractice: ${_this.readAloudPractice})';
 }
 
 
@@ -1470,11 +1470,11 @@ abstract mixin class $ReadingContentCopyWith<$Res>  {
   factory $ReadingContentCopyWith(ReadingContent value, $Res Function(ReadingContent) _then) = _$ReadingContentCopyWithImpl;
 @useResult
 $Res call({
- int sessionId, int storyId, String title, String? lesson, bool listenOnly, List<ReadingScene> scenes, List<ReadingVocabulary> vocabulary
+ int sessionId, int storyId, String title, String? lesson, bool listenOnly, List<ReadingScene> scenes, List<ReadingVocabulary> vocabulary, ReadAloudPractice? readAloudPractice
 });
 
 
-
+$ReadAloudPracticeCopyWith<$Res>? get readAloudPractice;
 
 }
 /// @nodoc
@@ -1487,7 +1487,7 @@ class _$ReadingContentCopyWithImpl<$Res>
 
 /// Create a copy of ReadingContent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = null,Object? storyId = null,Object? title = null,Object? lesson = freezed,Object? listenOnly = null,Object? scenes = null,Object? vocabulary = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = null,Object? storyId = null,Object? title = null,Object? lesson = freezed,Object? listenOnly = null,Object? scenes = null,Object? vocabulary = null,Object? readAloudPractice = freezed,}) {
   return _then(ReadingContent(
 sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
 as int,storyId: null == storyId ? _self.storyId : storyId // ignore: cast_nullable_to_non_nullable
@@ -1496,10 +1496,23 @@ as String,lesson: freezed == lesson ? _self.lesson : lesson // ignore: cast_null
 as String?,listenOnly: null == listenOnly ? _self.listenOnly : listenOnly // ignore: cast_nullable_to_non_nullable
 as bool,scenes: null == scenes ? _self.scenes : scenes // ignore: cast_nullable_to_non_nullable
 as List<ReadingScene>,vocabulary: null == vocabulary ? _self.vocabulary : vocabulary // ignore: cast_nullable_to_non_nullable
-as List<ReadingVocabulary>,
+as List<ReadingVocabulary>,readAloudPractice: freezed == readAloudPractice ? _self.readAloudPractice : readAloudPractice // ignore: cast_nullable_to_non_nullable
+as ReadAloudPractice?,
   ));
 }
+/// Create a copy of ReadingContent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ReadAloudPracticeCopyWith<$Res>? get readAloudPractice {
+    if (_self.readAloudPractice == null) {
+    return null;
+  }
 
+  return $ReadAloudPracticeCopyWith<$Res>(_self.readAloudPractice!, (value) {
+    return _then(_self.copyWith(readAloudPractice: value));
+  });
+}
 }
 
 
@@ -1581,10 +1594,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int sessionId,  int storyId,  String title,  String? lesson,  bool listenOnly,  List<ReadingScene> scenes,  List<ReadingVocabulary> vocabulary)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int sessionId,  int storyId,  String title,  String? lesson,  bool listenOnly,  List<ReadingScene> scenes,  List<ReadingVocabulary> vocabulary,  ReadAloudPractice? readAloudPractice)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ReadingContent() when $default != null:
-return $default(_that.sessionId,_that.storyId,_that.title,_that.lesson,_that.listenOnly,_that.scenes,_that.vocabulary);case _:
+return $default(_that.sessionId,_that.storyId,_that.title,_that.lesson,_that.listenOnly,_that.scenes,_that.vocabulary,_that.readAloudPractice);case _:
   return orElse();
 
 }
@@ -1602,10 +1615,10 @@ return $default(_that.sessionId,_that.storyId,_that.title,_that.lesson,_that.lis
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int sessionId,  int storyId,  String title,  String? lesson,  bool listenOnly,  List<ReadingScene> scenes,  List<ReadingVocabulary> vocabulary)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int sessionId,  int storyId,  String title,  String? lesson,  bool listenOnly,  List<ReadingScene> scenes,  List<ReadingVocabulary> vocabulary,  ReadAloudPractice? readAloudPractice)  $default,) {final _that = this;
 switch (_that) {
 case _ReadingContent():
-return $default(_that.sessionId,_that.storyId,_that.title,_that.lesson,_that.listenOnly,_that.scenes,_that.vocabulary);case _:
+return $default(_that.sessionId,_that.storyId,_that.title,_that.lesson,_that.listenOnly,_that.scenes,_that.vocabulary,_that.readAloudPractice);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1622,10 +1635,10 @@ return $default(_that.sessionId,_that.storyId,_that.title,_that.lesson,_that.lis
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int sessionId,  int storyId,  String title,  String? lesson,  bool listenOnly,  List<ReadingScene> scenes,  List<ReadingVocabulary> vocabulary)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int sessionId,  int storyId,  String title,  String? lesson,  bool listenOnly,  List<ReadingScene> scenes,  List<ReadingVocabulary> vocabulary,  ReadAloudPractice? readAloudPractice)?  $default,) {final _that = this;
 switch (_that) {
 case _ReadingContent() when $default != null:
-return $default(_that.sessionId,_that.storyId,_that.title,_that.lesson,_that.listenOnly,_that.scenes,_that.vocabulary);case _:
+return $default(_that.sessionId,_that.storyId,_that.title,_that.lesson,_that.listenOnly,_that.scenes,_that.vocabulary,_that.readAloudPractice);case _:
   return null;
 
 }
@@ -1637,7 +1650,7 @@ return $default(_that.sessionId,_that.storyId,_that.title,_that.lesson,_that.lis
 @JsonSerializable()
 
 class _ReadingContent implements ReadingContent {
-  const _ReadingContent({required this.sessionId, required this.storyId, required this.title, this.lesson, this.listenOnly = false,  List<ReadingScene> scenes = const <ReadingScene>[],  List<ReadingVocabulary> vocabulary = const <ReadingVocabulary>[]}): _scenes = scenes,_vocabulary = vocabulary;
+  const _ReadingContent({required this.sessionId, required this.storyId, required this.title, this.lesson, this.listenOnly = false,  List<ReadingScene> scenes = const <ReadingScene>[],  List<ReadingVocabulary> vocabulary = const <ReadingVocabulary>[], this.readAloudPractice}): _scenes = scenes,_vocabulary = vocabulary;
   factory _ReadingContent.fromJson(Map<String, dynamic> json) => _$ReadingContentFromJson(json);
 
 @override final  int sessionId;
@@ -1659,6 +1672,7 @@ class _ReadingContent implements ReadingContent {
   return EqualUnmodifiableListView(_vocabulary);
 }
 
+@override final  ReadAloudPractice? readAloudPractice;
 
 /// Create a copy of ReadingContent
 /// with the given fields replaced by the non-null parameter values.
@@ -1673,18 +1687,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadingContent&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.storyId, storyId) || other.storyId == storyId)&&(identical(other.title, title) || other.title == title)&&(identical(other.lesson, lesson) || other.lesson == lesson)&&(identical(other.listenOnly, listenOnly) || other.listenOnly == listenOnly)&&const DeepCollectionEquality().equals(other.scenes, _scenes)&&const DeepCollectionEquality().equals(other.vocabulary, _vocabulary));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadingContent&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.storyId, storyId) || other.storyId == storyId)&&(identical(other.title, title) || other.title == title)&&(identical(other.lesson, lesson) || other.lesson == lesson)&&(identical(other.listenOnly, listenOnly) || other.listenOnly == listenOnly)&&const DeepCollectionEquality().equals(other.scenes, _scenes)&&const DeepCollectionEquality().equals(other.vocabulary, _vocabulary)&&(identical(other.readAloudPractice, readAloudPractice) || other.readAloudPractice == readAloudPractice));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,sessionId,storyId,title,lesson,listenOnly,const DeepCollectionEquality().hash(_scenes),const DeepCollectionEquality().hash(_vocabulary));
+    return Object.hash(runtimeType,sessionId,storyId,title,lesson,listenOnly,const DeepCollectionEquality().hash(_scenes),const DeepCollectionEquality().hash(_vocabulary),readAloudPractice);
 }
 
 @override
 String toString() {
-    return 'ReadingContent(sessionId: $sessionId, storyId: $storyId, title: $title, lesson: $lesson, listenOnly: $listenOnly, scenes: $scenes, vocabulary: $vocabulary)';
+    return 'ReadingContent(sessionId: $sessionId, storyId: $storyId, title: $title, lesson: $lesson, listenOnly: $listenOnly, scenes: $scenes, vocabulary: $vocabulary, readAloudPractice: $readAloudPractice)';
 }
 
 
@@ -1695,11 +1709,11 @@ abstract mixin class _$ReadingContentCopyWith<$Res> implements $ReadingContentCo
   factory _$ReadingContentCopyWith(_ReadingContent value, $Res Function(_ReadingContent) _then) = __$ReadingContentCopyWithImpl;
 @override @useResult
 $Res call({
- int sessionId, int storyId, String title, String? lesson, bool listenOnly, List<ReadingScene> scenes, List<ReadingVocabulary> vocabulary
+ int sessionId, int storyId, String title, String? lesson, bool listenOnly, List<ReadingScene> scenes, List<ReadingVocabulary> vocabulary, ReadAloudPractice? readAloudPractice
 });
 
 
-
+@override $ReadAloudPracticeCopyWith<$Res>? get readAloudPractice;
 
 }
 /// @nodoc
@@ -1712,7 +1726,7 @@ class __$ReadingContentCopyWithImpl<$Res>
 
 /// Create a copy of ReadingContent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = null,Object? storyId = null,Object? title = null,Object? lesson = freezed,Object? listenOnly = null,Object? scenes = null,Object? vocabulary = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = null,Object? storyId = null,Object? title = null,Object? lesson = freezed,Object? listenOnly = null,Object? scenes = null,Object? vocabulary = null,Object? readAloudPractice = freezed,}) {
   return _then(_ReadingContent(
 sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
 as int,storyId: null == storyId ? _self.storyId : storyId // ignore: cast_nullable_to_non_nullable
@@ -1721,7 +1735,302 @@ as String,lesson: freezed == lesson ? _self.lesson : lesson // ignore: cast_null
 as String?,listenOnly: null == listenOnly ? _self.listenOnly : listenOnly // ignore: cast_nullable_to_non_nullable
 as bool,scenes: null == scenes ? _self._scenes : scenes // ignore: cast_nullable_to_non_nullable
 as List<ReadingScene>,vocabulary: null == vocabulary ? _self._vocabulary : vocabulary // ignore: cast_nullable_to_non_nullable
-as List<ReadingVocabulary>,
+as List<ReadingVocabulary>,readAloudPractice: freezed == readAloudPractice ? _self.readAloudPractice : readAloudPractice // ignore: cast_nullable_to_non_nullable
+as ReadAloudPractice?,
+  ));
+}
+
+/// Create a copy of ReadingContent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ReadAloudPracticeCopyWith<$Res>? get readAloudPractice {
+    if (_self.readAloudPractice == null) {
+    return null;
+  }
+
+  return $ReadAloudPracticeCopyWith<$Res>(_self.readAloudPractice!, (value) {
+    return _then(_self.copyWith(readAloudPractice: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$ReadAloudPractice {
+
+ int get interactionId; String get text; String? get audioUrl; String? get praiseFeedback; String? get praiseAudioUrl;
+/// Create a copy of ReadAloudPractice
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ReadAloudPracticeCopyWith<ReadAloudPractice> get copyWith => _$ReadAloudPracticeCopyWithImpl<ReadAloudPractice>(this as ReadAloudPractice, _$identity);
+
+  /// Serializes this ReadAloudPractice to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ReadAloudPractice;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadAloudPractice&&(identical(other.interactionId, _this.interactionId) || other.interactionId == _this.interactionId)&&(identical(other.text, _this.text) || other.text == _this.text)&&(identical(other.audioUrl, _this.audioUrl) || other.audioUrl == _this.audioUrl)&&(identical(other.praiseFeedback, _this.praiseFeedback) || other.praiseFeedback == _this.praiseFeedback)&&(identical(other.praiseAudioUrl, _this.praiseAudioUrl) || other.praiseAudioUrl == _this.praiseAudioUrl));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ReadAloudPractice;
+  return Object.hash(runtimeType,_this.interactionId,_this.text,_this.audioUrl,_this.praiseFeedback,_this.praiseAudioUrl);
+}
+
+@override
+String toString() {
+  final _this = this as ReadAloudPractice;
+  return 'ReadAloudPractice(interactionId: ${_this.interactionId}, text: ${_this.text}, audioUrl: ${_this.audioUrl}, praiseFeedback: ${_this.praiseFeedback}, praiseAudioUrl: ${_this.praiseAudioUrl})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ReadAloudPracticeCopyWith<$Res>  {
+  factory $ReadAloudPracticeCopyWith(ReadAloudPractice value, $Res Function(ReadAloudPractice) _then) = _$ReadAloudPracticeCopyWithImpl;
+@useResult
+$Res call({
+ int interactionId, String text, String? audioUrl, String? praiseFeedback, String? praiseAudioUrl
+});
+
+
+
+
+}
+/// @nodoc
+class _$ReadAloudPracticeCopyWithImpl<$Res>
+    implements $ReadAloudPracticeCopyWith<$Res> {
+  _$ReadAloudPracticeCopyWithImpl(this._self, this._then);
+
+  final ReadAloudPractice _self;
+  final $Res Function(ReadAloudPractice) _then;
+
+/// Create a copy of ReadAloudPractice
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? interactionId = null,Object? text = null,Object? audioUrl = freezed,Object? praiseFeedback = freezed,Object? praiseAudioUrl = freezed,}) {
+  return _then(ReadAloudPractice(
+interactionId: null == interactionId ? _self.interactionId : interactionId // ignore: cast_nullable_to_non_nullable
+as int,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,audioUrl: freezed == audioUrl ? _self.audioUrl : audioUrl // ignore: cast_nullable_to_non_nullable
+as String?,praiseFeedback: freezed == praiseFeedback ? _self.praiseFeedback : praiseFeedback // ignore: cast_nullable_to_non_nullable
+as String?,praiseAudioUrl: freezed == praiseAudioUrl ? _self.praiseAudioUrl : praiseAudioUrl // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ReadAloudPractice].
+extension ReadAloudPracticePatterns on ReadAloudPractice {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ReadAloudPractice value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ReadAloudPractice() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ReadAloudPractice value)  $default,){
+final _that = this;
+switch (_that) {
+case _ReadAloudPractice():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ReadAloudPractice value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ReadAloudPractice() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int interactionId,  String text,  String? audioUrl,  String? praiseFeedback,  String? praiseAudioUrl)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ReadAloudPractice() when $default != null:
+return $default(_that.interactionId,_that.text,_that.audioUrl,_that.praiseFeedback,_that.praiseAudioUrl);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int interactionId,  String text,  String? audioUrl,  String? praiseFeedback,  String? praiseAudioUrl)  $default,) {final _that = this;
+switch (_that) {
+case _ReadAloudPractice():
+return $default(_that.interactionId,_that.text,_that.audioUrl,_that.praiseFeedback,_that.praiseAudioUrl);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int interactionId,  String text,  String? audioUrl,  String? praiseFeedback,  String? praiseAudioUrl)?  $default,) {final _that = this;
+switch (_that) {
+case _ReadAloudPractice() when $default != null:
+return $default(_that.interactionId,_that.text,_that.audioUrl,_that.praiseFeedback,_that.praiseAudioUrl);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ReadAloudPractice implements ReadAloudPractice {
+  const _ReadAloudPractice({required this.interactionId, this.text = '', this.audioUrl, this.praiseFeedback, this.praiseAudioUrl});
+  factory _ReadAloudPractice.fromJson(Map<String, dynamic> json) => _$ReadAloudPracticeFromJson(json);
+
+@override final  int interactionId;
+@override@JsonKey() final  String text;
+@override final  String? audioUrl;
+@override final  String? praiseFeedback;
+@override final  String? praiseAudioUrl;
+
+/// Create a copy of ReadAloudPractice
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ReadAloudPracticeCopyWith<_ReadAloudPractice> get copyWith => __$ReadAloudPracticeCopyWithImpl<_ReadAloudPractice>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ReadAloudPracticeToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadAloudPractice&&(identical(other.interactionId, interactionId) || other.interactionId == interactionId)&&(identical(other.text, text) || other.text == text)&&(identical(other.audioUrl, audioUrl) || other.audioUrl == audioUrl)&&(identical(other.praiseFeedback, praiseFeedback) || other.praiseFeedback == praiseFeedback)&&(identical(other.praiseAudioUrl, praiseAudioUrl) || other.praiseAudioUrl == praiseAudioUrl));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,interactionId,text,audioUrl,praiseFeedback,praiseAudioUrl);
+}
+
+@override
+String toString() {
+    return 'ReadAloudPractice(interactionId: $interactionId, text: $text, audioUrl: $audioUrl, praiseFeedback: $praiseFeedback, praiseAudioUrl: $praiseAudioUrl)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ReadAloudPracticeCopyWith<$Res> implements $ReadAloudPracticeCopyWith<$Res> {
+  factory _$ReadAloudPracticeCopyWith(_ReadAloudPractice value, $Res Function(_ReadAloudPractice) _then) = __$ReadAloudPracticeCopyWithImpl;
+@override @useResult
+$Res call({
+ int interactionId, String text, String? audioUrl, String? praiseFeedback, String? praiseAudioUrl
+});
+
+
+
+
+}
+/// @nodoc
+class __$ReadAloudPracticeCopyWithImpl<$Res>
+    implements _$ReadAloudPracticeCopyWith<$Res> {
+  __$ReadAloudPracticeCopyWithImpl(this._self, this._then);
+
+  final _ReadAloudPractice _self;
+  final $Res Function(_ReadAloudPractice) _then;
+
+/// Create a copy of ReadAloudPractice
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? interactionId = null,Object? text = null,Object? audioUrl = freezed,Object? praiseFeedback = freezed,Object? praiseAudioUrl = freezed,}) {
+  return _then(_ReadAloudPractice(
+interactionId: null == interactionId ? _self.interactionId : interactionId // ignore: cast_nullable_to_non_nullable
+as int,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,audioUrl: freezed == audioUrl ? _self.audioUrl : audioUrl // ignore: cast_nullable_to_non_nullable
+as String?,praiseFeedback: freezed == praiseFeedback ? _self.praiseFeedback : praiseFeedback // ignore: cast_nullable_to_non_nullable
+as String?,praiseAudioUrl: freezed == praiseAudioUrl ? _self.praiseAudioUrl : praiseAudioUrl // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

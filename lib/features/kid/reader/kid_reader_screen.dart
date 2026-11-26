@@ -16,6 +16,7 @@ import '../data/kid_session_controller.dart';
 import '../interaction/kid_interaction_screen.dart';
 import '../quiz/kid_after_reading_screen.dart';
 import 'kid_read_aloud_controller.dart';
+import 'kid_read_aloud_practice_page.dart';
 import 'kid_reader_audio.dart';
 import 'kid_reader_bottom_bar.dart';
 import 'kid_reader_controller.dart';
@@ -47,6 +48,9 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
 
   /// Cờ chống mở chồng hộp thoại tương tác.
   bool _askingInteraction = false;
+
+  /// Đang ở trang "Luyện đọc to" (sau trang cuối, không phải trang của controller).
+  bool _onPractice = false;
 
   late final KidSessionController _kidSession;
 
@@ -141,7 +145,9 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
   void _goTo(int i, {bool skipGuard = false}) {
     final state = ref.read(kidReaderControllerProvider(widget.storyId));
     final totalPages = state.totalPages;
-    if (i < 0 || i >= totalPages) return;
+    final practiceText = state.content?.readAloudPractice?.text.trim() ?? '';
+    final isPractice = i == totalPages && practiceText.isNotEmpty;
+    if (i < 0 || (i >= totalPages && !isPractice)) return;
 
     final cur = state.currentPage;
     if (!skipGuard && i > cur && cur >= 0 && cur < state.pages.length) {
@@ -159,7 +165,22 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
 
     _cancelAloud();
     _audio.stop();
-    setState(() => _activeSegmentId = null);
+    setState(() {
+      _activeSegmentId = null;
+      _onPractice = isPractice;
+    });
+
+    if (isPractice) {
+      final pc = _pageController;
+      if (pc != null && pc.hasClients && pc.page?.round() != i) {
+        pc.animateToPage(
+          i,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+      return;
+    }
 
     _notifier.goToPage(i);
 
@@ -186,7 +207,10 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
     _cancelAloud();
     _audio.stop();
     if (mounted) {
-      setState(() => _activeSegmentId = null);
+      setState(() {
+        _activeSegmentId = null;
+        _onPractice = false;
+      });
     }
 
     _notifier.goToPage(idx);
@@ -435,7 +459,8 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
         final pc = _pageController;
         if (pc != null && pc.hasClients) {
           final page = pc.page?.round();
-          if (page != next.currentPage) {
+          // Trang luyện đọc không phải trang của controller: đừng kéo về.
+          if (!_onPractice && page != next.currentPage) {
             pc.jumpToPage(next.currentPage);
           }
         }
@@ -493,6 +518,18 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
           msg.isNotEmpty ? msg : 'Em đọc hay quá!',
           type: TtToastType.success,
         );
+        final practiceAudio =
+            ref
+                .read(kidReaderControllerProvider(widget.storyId))
+                .content
+                ?.readAloudPractice
+                ?.praiseAudioUrl ??
+            '';
+        if (next.practice &&
+            next.result!.goodCount < next.result!.totalCount &&
+            practiceAudio.trim().isNotEmpty) {
+          _audio.playUrls([practiceAudio]);
+        }
       }
     });
 
@@ -564,6 +601,15 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
         : null;
     final audioAvailable =
         currentScene != null && _isAudioAvailable(currentScene);
+    final practice = content.readAloudPractice;
+    final hasPractice = practice != null && practice.text.trim().isNotEmpty;
+    void togglePractice() => ref
+        .read(kidReadAloudControllerProvider(widget.storyId).notifier)
+        .toggle(
+          practice!.interactionId,
+          practice: true,
+          onStart: () => _audio.stop(),
+        );
 
     // Nếu đã hoàn thành
     if (state.isFinished && state.completedResult != null) {
@@ -617,7 +663,9 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '${currentPage + 1} / $totalPages',
+                  _onPractice
+                      ? '${totalPages + 1} / ${totalPages + 1}'
+                      : '${currentPage + 1} / ${totalPages + (hasPractice ? 1 : 0)}',
                   style: TextStyle(
                     fontFamily: 'Nunito',
                     fontWeight: FontWeight.w700,
@@ -636,7 +684,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                       ? KidReadingMode.readFirst
                       : KidReadingMode.listenFirst;
                   _notifier.setReadingMode(newMode);
-                  if (newMode == KidReadingMode.listenFirst) {
+                  if (newMode == KidReadingMode.listenFirst && !_onPractice) {
                     _playPage(currentPage);
                   } else {
                     _audio.stop();
@@ -700,13 +748,33 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
         Expanded(
           child: PageView.builder(
             controller: _pageController,
-            itemCount: totalPages,
+            itemCount: totalPages + (hasPractice ? 1 : 0),
             onPageChanged: (i) {
-              if (i != state.currentPage) {
+              if (i == totalPages
+                  ? !_onPractice
+                  : (i != state.currentPage || _onPractice)) {
                 _goTo(i);
               }
             },
             itemBuilder: (context, i) {
+              if (i == totalPages && hasPractice) {
+                final audioUrl = practice.audioUrl ?? '';
+                return KidReadAloudPracticePage(
+                  practice: practice,
+                  result: aloud.practice ? aloud.result : null,
+                  recording: aloud.recording && aloud.practice,
+                  sending: aloud.sending && aloud.practice,
+                  onMic: togglePractice,
+                  onRetry: () => ref
+                      .read(
+                        kidReadAloudControllerProvider(widget.storyId).notifier,
+                      )
+                      .clear(),
+                  onPlaySample: audioUrl.trim().isEmpty
+                      ? null
+                      : () => _audio.playUrls([audioUrl]),
+                );
+              }
               if (i < 0 || i >= scenes.length) {
                 return const SizedBox.shrink();
               }
@@ -719,6 +787,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                     : null,
                 aloudResult:
                     i == currentPage &&
+                        !aloud.practice &&
                         aloud.result != null &&
                         scenes[i].segments.any(
                           (s) => s.segmentId == aloud.result!.segmentId,
@@ -727,7 +796,8 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
                     : null,
                 layout: layout,
                 isNarrating: i == currentPage && _isAudioPlaying,
-                isAloudBusy: i == currentPage && (aloud.recording || aloud.sending),
+                isAloudBusy:
+                    i == currentPage && (aloud.recording || aloud.sending),
                 onVocabTap: _openVocab,
                 onAloudHintTap: (message) =>
                     _toast(message, type: TtToastType.info),
@@ -739,7 +809,7 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
         // ── Bottom ──
         if (!state.isFinished) ...[
           // Nút hoàn thành khi ở trang cuối
-          if (currentPage == totalPages - 1) ...[
+          if (hasPractice ? _onPractice : currentPage == totalPages - 1) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: KidBtn3D(
@@ -755,16 +825,21 @@ class _KidReaderScreenState extends ConsumerState<KidReaderScreen>
 
           // Thanh điều khiển
           KidReaderBottomBar(
-            canGoPrev: currentPage > 0,
-            canGoNext: currentPage < totalPages - 1,
+            canGoPrev: _onPractice || currentPage > 0,
+            canGoNext:
+                !_onPractice && (currentPage < totalPages - 1 || hasPractice),
             isAudioPlaying: _isAudioPlaying,
-            isAudioAvailable: audioAvailable,
+            isAudioAvailable: !_onPractice && audioAvailable,
             isRecording: aloud.recording,
             isSending: aloud.sending,
-            onPrev: () => _goTo(currentPage - 1),
+            onPrev: () => _goTo(_onPractice ? totalPages - 1 : currentPage - 1),
             onNext: () => _goTo(currentPage + 1),
             onToggleAudio: () => _onToggleAudio(currentPage, content),
             onMicTap: () {
+              if (_onPractice) {
+                togglePractice();
+                return;
+              }
               final scene = (currentPage >= 0 && currentPage < scenes.length)
                   ? scenes[currentPage]
                   : null;

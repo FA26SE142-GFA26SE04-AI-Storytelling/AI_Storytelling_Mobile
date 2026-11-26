@@ -34,10 +34,10 @@ void main() {
               "imageUrl": "https://x/a.png",
               "audioUrl": null,
               "feedback": "Đúng rồi!",
-              "feedbackAudioUrl": null
-            }
-          ]
-        }
+              "feedbackAudioUrl": null,
+            },
+          ],
+        },
       };
 
       final scene = ReadingScene.fromJson(json);
@@ -74,7 +74,7 @@ void main() {
         "suggestedAnswer": null,
         "replaySceneIndexes": [0, 2],
         "revealed": false,
-        "correctOrderOptionIds": null
+        "correctOrderOptionIds": null,
       };
 
       final result = ListeningAttemptResult.fromJson(json);
@@ -91,13 +91,13 @@ void main() {
         "segmentId": 7,
         "words": [
           {"index": 0, "text": "Mèo", "status": "good", "hint": null},
-          {"index": 1, "text": "ngồi", "status": "retry", "hint": "unclear"}
+          {"index": 1, "text": "ngồi", "status": "retry", "hint": "unclear"},
         ],
         "goodCount": 1,
         "retryCount": 1,
         "skippedCount": 0,
         "totalCount": 2,
-        "message": "Em đọc hay lắm!"
+        "message": "Em đọc hay lắm!",
       };
 
       final result = ReadAloudResult.fromJson(json);
@@ -107,6 +107,44 @@ void main() {
       expect(result.words[1].hint, 'unclear');
       expect(result.goodCount, 1);
       expect(result.totalCount, 2);
+    });
+
+    test('ReadAloudResult.fromJson của luyện đọc to (segmentId null)', () {
+      final result = ReadAloudResult.fromJson({
+        'sessionId': 1,
+        'segmentId': null,
+        'interactionId': 5,
+        'words': [],
+        'goodCount': 0,
+        'retryCount': 0,
+        'skippedCount': 0,
+        'totalCount': 0,
+        'message': '',
+      });
+
+      expect(result.segmentId, isNull);
+      expect(result.interactionId, 5);
+    });
+
+    test('ReadingContent.fromJson có và không có readAloudPractice', () {
+      final base = {'sessionId': 1, 'storyId': 2, 'title': 'Truyện'};
+
+      expect(ReadingContent.fromJson(base).readAloudPractice, isNull);
+
+      final content = ReadingContent.fromJson({
+        ...base,
+        'readAloudPractice': {
+          'interactionId': 7,
+          'text': 'Mèo ngồi trên thảm.',
+          'audioUrl': 'https://x/a.mp3',
+          'praiseFeedback': 'Cố lên nhé!',
+          'praiseAudioUrl': null,
+        },
+      });
+
+      expect(content.readAloudPractice!.interactionId, 7);
+      expect(content.readAloudPractice!.text, 'Mèo ngồi trên thảm.');
+      expect(content.readAloudPractice!.praiseFeedback, 'Cố lên nhé!');
     });
   });
 }

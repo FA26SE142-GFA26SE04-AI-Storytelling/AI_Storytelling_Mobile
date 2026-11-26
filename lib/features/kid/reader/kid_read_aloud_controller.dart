@@ -25,6 +25,7 @@ class KidReadAloudState {
     this.result,
     this.errorMessage,
     this.elapsedSeconds = 0,
+    this.practice = false,
   });
 
   final bool recording;
@@ -34,6 +35,9 @@ class KidReadAloudState {
   final String? errorMessage;
   final int elapsedSeconds;
 
+  /// Đang ghi/chấm câu luyện đọc to sau cảnh cuối (segmentId là interactionId).
+  final bool practice;
+
   KidReadAloudState copyWith({
     bool? recording,
     bool? sending,
@@ -41,6 +45,7 @@ class KidReadAloudState {
     Object? result = _sentinel,
     Object? errorMessage = _sentinel,
     int? elapsedSeconds,
+    bool? practice,
   }) => KidReadAloudState(
     recording: recording ?? this.recording,
     sending: sending ?? this.sending,
@@ -50,6 +55,7 @@ class KidReadAloudState {
         ? this.errorMessage
         : errorMessage as String?,
     elapsedSeconds: elapsedSeconds ?? this.elapsedSeconds,
+    practice: practice ?? this.practice,
   );
 }
 
@@ -76,15 +82,21 @@ class KidReadAloudController extends Notifier<KidReadAloudState> {
     return const KidReadAloudState();
   }
 
-  /// Bật/tắt ghi âm để đọc to đoạn [segmentId].
-  Future<void> toggle(int segmentId, {required VoidCallback onStart}) async {
+  /// Bật/tắt ghi âm để đọc to; [segmentId] là id đích: segmentId, hoặc interactionId khi [practice].
+  Future<void> toggle(
+    int segmentId, {
+    required VoidCallback onStart,
+    bool practice = false,
+  }) async {
     if (state.recording) {
       await _stopAndSend();
       return;
     }
     if (state.sending) return;
     if (kIsWeb) {
-      _safeSetState(state.copyWith(errorMessage: 'Máy này chưa hỗ trợ ghi âm.'));
+      _safeSetState(
+        state.copyWith(errorMessage: 'Máy này chưa hỗ trợ ghi âm.'),
+      );
       return;
     }
 
@@ -93,37 +105,53 @@ class KidReadAloudController extends Notifier<KidReadAloudState> {
 
     try {
       if (!await recorder.isEncoderSupported(AudioEncoder.wav)) {
-        _safeSetState(state.copyWith(errorMessage: 'Thiết bị này chưa ghi âm được.'));
+        _safeSetState(
+          state.copyWith(errorMessage: 'Thiết bị này chưa ghi âm được.'),
+        );
         return;
       }
       if (!await recorder.hasPermission()) {
-        _safeSetState(state.copyWith(errorMessage: 'Em cần cho phép dùng micro để đọc nhé.'));
+        _safeSetState(
+          state.copyWith(
+            errorMessage: 'Em cần cho phép dùng micro để đọc nhé.',
+          ),
+        );
         return;
       }
     } catch (_) {
-      _safeSetState(state.copyWith(errorMessage: 'Có lỗi khi bật ghi âm. Em thử lại nhé.'));
+      _safeSetState(
+        state.copyWith(errorMessage: 'Có lỗi khi bật ghi âm. Em thử lại nhé.'),
+      );
       return;
     }
 
     try {
       onStart();
       final tempDir = await getTemporaryDirectory();
-      final path = '${tempDir.path}/read_aloud_${DateTime.now().millisecondsSinceEpoch}.wav';
+      final path =
+          '${tempDir.path}/read_aloud_${DateTime.now().millisecondsSinceEpoch}.wav';
 
       await recorder.start(
-        const RecordConfig(encoder: AudioEncoder.wav, sampleRate: 16000, numChannels: 1),
+        const RecordConfig(
+          encoder: AudioEncoder.wav,
+          sampleRate: 16000,
+          numChannels: 1,
+        ),
         path: path,
       );
 
       _recordedPath = path;
-      _safeSetState(state.copyWith(
-        recording: true,
-        sending: false,
-        segmentId: segmentId,
-        result: null,
-        errorMessage: null,
-        elapsedSeconds: 0,
-      ));
+      _safeSetState(
+        state.copyWith(
+          recording: true,
+          sending: false,
+          segmentId: segmentId,
+          result: null,
+          errorMessage: null,
+          elapsedSeconds: 0,
+          practice: practice,
+        ),
+      );
 
       _timer?.cancel();
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
@@ -139,7 +167,9 @@ class KidReadAloudController extends Notifier<KidReadAloudState> {
         if (!limit && _recordedPath != null) {
           try {
             final f = File(_recordedPath!);
-            if (f.existsSync() && f.lengthSync() >= 3 * 1024 * 1024) limit = true;
+            if (f.existsSync() && f.lengthSync() >= 3 * 1024 * 1024) {
+              limit = true;
+            }
           } catch (_) {}
         }
         if (limit) {
@@ -148,7 +178,9 @@ class KidReadAloudController extends Notifier<KidReadAloudState> {
         }
       });
     } catch (_) {
-      _safeSetState(state.copyWith(errorMessage: 'Có lỗi khi bật ghi âm. Em thử lại nhé.'));
+      _safeSetState(
+        state.copyWith(errorMessage: 'Có lỗi khi bật ghi âm. Em thử lại nhé.'),
+      );
     }
   }
 
@@ -163,6 +195,7 @@ class KidReadAloudController extends Notifier<KidReadAloudState> {
     final path = await _recorder?.stop() ?? _recordedPath;
 
     final targetSegmentId = state.segmentId;
+    final practice = state.practice;
 
     try {
       final sid = ref.read(kidReaderControllerProvider(storyId)).sessionId;
@@ -173,19 +206,44 @@ class KidReadAloudController extends Notifier<KidReadAloudState> {
       if (targetSegmentId == null || path == null) return;
 
       final repo = ref.read(kidReadingRepositoryProvider);
-      final result = await repo.readAloud(sid.toString(), targetSegmentId, filePath: path);
-      _safeSetState(state.copyWith(result: result, segmentId: targetSegmentId, errorMessage: null));
+      final result = practice
+          ? await repo.readAloudPractice(
+              sid.toString(),
+              targetSegmentId,
+              filePath: path,
+            )
+          : await repo.readAloud(
+              sid.toString(),
+              targetSegmentId,
+              filePath: path,
+            );
+      _safeSetState(
+        state.copyWith(
+          result: result,
+          segmentId: targetSegmentId,
+          errorMessage: null,
+          practice: practice,
+        ),
+      );
     } on ApiException catch (e) {
       if (e.statusCode == 403) {
         final msg = e.message.trim();
-        _safeSetState(state.copyWith(
-          errorMessage: msg.isNotEmpty ? msg : 'Bố mẹ chưa bật đọc bằng giọng nói cho em.',
-        ));
+        _safeSetState(
+          state.copyWith(
+            errorMessage: msg.isNotEmpty
+                ? msg
+                : 'Bố mẹ chưa bật đọc bằng giọng nói cho em.',
+          ),
+        );
       } else {
-        _safeSetState(state.copyWith(errorMessage: 'Chưa chấm được, em đọc lại nhé.'));
+        _safeSetState(
+          state.copyWith(errorMessage: 'Chưa chấm được, em đọc lại nhé.'),
+        );
       }
     } catch (_) {
-      _safeSetState(state.copyWith(errorMessage: 'Chưa chấm được, em đọc lại nhé.'));
+      _safeSetState(
+        state.copyWith(errorMessage: 'Chưa chấm được, em đọc lại nhé.'),
+      );
     } finally {
       _safeSetState(state.copyWith(sending: false));
       _cleanupFile(path);
@@ -206,17 +264,27 @@ class KidReadAloudController extends Notifier<KidReadAloudState> {
       } catch (_) {}
       _recordedPath = null;
     }
-    _safeSetState(state.copyWith(
-      recording: false,
-      segmentId: null,
-      result: null,
-      errorMessage: null,
-      elapsedSeconds: 0,
-    ));
+    _safeSetState(
+      state.copyWith(
+        recording: false,
+        segmentId: null,
+        result: null,
+        errorMessage: null,
+        elapsedSeconds: 0,
+        practice: false,
+      ),
+    );
   }
 
   /// Xóa kết quả chấm khi đổi đoạn hoặc đổi trang.
-  void clear() => _safeSetState(state.copyWith(result: null, segmentId: null, errorMessage: null));
+  void clear() => _safeSetState(
+    state.copyWith(
+      result: null,
+      segmentId: null,
+      errorMessage: null,
+      practice: false,
+    ),
+  );
 
   /// Xóa thông báo lỗi.
   void clearError() => _safeSetState(state.copyWith(errorMessage: null));
@@ -240,5 +308,5 @@ class KidReadAloudController extends Notifier<KidReadAloudState> {
 /// Provider quản lý việc trẻ đọc to một đoạn theo [storyId].
 final kidReadAloudControllerProvider = NotifierProvider.autoDispose
     .family<KidReadAloudController, KidReadAloudState, String>(
-  KidReadAloudController.new,
-);
+      KidReadAloudController.new,
+    );
