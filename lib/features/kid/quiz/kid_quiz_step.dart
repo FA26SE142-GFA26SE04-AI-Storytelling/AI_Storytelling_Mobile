@@ -40,6 +40,9 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
   bool _loadingResult = false;
   bool _hasError = false;
 
+  /// Bé đã bấm "Bắt đầu" ở màn mở đầu; làm lại câu đố thì không hỏi lại.
+  bool _started = false;
+
   List<ChildQuizItem> _questions = const <ChildQuizItem>[];
   Map<int, List<String>> _shuffledChoices = <int, List<String>>{};
   int _currentIndex = 0;
@@ -379,6 +382,80 @@ class _KidQuizStepState extends ConsumerState<KidQuizStep> {
               icon: Icons.refresh_rounded,
               isSecondary: true,
               onPressed: _loadQuiz,
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (!_started) {
+      return Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                child:
+                    Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const TtFrog(mood: TtFrogMood.happy, size: 100),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Em bắt đầu vào câu hỏi nhé',
+                              style: TextStyle(
+                                fontFamily: 'Baloo2',
+                                fontSize: 26,
+                                fontWeight: FontWeight.w800,
+                                color: tt.text,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: tt.gold.withValues(alpha: 0.25),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: tt.goldDeep,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Text(
+                                '${_questions.length} câu hỏi',
+                                style: TextStyle(
+                                  fontFamily: 'Nunito',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: tt.warnInk,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                        .animate()
+                        .fadeIn(duration: 300.ms)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                          duration: 300.ms,
+                        ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: _KidQuizButton(
+              label: 'Bắt đầu',
+              icon: Icons.play_arrow_rounded,
+              onPressed: () => setState(() => _started = true),
             ),
           ),
         ],
