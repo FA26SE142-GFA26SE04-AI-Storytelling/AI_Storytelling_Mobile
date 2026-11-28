@@ -10,10 +10,12 @@ import '../../../models/story_handover_dto.dart';
 /// Bé đã đọc gì và lộ trình của bé (dùng ở tab Học tập).
 abstract class HomeRepository {
   /// GET /ParentReadingFeedback/{childId}: truyện đã đọc xong, mới nhất trước.
+  /// [storyId] khác null thì chỉ lấy các lần đọc của truyện đó.
   Future<ParentReadingFeedbackPageDto> fetchReadingFeedback(
     int childId, {
     int pageIndex = 1,
     int pageSize = 20,
+    int? storyId,
   });
 
   /// GET /ChildRoadmap/{childId}; null khi bé chưa có lộ trình (404).
@@ -50,10 +52,15 @@ class ApiHomeRepository implements HomeRepository {
     int childId, {
     int pageIndex = 1,
     int pageSize = 20,
+    int? storyId,
   }) => runApi(() async {
     final response = await dio.get<dynamic>(
       '/ParentReadingFeedback/$childId',
-      queryParameters: {'pageIndex': pageIndex, 'pageSize': pageSize},
+      queryParameters: {
+        'pageIndex': pageIndex,
+        'pageSize': pageSize,
+        'storyId': ?storyId,
+      },
     );
     final data = _unwrap(response);
     if (data == null) return const ParentReadingFeedbackPageDto();

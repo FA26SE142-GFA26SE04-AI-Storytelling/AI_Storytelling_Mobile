@@ -8,6 +8,7 @@ import '../../../core/widgets/tt_button.dart';
 import '../../../core/widgets/tt_card.dart';
 import '../../../models/child_profile_dto.dart';
 import '../../../models/parent_reading_feedback_dto.dart';
+import '../../home/data/home_repository.dart';
 import 'learning_providers.dart';
 import 'learning_session_sheet.dart';
 import 'learning_widgets.dart';
@@ -220,7 +221,9 @@ class _StoryTile extends StatelessWidget {
           const Spacer(),
           const SizedBox(height: 10),
           TtButton(
-            label: '${items.length} lần đọc',
+            // readCount là tổng lần đọc xong của truyện; items chỉ là các lần nằm trong trang đang tải.
+            label:
+                '${latest.readCount > items.length ? latest.readCount : items.length} lần đọc',
             icon: Icons.history_rounded,
             variant: TtButtonVariant.secondary,
             expanded: true,
@@ -239,41 +242,91 @@ Future<void> showRunsSheet(
   required List<ParentReadingFeedbackItemDto> items,
   required SummaryAudio audio,
 }) {
-  final title = items.first.title;
   return showLearningSheet(
     context,
-    title: title,
+    title: items.first.title,
     initialSize: 0.6,
-    builder: (controller) => ListView.separated(
+    builder: (controller) => _RunsList(
       controller: controller,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      itemCount: items.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
-      itemBuilder: (context, idx) {
-        final i = items[idx];
-        final ordinal = i.readOrdinal ?? (items.length - idx);
-        return _RunRow(
-              item: i,
-              ordinal: ordinal,
-              onTap: () => showSessionSheet(
-                context,
-                child: child,
-                item: i,
-                title: title,
-                ordinal: ordinal,
-                audio: audio,
-              ),
-            )
-            .animate(delay: (40 * (idx < 8 ? idx : 8)).ms)
-            .fadeIn(duration: 260.ms)
-            .slideX(begin: 0.06, end: 0, duration: 260.ms);
-      },
+      child: child,
+      items: items,
+      audio: audio,
     ),
   );
 }
 
+/// Danh sách lần đọc trong bảng: tải đủ các lần đọc của riêng truyện này (lọc storyId),
+/// vì trang kết quả gộp chung mọi truyện nên các lần cũ có thể nằm ở trang sau.
+class _RunsList extends ConsumerStatefulWidget {
+  const _RunsList({
+    required this.controller,
+    required this.child,
+    required this.items,
+    required this.audio,
+  });
+
+  final ScrollController controller;
+  final ChildProfileDto child;
+  final List<ParentReadingFeedbackItemDto> items;
+  final SummaryAudio audio;
+
+  @override
+  ConsumerState<_RunsList> createState() => _RunsListState();
+}
+
+class _RunsListState extends ConsumerState<_RunsList> {
+  late final Future<ParentReadingFeedbackPageDto> _runs = ref
+      .read(homeRepositoryProvider)
+      // shortcut: chỉ lấy 50 lần mới nhất (pageSize tối đa của API); thêm tải tiếp khi có truyện đọc hơn 50 lần.
+      .fetchReadingFeedback(
+        widget.child.id,
+        pageSize: 50,
+        storyId: widget.items.first.storyId,
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<ParentReadingFeedbackPageDto>(
+      future: _runs,
+      builder: (context, snap) {
+        // Chưa tải xong hoặc lỗi thì vẫn hiện các lần đã có trong trang.
+        final fetched = snap.data?.items ?? const [];
+        final items = fetched.isNotEmpty ? fetched : widget.items;
+        final title = items.first.title;
+        return ListView.separated(
+          controller: widget.controller,
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          itemCount: items.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 10),
+          itemBuilder: (context, idx) {
+            final i = items[idx];
+            final ordinal = i.readOrdinal ?? (items.length - idx);
+            return _RunRow(
+                  key: ValueKey(i.sessionId),
+                  item: i,
+                  ordinal: ordinal,
+                  onTap: () => showSessionSheet(
+                    context,
+                    child: widget.child,
+                    item: i,
+                    title: title,
+                    ordinal: ordinal,
+                    audio: widget.audio,
+                  ),
+                )
+                .animate(delay: (40 * (idx < 8 ? idx : 8)).ms)
+                .fadeIn(duration: 260.ms)
+                .slideX(begin: 0.06, end: 0, duration: 260.ms);
+          },
+        );
+      },
+    );
+  }
+}
+
 class _RunRow extends StatelessWidget {
   const _RunRow({
+    super.key,
     required this.item,
     required this.ordinal,
     required this.onTap,

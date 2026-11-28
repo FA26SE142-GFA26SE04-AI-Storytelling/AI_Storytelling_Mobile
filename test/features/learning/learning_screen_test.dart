@@ -38,17 +38,31 @@ class _FakeHome implements HomeRepository {
   /// Có giá trị thì trả đúng danh sách này (một trang) cho bé 1.
   List<ParentReadingFeedbackItemDto>? items;
 
+  /// Lần đọc trả về khi lọc theo truyện (storyId); null thì lọc từ [items].
+  List<ParentReadingFeedbackItemDto>? storyItems;
+
   @override
   Future<ParentReadingFeedbackPageDto> fetchReadingFeedback(
     int childId, {
     int pageIndex = 1,
     int pageSize = 20,
+    int? storyId,
   }) async {
-    calls.add('feedback:$childId:$pageIndex');
+    calls.add(
+      storyId == null
+          ? 'feedback:$childId:$pageIndex'
+          : 'feedback:$childId:story:$storyId',
+    );
     if (failFeedback) {
       throw const ApiException(message: 'Không tải được truyện bé đã đọc.');
     }
     if (childId == 4) return const ParentReadingFeedbackPageDto();
+    if (storyId != null) {
+      final runs = (storyItems ?? items ?? const [])
+          .where((i) => i.storyId == storyId)
+          .toList();
+      return ParentReadingFeedbackPageDto(items: runs, totalCount: runs.length);
+    }
     final fixed = items;
     if (fixed != null && childId == 1) {
       return ParentReadingFeedbackPageDto(
@@ -508,6 +522,27 @@ void main() {
     // Chip của lần gần nhất, không phải của lần cũ.
     expect(find.text('⭐ Câu đố 90%'), findsOneWidget);
   });
+
+  testWidgets(
+    'Lần đọc cũ ở trang sau: nút theo readCount, bảng tải đủ theo storyId',
+    (tester) async {
+      final rich = _richItems();
+      final home = _FakeHome()
+        ..items = [rich.first.copyWith(readCount: 3), rich.last]
+        ..storyItems = rich;
+      await _pump(tester, home: home);
+      await _openTab(tester, 'Kết quả đọc');
+
+      expect(find.text('3 lần đọc'), findsOneWidget);
+      await tester.tap(find.text('3 lần đọc'));
+      await tester.pumpAndSettle();
+      expect(home.calls, contains('feedback:1:story:7'));
+      for (final n in [3, 2, 1]) {
+        expect(find.textContaining('Lần $n ·'), findsOneWidget);
+      }
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'Bảng lần đọc: thứ tự, lần dừng giữa chừng, mở / đóng lại nhiều lần',
